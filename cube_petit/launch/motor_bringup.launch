@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Parameters for the hardware interface and controllers -->
+  <rosparam file="$(find cube_petit)/config/motor.yaml"/>
+  <rosparam file="$(find cube_petit)/config/odom.yaml"/>
+
+  <!-- launch our hardware interface -->
+
+  <arg name="protocol_version" default="p1"/>
+  <node pkg="dynamixel_control_hw" type="dynamixel_control_$(arg protocol_version)" name="dynamixel_control" output="screen" clear_params="true" required="true"/>
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" clear_params="true" args="/motor_controllers/joint_state_controller /diff_drive_controller"/>
+
+</launch>

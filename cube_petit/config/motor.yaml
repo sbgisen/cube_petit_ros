@@ -1,0 +1,35 @@
+motor_controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 100
+
+  right_wheel_vel_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: right_wheel_joint
+
+  left_wheel_vel_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: left_wheel_joint
+
+
+dynamixel_control:
+  serial_interface: /dev/ttyUSB1
+  loop_frequency: 100
+  cycle_time_error_threshold: 0.2 # 0.002
+  baudrate: 1000000 # in bauds
+  read_timeout: 10.005 # in seconds # 0.005
+  scan_timeout: 10.005 # in seconds
+  # Cofniguration of the servos
+  servos:
+    right_wheel_joint:
+      # hardware ID of the actuator
+      id: 2
+      offset: 3.14159265359
+      #max-speed: 4.0 # in rad
+      command_interface: velocity
+      reverse: true
+    left_wheel_joint:
+      id: 1
+      offset: 3.14159265359
+      command_interface: velocity
+

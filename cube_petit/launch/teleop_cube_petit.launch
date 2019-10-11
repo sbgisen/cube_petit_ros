@@ -1,0 +1,14 @@
+<launch>
+  <arg name="model" default="$(find cube_petit)/urdf/cube_petit.urdf"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+  <node name="joy_node" pkg="joy" type="joy_node" />
+
+  <node name="cmd_vel_publisher" pkg="cube_petit" type="cmd_vel_publisher">
+    <remap from="cmd_vel" to="diff_drive_controller/cmd_vel"/>
+  </node>
+
+  
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+</launch>

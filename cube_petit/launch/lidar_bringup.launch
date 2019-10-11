@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+
+	<node pkg="lh_laser_driver" type="lh_laser_publisher" name="LH_laser_publisher" output="screen">
+		<param name="port" value="/dev/ttyUSB0"/>
+		<param name="frame_id" value="pacecat_link"/>
+	</node>
+
+</launch>

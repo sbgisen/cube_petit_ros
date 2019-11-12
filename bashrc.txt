@@ -1,0 +1,84 @@
+### terminal/editor
+export PS1="\n"$PS1
+alias v="vim $@"
+alias vi="vim $@"
+alias codenew="code `ls -la -t -F  | grep -v / | awk 'NR==2{print $9}'`"
+### git 
+alias g="git"
+alias gitch="git checkout $@"
+alias gitbr="git branch $@"
+alias gitbra="git branch -a"
+alias gitad="git add $@"
+alias gitadd="git add ."
+alias gitaddcm="git add . $@ && git commit -v"
+alias gitcm="git commit $@"
+alias gitcmv="git commit -v $@"
+alias gitdf="git diff $@"
+alias gitst="git status"
+alias gitfe="git fetch $@"
+alias gitlog="git log --oneline $@"
+### basic
+alias agi="sudo apt install $@"
+alias a="alias"
+alias his="history"
+alias mkcd="mkdir -p $@ && cd $@"
+alias mkdircd="mkdir $1 && cd $_"
+alias l="ls"
+alias cl="clear"
+alias ..="cd ../"
+alias ....="cd ../../"
+alias ......="cd ../../../"
+alias psgrep="ps aux |grep -v grep| grep $@"
+alias psgr="ps aux |grep -v grep | grep $@ | awk '{$2=\"\033[0;31m\"$2\"\033[0;39m\";$12=\"\033[0;33m\"$12\"\033[0;39m\";print $2, $11, $12, $13, $14}'"
+alias psgrepkill="bash /home/gisen/shell_scripts/ps_grep_kill.sh $@"
+### bash
+alias editbash="vim ~/.bashrc"
+alias bashrc="source ~/.bashrc"
+
+# export LIBGL_ALWAYS_SOFTWARE=1
+
+### ROS
+alias rg="rqt_graph"
+alias rosr="rosrun $@"
+alias rosl="roslaunch $@"
+alias ross="rosservice $@"
+alias rost="rostopic $@"
+alias rtree="rosrun rqt_tf_tree rqt_tf_tree"
+
+### ROS_MASTER
+## for cuboid
+# export ROS_MASTER_URI=http://192.168.12.218:11311
+## for local PC
+# export ROS_MASTER_URI=http://localhost:11311
+# export ROS_MASTER_URI=http://172.20.10.12:11311
+
+### ROS_IP
+## cube_IP
+# export ROS_IP=192.168.12.114 #my PC_IP 114
+## wifi tezaring
+# export ROS_IP=172.20.10.12
+
+export bash="source ~/.bashrc"
+
+### ssh
+# alias ssh_raspi4="ssh gisen-r@192.168.12.33"
+# alias scp_send_raspi4="scp $1 gisen-r@192.168.12.33:/home/gisen-r/"
+# alias scp_recv_raspi4="scp gisen-r@192.168.12.33:/home/gisen-r/$1 ./"
+
+### my_function1 history
+# alias hisaptall="cat /var/log/apt/history.log"
+# alias hisapt='cat /var/log/apt/history.log |grep Commandline | sed -e "s/Commandline://g"'
+
+### my_function2_shortcut
+# A="/home/gisen/ros/src/sbgisen/ros_study_airly/"
+# B="/home/gisen/ros/src/raspimouse"
+# alias cda="cd $A"
+# alias cdc="cd $B"
+
+### hardware_sensors
+
+## xinput set-prop 'Logitech MX Ergo' 'Device Accel Constant Deceleration' 0.5
+# export LIBDYNAMIXEL=/home/gisen/ros/src/libdynamixel
+# xinput set-prop "Sony PLAYSTATION(R)3 Controller" "Device Enabled" 0
+# export PATH=$PATH:/home/gisen/ros/src/sbgisen/mixcell/QTCode
+# export PYTHONPATH=$PYTHONPATH:/home/gisen/ros/src/sbgisen/mixcell/source_code

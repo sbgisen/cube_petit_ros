@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <arg name="model" default="$(find cube_petit)/urdf/cube_petit.xacro" />
+    <!--arg name="rvizconfig" default="$(find sim1_lecture)/rviz/dtw_gazebo4_wheel.rviz"/-->
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
+
+    <env name="GAZEBO_MODEL_PATH" value="$(find cube_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)" />
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="true"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+        <arg name="world_name" value="$(find cube_petit)/worlds/cube_with_house.world"/>
+    </include>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model cube_petit -x -2 -y -1" />
+
+    <param name="/diff_drive_controller/enable_odom_tf" value="true"/>
+    <!-- Parameters for the hardware interface and controllers -->
+    <rosparam command="load" file="$(find cube_petit)/config/motor.yaml"/>
+    <rosparam command="load" file="$(find cube_petit)/config/odom.yaml"/>
+    <!-- <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/cube_petit" args="diff_drive_controller joint_state_controller"/> -->
+    <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/cube_petit" args="joint_state_controller diff_drive_controller"/>
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/cube_petit"/> -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/cube_petit"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="" required="false"/>
+
+
+    <arg name="teleop_config" default="$(find cube_petit)/config/ps3.config.yaml"/>
+        <node name="joy_node" pkg="joy" type="joy_node" />
+    <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+      <rosparam command="load" file="$(arg teleop_config)" />
+      <remap from="cmd_vel" to="/cube_petit/diff_drive_controller/cmd_vel"/>
+    </node>
+
+
+</launch>

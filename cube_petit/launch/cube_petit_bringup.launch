@@ -3,6 +3,6 @@
 
   <include file="$(find cube_petit)/launch/teleop_cube_petit.launch"/>
   <include file="$(find cube_petit)/launch/motor_bringup.launch"/>
-  <include file="$(find cube_petit)/launch/lidar_bringup.launch"/>
+  <!-- <include file="$(find cube_petit)/launch/lidar_bringup.launch"/> -->
 
 </launch>

@@ -1,0 +1,20 @@
+global_frame: map
+
+update_frequency: 1
+publish_frequency: 1
+resolution: 0.1
+static_map: true
+
+rgbd_obstacles:
+  voxel_decay:  30
+  voxel_size: 0.1
+inflater:
+  cost_scaling_factor: 10.0
+  inflation_radius: 1.0
+  inflate_unknown: true # - {name: obstacles,  type: "costmap_2d::VoxelLayer"}
+
+plugins:
+ - {name: static_map, type: "costmap_2d::StaticLayer"}
+#  - {name: rgbd_obstacles, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+ - {name: laser_obstacles,  type: "costmap_2d::ObstacleLayer"}
+ - {name: inflater,   type: "costmap_2d::InflationLayer"}

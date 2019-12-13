@@ -1,0 +1,41 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+
+	<arg name="scan" default="/pacecat_link/scan"/>
+	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" required="true" output="screen">
+		
+		
+		<remap from="scan" to="$(arg scan)"/>
+		<param name="linearUpdate" value="0.2"/>
+		<param name="angularUpdate" value="0.25"/>
+
+
+		<!--param name="maxUrange" value="5.5"/>
+		<param name="maxRange" value="5.5"/>
+		<param name="minimumScore" value="50"/>
+		<param name="temporalUpdate" value="5.0"/>
+		<param name="delta" value="0.025"/-->
+
+		  <!-- <param name="base_frame" value="base_link" />
+		<param name="odom_frame" value="odom" />
+		<param name="maxUrange" value="4.0" />
+		<param name="maxRange" value="4.0" />
+		<param name="xmin" value="-15" />
+		<param name="ymin" value="-15" />
+		<param name="xmax" value="15" />
+		<param name="ymax" value="15" />
+		<param name="srr" value="0.1" />
+		<param name="srt" value="0.1"/>
+		<param name="str" value="0.1"/>
+		<param name="stt" value="0.1"/>
+		<param name="particles" value="30" /> -->
+
+	</node>
+	<!-- map convert to image node -->
+	<param name="map_image/full/compressed/format" value="png" />
+	<node name="map_to_image" pkg="hector_compressed_map_transport" type="map_to_image_node" output="screen">
+		<remap from="pose" to="robot_pose" />
+	</node>
+	<!-- <node pkg="rviz" type="rviz" name="rviz"/> -->
+</launch>
+

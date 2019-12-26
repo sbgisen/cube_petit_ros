@@ -1,8 +1,18 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="model" default="$(find cube_petit)/urdf/cube_petit.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
   <include file="$(find cube_petit)/launch/teleop_cube_petit.launch"/>
   <include file="$(find cube_petit)/launch/motor_bringup.launch"/>
-  <!-- <include file="$(find cube_petit)/launch/lidar_bringup.launch"/> -->
+  <include file="$(find cube_petit)/launch/lidar_bringup.launch"/>
 
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="map_scan_front_aku_laser_filter">
+    <remap from="scan" to="pacecat_link/scan" />
+    <!--<remap from="pacecat_link/scan" to="map_scan_front_shadow_filtered" />-->
+    <remap from="scan_filtered" to="pacecat_link/scan_filtered" />
+    <rosparam command="load" file="$(find cube_petit)/config/cube_petit_aku_front.yaml" />
+  </node>
 </launch>

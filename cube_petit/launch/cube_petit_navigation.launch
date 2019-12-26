@@ -1,13 +1,13 @@
 <launch>
   <arg name="debug" default="$(optenv CUBE_DEBUG false)"/>
   <!--cube_kit, cuboid or signage -->
-  <arg name="robot" default="cuboid"/>
-  <arg name="scan" default="pacecat_link/scan"/>
+  <arg name="robot" default="cube_petit"/>
+  <arg name="scan" default="pacecat_link/scan_filtered"/>
   <!-- Navigation requires at least one map.
        In addition, it is sometimes desirable to have a "keepout" map
        which is used for costmaps, but not localization -->
-  <arg name="map_file" default="$(find cube_petit)/maps/room1.yaml"/>
-  <arg name="map_keepout_file" default="$(find cube_petit)/maps/room_keepout1.yaml" />
+  <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/>
+  <arg name="map_keepout_file" default="$(find cube_petit)/map/map_keepout.yaml" />
   <arg name="use_keepout" default="false" />
   <param name="map_server/map_file" value="$(arg map_file)" />
 
@@ -39,7 +39,7 @@
     <arg if="$(arg use_keepout)" name="map_topic" value="map_keepout" />
     <!--cube_kit, cuboid or signage -->
 	  <arg name="robot" value="$(arg robot)"/>
-    <arg name="odom_topic" value="base/diff_drive_controller/odom" />
+    <arg name="odom_topic" value="diff_drive_controller/odom" />
 
     <arg name="costmap_image" value="$(arg costmap_image)" />
   </include>

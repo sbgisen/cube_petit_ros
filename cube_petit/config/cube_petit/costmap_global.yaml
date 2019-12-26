@@ -1,7 +1,7 @@
 global_frame: map
 
-update_frequency: 1
-publish_frequency: 1
+update_frequency: 0.3 #1
+publish_frequency: 0.3 #1
 resolution: 0.1
 static_map: true
 

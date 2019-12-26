@@ -1,4 +1,4 @@
-cube_petit/diff_drive_controller:
+/diff_drive_controller:
   type        : "diff_drive_controller/DiffDriveController"
   left_wheel  : "left_wheel_joint"
   right_wheel : "right_wheel_joint"
@@ -69,6 +69,6 @@ cube_petit/diff_drive_controller:
 #       i_clamp_max: 1000.0
 #       antiwindup: true
 
-cube_petit/joint_state_controller:
+/motor_controllers/joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: 50

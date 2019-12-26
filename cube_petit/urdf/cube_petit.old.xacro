@@ -4,7 +4,7 @@
   <joint name="body_joint" type="fixed">
     <parent link="base_link"/>
     <child link="body_link"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <origin rpy="0 0 0" xyz="0.0 0 0"/>
   </joint>
   <link name="body_link">
     <visual>
@@ -42,7 +42,7 @@
   <joint name="laser_joint" type="fixed">
     <parent link="body_link"/>
     <child link="pacecat_link"/>
-    <origin rpy="0 0 3.14159" xyz="0.0 0 0.23975"/>
+    <origin rpy="0 0 0" xyz="0.0 0 0.23975"/>
   </joint>
   <link name="pacecat_link">
     <inertial>
@@ -158,6 +158,7 @@
     <axis xyz="0 1 0"/>
     <!-- <limit effort="1000" velocity=""/> -->
   </joint>
+  <!-- only for gazebo -->
   <transmission name="right_wheel_trans" type="SimpleTransmission">
     <type>transmission_interface/SimpleTransmission</type>
     <actuator name="right_wheel_motor">
@@ -198,7 +199,7 @@
     <kp value="50000"/>
     <kd value="0"/>
   </gazebo>
-
+  <!-- load gazebo plugin (hardware interface) -->
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/cube_petit</robotNamespace>

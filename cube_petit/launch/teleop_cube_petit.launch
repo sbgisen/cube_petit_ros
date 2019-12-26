@@ -1,5 +1,5 @@
 <launch>
-  <arg name="model" default="$(find cube_petit)/urdf/cube_petit.urdf"/>
+  <arg name="model" default="$(find cube_petit)/urdf/cube_petit.xacro"/>
   <arg name="teleop_config" default="$(find cube_petit)/config/ps3.config.yaml"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 
@@ -11,7 +11,7 @@
 
   <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
     <rosparam command="load" file="$(arg teleop_config)" />
-    <remap from="cmd_vel" to="/cube_petit/diff_drive_controller/cmd_vel"/>
+    <remap from="cmd_vel" to="/diff_drive_controller/cmd_vel"/>
   </node>
   
   <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" /> -->

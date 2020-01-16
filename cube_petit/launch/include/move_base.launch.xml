@@ -14,14 +14,11 @@
 
   <!-- planners, costmaps, etc -->
   <node pkg="move_base" type="move_base" name="move_base" respawn="true" output="screen">
-    <rosparam file="$(find cube_petit)/config/cube_petit/costmap_common.yaml" command="load" ns="global_costmap" />
-	  <rosparam file="$(find cube_petit)/config/cube_petit/costmap_common.yaml" command="load" ns="local_costmap" />
-    <!-- <rosparam file="$(find cube_petit)/config/costmap_local.yaml" command="load" ns="local_costmap" /> -->
-    <rosparam file="$(find cube_petit)/config/cube_petit/costmap_local.yaml" command="load" ns="local_costmap" />
-    <!-- <rosparam file="$(find cube_petit)/config/costmap_global.yaml" command="load" ns="global_costmap" /> -->
-    <rosparam file="$(find cube_petit)/config/cube_petit/costmap_global.yaml" command="load" ns="global_costmap" />
-    <!-- <rosparam file="$(find cube_petit)/config/move_base.yaml" command="load" /> -->
-    <rosparam file="$(find cube_petit)/config/cube_petit/move_base.yaml" command="load" />
+    <rosparam file="$(find cube_petit)/config/navigation/costmap_common.yaml" command="load" ns="global_costmap" />
+	  <rosparam file="$(find cube_petit)/config/navigation/costmap_common.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find cube_petit)/config/navigation/costmap_local.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find cube_petit)/config/navigation/costmap_global.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find cube_petit)/config/navigation/move_base.yaml" command="load" />
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
     <remap from="map" to="$(arg map_topic)" />
@@ -35,13 +32,4 @@
   </node>
   </group>
 
-  <!-- Diagnostics for move_base-->
-  <!-- <node pkg="cube_diagnostic" type="diagnostic_move_base.py" name="diagnostic_move_base_status" output="log">
-    <param name="id" value="move_base"/> 
-    <param name="topic" value="/move_base/result"/>
-    <param name="warn_count" value="1"/> 
-    <param name="error_count" value="3"/> 
-  </node> -->
-<!-- <node if="$(arg rotate)" name="rotate_in_place" pkg="cube_petit" type="rotate_in_place_vel.py" respawn="false" output="screen">
-</node> -->
 </launch>

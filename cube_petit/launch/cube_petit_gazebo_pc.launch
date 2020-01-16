@@ -33,11 +33,14 @@
     <rosparam command="load" file="$(find cube_petit)/config/odom_gazebo.yaml"/>
     <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/cube_petit" args="joint_state_controller diff_drive_controller"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/cube_petit"/>
-    <node name="rviz" pkg="rviz" type="rviz" args="" required="false">
-      <remap from="/clicked_point" to="/navigation/clicked_point"/>
-      <remap from="/initialpose" to="/navigation/initialpose"/>
-      <remap from="/move_base_simple/goal" to="/navigation/move_base_simple/goal"/>
-    </node>
+    
+    <!-- launch rviz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="" required="false"/>
+    <group ns="rviz_topics_relay">
+      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /navigation/clicked_point"/>
+      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /navigation/initialpose"/>
+      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /navigation/move_base_simple/goal"/>
+    </group>
 
     <!-- launch teleop -->
     <group ns="joystick">

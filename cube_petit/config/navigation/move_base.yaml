@@ -23,7 +23,6 @@ oscillation_distance: 0.5
 footprint: [[-0.11, 0.11], [0.11, 0.11], [0.11, -0.11], [-0.11, -0.11]]
 
 NavfnROS:
-  # allow_unknown: false  # investigate this
   allow_unknown: true  # investigate this
   default_tolerance: 0.0
   # do not restrict planner

@@ -1,4 +1,4 @@
-scan_filter_chain:
+/pacecat/scan_filter_chain:
 - name: angle0
   type: laser_filters/LaserScanAngularBoundsFilterInPlace
   params:

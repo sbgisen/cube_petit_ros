@@ -102,6 +102,104 @@
     </sensor>
   </gazebo>
 
+  <joint name="depth_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="realsense_link"/>
+    <origin rpy="0 0 0" xyz="0.10137 0.0 0.10306"/>
+  </joint>
+  <link name="realsense_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
+      <mass value="0.11166745"/>
+      <inertia
+        ixx="0.004391"
+        ixy="0.000000" iyy="0.004391"
+        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="realsense_link">
+    <mu1 value="0.5"/>
+    <kp value="50000"/>
+    <kd value="0"/>
+    <sensor type="depth" name="realsense">
+      <always_on>true</always_on>
+      <update_rate>4.0</update_rate>
+      <camera>
+        <horizontal_fov>${60.0*3.1415926/180.0}</horizontal_fov>
+        <image>
+          <format>R8G8B8</format>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.40</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin name="kinect_camera_controller" filename="libgazebo_ros_openni_kinect.so">
+      <!-- <plugin name="realsense_camera_controller" filename="libRealSensePlugin.so"> -->
+        <cameraName>camera</cameraName>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>4</updateRate>
+        <imageTopicName>realsense/image_color</imageTopicName>
+        <depthImageTopicName>realsense/image_depth_rect</depthImageTopicName>
+        <pointCloudTopicName>realsense/points</pointCloudTopicName>
+        <cameraInfoTopicName>realsense/camera_info</cameraInfoTopicName>
+        <!-- <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName> -->
+        <frameName>realsense_optical_link</frameName>
+        <baseline>0.1</baseline>
+        <distortion_k1>0.0</distortion_k1>
+        <distortion_k2>0.0</distortion_k2>
+        <distortion_k3>0.0</distortion_k3>
+        <distortion_t1>0.0</distortion_t1>
+        <distortion_t2>0.0</distortion_t2>
+        <pointCloudCutoff>0.4</pointCloudCutoff>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <joint name="depth_optical_joint" type="fixed">
+    <parent link="realsense_link"/>
+    <child link="realsense_optical_link"/>
+    <origin rpy="-1.57 0 -1.57" xyz="0.0 0.0 0.0"/>
+  </joint>
+  <link name="realsense_optical_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
+      <mass value="0.11166745"/>
+      <inertia
+        ixx="0.004391"
+        ixy="0.000000" iyy="0.004391"
+        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+    </collision>
+  </link>  
+
   <joint name="left_wheel_joint" type="continuous">
     <origin rpy="0 0 0" xyz="-0.002 0.077 0.033"/>
     <parent link="body_link"/>

@@ -96,7 +96,7 @@
         </noise>
       </ray>
       <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_laser.so">
-        <topicName>/pacecat_link/scan</topicName>
+        <topicName>/pacecat/scan</topicName>
         <frameName>pacecat_link</frameName>
       </plugin>
     </sensor>

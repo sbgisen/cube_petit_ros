@@ -1,4 +1,0 @@
-explore_costmap:
-  sensor:
-      observation_sources: laser
-      laser: {data_type: LaserScan, clearing: true, marking: true, topic: map_scan, inf_is_valid: true, raytrace_range: 30.0, obstacle_range: 30.0}

@@ -1,18 +1,22 @@
 <launch>
   <arg name="model" default="$(find cube_petit)/urdf/cube_petit.xacro"/>
-  <arg name="teleop_config" default="$(find cube_petit)/config/ps3.config.yaml"/>
-  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 
-  <node name="joy_node" pkg="joy" type="joy_node" />
+  <group ns="joystick">
+    <arg name="teleop_config" default="$(find cube_petit)/config/ps3.config.yaml"/>
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 
-  <!-- <node name="cmd_vel_publisher" pkg="cube_petit" type="cmd_vel_publisher">
-    <remap from="cmd_vel" to="diff_drive_controller/cmd_vel"/>
-  </node> -->
+    <node name="joy_node" pkg="joy" type="joy_node" />
 
-  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
-    <rosparam command="load" file="$(arg teleop_config)" />
-    <remap from="cmd_vel" to="/diff_drive_controller/cmd_vel"/>
-  </node>
+    <!-- <node name="cmd_vel_publisher" pkg="cube_petit" type="cmd_vel_publisher">
+      <remap from="cmd_vel" to="diff_drive_controller/cmd_vel"/>
+    </node> -->
+
+    <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+      <rosparam command="load" file="$(arg teleop_config)" />
+      <remap from="cmd_vel" to="/diff_drive_controller/cmd_vel"/>
+    </node>
   
+ </group>
+
   <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" /> -->
 </launch>

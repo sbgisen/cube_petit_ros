@@ -1,0 +1,12 @@
+
+cube_petit/map/old/
+
+cube_petit/\.vscode/
+
+*.old
+
+cube_petit/map/cube_petit/old/
+
+*.swp
+
+cube_petit/map/cube_petit/

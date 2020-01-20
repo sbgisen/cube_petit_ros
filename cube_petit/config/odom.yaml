@@ -52,23 +52,6 @@
       antiwindup: true
       publish_state: true
 
-# /cube_petit/gazebo_ros_control:
-#   pid_gains:
-#     right_wheel_joint:
-#       p: 1.0
-#       i: 0.0
-#       d: 0.0
-#       i_clamp_min: -1000.0
-#       i_clamp_max: 1000.0
-#       antiwindup: true
-#     left_wheel_joint:
-#       p: 1.0
-#       i: 0.0
-#       d: 0.0
-#       i_clamp_min: -1000.0
-#       i_clamp_max: 1000.0
-#       antiwindup: true
-
 /motor_controllers/joint_state_controller:
   type: joint_state_controller/JointStateController
   publish_rate: 50

@@ -16,6 +16,6 @@ inflater:
   cost_scaling_factor: 4.0 #5
   inflation_radius: 1.0
 plugins:
-#  - {name: rgbd_obstacles, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
+ - {name: rgbd_obstacles, type: "spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer"}
  - {name: laser_obstacles,  type: "costmap_2d::ObstacleLayer"}
  - {name: inflater,   type: "costmap_2d::InflationLayer"}

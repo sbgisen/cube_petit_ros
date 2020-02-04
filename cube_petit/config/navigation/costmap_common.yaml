@@ -44,7 +44,7 @@ rgbd_obstacles:
   voxel_size:  0.05   #meters
   track_unknown_space: true   #default space is unknown
   observation_persistence: 0.0  #seconds
-  max_obstacle_height: 1.2    #meters
+  max_obstacle_height: 1.5    #meters
   unknown_threshold: 15     #voxel height,
   mark_threshold: 0      #voxel height
   update_footprint_enabled: true
@@ -55,10 +55,10 @@ rgbd_obstacles:
   transform_tolerance: 0.2    # seconds
   mapping_mode: false  # default off, saves map not for navigation
   map_save_duration: 60     #default 60s, how often to autosave
-  observation_sources: kinect_mark kinect_clear
-  kinect_mark:
+  observation_sources: realsense_mark realsense_clear
+  realsense_mark:
      data_type: PointCloud2
-     topic: camera/sd/points_edge #camera/sd/points_filtered
+     topic: /camera/realsense/points
      marking: true
      clearing: false
      min_obstacle_height: 0.05   #default 0, meters
@@ -68,17 +68,15 @@ rgbd_obstacles:
      inf_is_valid: false          #default false, for laser scans
      clear_after_reading: true    #default false, clear the buffer after the layer gets readings from it
      voxel_filter: true           #default off, apply voxel filter to sensor, recommend on 
-  kinect_clear:
+  realsense_clear:
      data_type: PointCloud2
-     topic: camera/sd/points_edge
-     data_type: LaserScan
-     topic: head_scan
-     marking: true
-     clearing: false #true
-     min_obstacle_height: 0.09
-     max_obstacle_height: 1.0 #0.6
+     topic: /camera/realsense/points
+     marking: false
+     clearing: true
+     min_obstacle_height: 0.05   #default 0, meters
+     max_obstacle_height: 1.5     #defaule 3, meters
      expected_update_rate: 0.0    #default 0, if not updating at this rate at least, remove from buffer
      observation_persistence: 0.0 #default 0, use all measurements taken during now-value, 0=latest 
-     inf_is_valid: true #default false, for laser scans
+     inf_is_valid: false          #default false, for laser scans
      clear_after_reading: true    #default false, clear the buffer after the layer gets readings from it
      voxel_filter: true           #default off, apply voxel filter to sensor, recommend on 

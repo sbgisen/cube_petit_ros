@@ -104,10 +104,10 @@
 
   <joint name="depth_joint" type="fixed">
     <parent link="body_link"/>
-    <child link="realsense_link"/>
+    <child link="camera_link"/>
     <origin rpy="0 0 0" xyz="0.10137 0.0 0.10306"/>
   </joint>
-  <link name="realsense_link">
+  <link name="camera_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
       <mass value="0.11166745"/>
@@ -130,11 +130,11 @@
       </geometry>
     </collision>
   </link>
-  <gazebo reference="realsense_link">
+  <gazebo reference="camera_link">
     <mu1 value="0.5"/>
     <kp value="50000"/>
     <kd value="0"/>
-    <sensor type="depth" name="realsense">
+    <sensor type="depth" name="camera">
       <always_on>true</always_on>
       <update_rate>4.0</update_rate>
       <camera>
@@ -154,12 +154,12 @@
         <cameraName>camera</cameraName>
         <alwaysOn>true</alwaysOn>
         <updateRate>4</updateRate>
-        <imageTopicName>realsense/image_color</imageTopicName>
-        <depthImageTopicName>realsense/image_depth_rect</depthImageTopicName>
-        <pointCloudTopicName>realsense/points</pointCloudTopicName>
-        <cameraInfoTopicName>realsense/camera_info</cameraInfoTopicName>
+        <imageTopicName>camera/image_color</imageTopicName>
+        <depthImageTopicName>camera/image_depth_rect</depthImageTopicName>
+        <pointCloudTopicName>camera/points</pointCloudTopicName>
+        <cameraInfoTopicName>camera/camera_info</cameraInfoTopicName>
         <!-- <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName> -->
-        <frameName>realsense_optical_link</frameName>
+        <frameName>camera_optical_link</frameName>
         <pointCloudCutoff>0.2</pointCloudCutoff>
         <pointCloudCutoffMax>1.5</pointCloudCutoffMax>
         <baseline>0.1</baseline>
@@ -173,11 +173,11 @@
   </gazebo>
 
   <joint name="depth_optical_joint" type="fixed">
-    <parent link="realsense_link"/>
-    <child link="realsense_optical_link"/>
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
     <origin rpy="-1.57 0 -1.57" xyz="0.0 0.0 0.0"/>
   </joint>
-  <link name="realsense_optical_link">
+  <link name="camera_optical_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
       <mass value="0.11166745"/>

@@ -53,6 +53,9 @@
       <arg name="odom_topic" value="$(arg odom)" />
       <arg name="costmap_image" value="$(arg costmap_image)" />
       <remap from="move_base_simple/goal" to="/move_base_simple/goal"/>
+      <remap from="initial_pose" to="/initial_pose"/>
+      <remap from="clicked_point" to="/clicked_point"/>
+      
     </include>
   </group>
 

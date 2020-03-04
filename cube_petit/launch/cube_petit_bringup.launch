@@ -21,4 +21,7 @@
       <rosparam command="load" file="$(find cube_petit)/config/sensors/cube_petit_pacecat_filter.yaml" />
     </node>
   </group>
+
+  <include file="$(find cube_petit)/launch/realsense_rgbd.launch"/>
+
 </launch>

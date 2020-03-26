@@ -105,7 +105,7 @@
   <joint name="depth_joint" type="fixed">
     <parent link="body_link"/>
     <child link="camera_link"/>
-    <origin rpy="0 0 0" xyz="0.10137 0.0 0.10306"/>
+    <origin rpy="0 0.0034 0" xyz="0.10137 0.0 0.10306"/>
   </joint>
   <link name="camera_link">
     <inertial>

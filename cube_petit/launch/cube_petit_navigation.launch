@@ -11,7 +11,7 @@
     <!-- [EDIT] map file name-->
     <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
 
-    <arg name="map_file" default="$(find cube_petit)/map/gazebo/map.yaml"/>
+    <arg name="map_file" default="$(find cube_petit)/map/floor_eight/map.yaml"/>
 
     <!-- [EDIT] keepout map file name if you need -->
     <arg name="map_keepout_file" default="$(find cube_petit)/map/map_keepout.yaml" />
@@ -43,6 +43,11 @@
       <arg name="scan_topic" value="$(arg scan)"/>  
     </include>
 
+    <group ns="rviz_topics_relay">
+      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /navigation/clicked_point"/>
+      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /navigation/initialpose"/>
+      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /navigation/move_base_simple/goal"/>
+    </group>
 
 
     <!-- move the robot -->

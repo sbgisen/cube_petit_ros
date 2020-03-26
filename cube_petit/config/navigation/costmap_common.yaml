@@ -46,7 +46,7 @@ rgbd_obstacles:
   observation_persistence: 0.0  #seconds
   max_obstacle_height: 1.5    #meters
   unknown_threshold: 15     #voxel height,
-  mark_threshold: 0      #voxel height
+  mark_threshold: 1      #voxel height
   update_footprint_enabled: true
   combination_method: 1      #1=max, 0=override
   obstacle_range: 2.0    #meters
@@ -58,7 +58,7 @@ rgbd_obstacles:
   observation_sources: realsense_mark realsense_clear
   realsense_mark:
      data_type: PointCloud2
-     topic: /camera/points
+     topic: /camera/depth_registered/points
      marking: true
      clearing: false
      min_obstacle_height: 0.05   #default 0, meters
@@ -70,7 +70,7 @@ rgbd_obstacles:
      voxel_filter: true           #default off, apply voxel filter to sensor, recommend on 
   realsense_clear:
      data_type: PointCloud2
-     topic: /camera/points
+     topic: /camera/depth_registered/points
      marking: false
      clearing: true
      min_obstacle_height: 0.05   #default 0, meters

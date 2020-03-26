@@ -1,5 +1,5 @@
 dynamixel_control:
-  serial_interface: /dev/ttyDYNAMIXEL_2.4.3
+  serial_interface: /dev/ttyDYNAMIXEL_3.4.2
   loop_frequency: 100
   cycle_time_error_threshold: 0.2 # 0.002
   baudrate: 1000000 # in bauds

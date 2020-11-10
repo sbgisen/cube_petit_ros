@@ -10,7 +10,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-    	  <mesh filename="package://cube_petit/meshes/cube_petit/cube_petit_body.obj"/>
+    	  <mesh filename="package://cube_petit_description/meshes/cube_petit/cube_petit_body.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -229,7 +229,7 @@
     <visual>
     <origin rpy="-1.57079632679 0 0" xyz="0 0 0"/>
       <geometry>
-	      <mesh filename="package://cube_petit/meshes/cube_petit/cube_petit_wheel.obj"/>
+	      <mesh filename="package://cube_petit_description/meshes/cube_petit/cube_petit_wheel.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -278,7 +278,7 @@
     <visual>
       <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://cube_petit/meshes/cube_petit/cube_petit_wheel.obj"/>
+        <mesh filename="package://cube_petit_description/meshes/cube_petit/cube_petit_wheel.obj"/>
       </geometry>
     </visual>
     <collision>

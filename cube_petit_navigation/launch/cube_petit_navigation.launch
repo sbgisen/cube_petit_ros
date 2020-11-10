@@ -11,10 +11,10 @@
     <!-- [EDIT] map file name-->
     <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
 
-    <arg name="map_file" default="$(find cube_petit)/map/floor_eight/map.yaml"/>
+    <arg name="map_file" default="$(find cube_petit_gazebo)/map/floor_eight/map.yaml"/>
 
     <!-- [EDIT] keepout map file name if you need -->
-    <arg name="map_keepout_file" default="$(find cube_petit)/map/map_keepout.yaml" />
+    <arg name="map_keepout_file" default="$(find cube_petit_gazebo)/map/map_keepout.yaml" />
     <arg name="use_keepout" default="false" />
     <param name="map_server/map_file" value="$(arg map_file)" />
 
@@ -22,8 +22,8 @@
     <arg name="costmap_image" default="false" />
 
     <!-- Navigation parameter files -->
-    <arg name="move_base_include" default="$(find cube_petit)/launch/include/move_base.launch.xml"/>
-    <arg name="amcl_include" default="$(find cube_petit)/launch/include/amcl.launch.xml"/>
+    <arg name="move_base_include" default="$(find cube_petit_navigation)/launch/include/move_base.launch.xml"/>
+    <arg name="amcl_include" default="$(find cube_petit_navigation)/launch/include/amcl.launch.xml"/>
 
 
     <!-- serve up a map -->

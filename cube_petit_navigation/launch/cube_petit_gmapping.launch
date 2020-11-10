@@ -1,7 +1,7 @@
 <!-- -*- mode: XML -*- -->
 <launch>
 	<!-- load cube_petit.xacro -->
-	<arg name="model" default="$(find cube_petit)/urdf/cube_petit.xacro" />
+	<arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" />
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
 
 	<!-- [EDIT] topic name for scan -->

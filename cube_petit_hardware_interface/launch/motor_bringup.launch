@@ -2,8 +2,8 @@
 <launch>
 
   <!-- Parameters for the hardware interface and controllers -->
-  <rosparam file="$(find cube_petit)/config/motor.yaml"/>
-  <rosparam file="$(find cube_petit)/config/odom.yaml"/>
+  <rosparam file="$(find cube_petit_hardware_interface)/config/motor.yaml"/>
+  <rosparam file="$(find cube_petit_navigation)/config/odom.yaml"/>
 
   <!-- launch our hardware interface -->
 

@@ -194,8 +194,8 @@ include_directories(
 # )
 
 
-add_executable(cmd_vel_publisher src/cmd_vel_publisher.cpp)
-target_link_libraries(cmd_vel_publisher ${catkin_LIBRARIES})
+# add_executable(cmd_vel_publisher src/cmd_vel_publisher.cpp)
+# target_link_libraries(cmd_vel_publisher ${catkin_LIBRARIES})
 
 #############
 ## Testing ##

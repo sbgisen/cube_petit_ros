@@ -1,14 +1,23 @@
 <?xml version="1.0"?>
 <launch>
+  <arg name="cube_petit_version" default="2"/>
 
   <!-- Parameters for the hardware interface and controllers -->
   <rosparam file="$(find cube_petit_hardware_interface)/config/motor.yaml"/>
   <rosparam file="$(find cube_petit_navigation)/config/odom.yaml"/>
-
+  
+  <node pkg="socketcan_bridge" name="socketcan_to_topic_node" type="socketcan_to_topic_node" required="true"/>
   <!-- launch our hardware interface -->
-
-  <arg name="protocol_version" default="p1"/>
-  <node pkg="dynamixel_control_hw" type="dynamixel_control_$(arg protocol_version)" name="dynamixel_control" output="screen" clear_params="true" required="true"/>
-  <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" clear_params="true" args="/motor_controllers/joint_state_controller /diff_drive_controller"/>
-
+  <!-- dynamixel-->
+  <group if="$(eval cube_petit_version=='1')">
+    <arg name="protocol_version" default="p1"/> 
+    <node pkg="dynamixel_control_hw" type="dynamixel_control_$(arg protocol_version)" name="dynamixel_control" output="screen" clear_params="true" required="true"/>
+  </group>
+  <!-- dji M2006-->
+  <!-- <group if="$(eval cube_petit_version=='2')"> -->
+    <node pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface" name="dji_control" output="screen" clear_params="true" required="true"/> 
+  <!-- </group> -->
+  
+  <!-- <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" clear_params="true" args="/motor_controllers/joint_state_controller /diff_drive_controller"/> -->
+  
 </launch>

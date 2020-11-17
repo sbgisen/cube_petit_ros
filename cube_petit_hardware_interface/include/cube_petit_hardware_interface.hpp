@@ -25,18 +25,39 @@
 class Cube_Petit_Hardware_Interface : public hardware_interface::RobotHW{
 
 private:
+  //std::shared_ptr<Dji_Can_Communication> dji_can_ptr_;
+  Dji_Can_Communication dji_can_;
+  hardware_interface::JointStateInterface    joint_state_interface_;
+  hardware_interface::VelocityJointInterface joint_velocity_interface_;
+
+  std::vector<uint8_t> mode_;
+  std::vector<double> position_, velocity_, effort_;
+  std::vector<double> velocity_command_;
+    
+  std::vector<bool> direction_;
+
+  enum Params {
+    POSITION_LEFT,
+    VELOCITY_LEFT,
+    EFFORT_LEFT,
+    POSITION_RIGHT,
+    VELOCITY_RIGHT,
+    EFFORT_RIGHT
+  };
+
+  //モータの左右
+  enum Side {
+    LEFT,
+    RIGHT
+  };
 
 public:
-    Cube_Petit_Hardware_Interface();
-    ~Cube_Petit_Hardware_Interface();
-
-    Dji_Can_Communication dji_can_;
-
-    void write();// override;  //何者
-    void read();// override;
-
-
-
+  Cube_Petit_Hardware_Interface(ros::NodeHandle nh);
+  ~Cube_Petit_Hardware_Interface();
+  std::string execCmd(std::string system_cmd);
+  void update();
+  void write();// override;  //何者
+  void read();// override;
 };
 
 #endif //CUBE_PETIT_HARDWARE_INTERFACE

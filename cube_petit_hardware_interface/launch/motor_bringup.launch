@@ -15,7 +15,7 @@
   </group>
   <!-- dji M2006-->
   <!-- <group if="$(eval cube_petit_version=='2')"> -->
-    <node pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface" name="dji_control" output="screen" clear_params="true" required="true"/> 
+    <node pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface_node" name="cube_petit_hardware_interface" output="screen" clear_params="true" required="true"/> 
   <!-- </group> -->
   
   <!-- <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" clear_params="true" args="/motor_controllers/joint_state_controller /diff_drive_controller"/> -->

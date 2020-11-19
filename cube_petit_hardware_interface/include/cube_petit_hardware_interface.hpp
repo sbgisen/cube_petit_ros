@@ -33,8 +33,8 @@ private:
   std::vector<uint8_t> mode_;
   std::vector<double> position_, velocity_, effort_;
   std::vector<double> velocity_command_;
-    
   std::vector<bool> direction_;
+  std::vector<double> status_;
 
   enum Params {
     POSITION_LEFT,
@@ -52,11 +52,12 @@ private:
   };
 
 public:
-  Cube_Petit_Hardware_Interface(ros::NodeHandle nh);
+  Cube_Petit_Hardware_Interface();
   ~Cube_Petit_Hardware_Interface();
+  void initialize(ros::NodeHandle nh);
   std::string execCmd(std::string system_cmd);
   void update();
-  void write();// override;  //何者
+  void write();// override;  //いらない
   void read();// override;
 };
 

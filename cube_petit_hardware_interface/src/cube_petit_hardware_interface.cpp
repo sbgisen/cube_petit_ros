@@ -16,20 +16,23 @@ Motor Controller: C610
 int main(int argc, char **argv){
   ros::init(argc, argv, "cube_petit_hardware_interface");
   ros::NodeHandle nh("~");
-  ros::Rate loop_rate(1);
   int count =1;
 
   Cube_Petit_Hardware_Interface hw_interface;
   hw_interface.initialize(nh);
-
+  controller_manager::ControllerManager controller_manager(&hw_interface, nh);
+  ros::Rate loop_rate(1.0 / hw_interface.getPeriod().toSec());
+  // ros::Rate loop_rate(100);
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
   while(ros::ok()){
-    ROS_INFO("main loop");
-    hw_interface.update();
+    controller_manager.update(hw_interface.getTime(), hw_interface.getPeriod());
     ros::spinOnce();
+    hw_interface.update();
     loop_rate.sleep();
-    //count++;
   }
-    return 0;
+  spinner.stop();
+  return 0;
 }
 
 std::string Cube_Petit_Hardware_Interface::execCmd(std::string system_cmd){ //static
@@ -51,26 +54,13 @@ std::string Cube_Petit_Hardware_Interface::execCmd(std::string system_cmd){ //st
 /*  read Joint States from CAN          */
 ////////////////////////////////////////////
 void Cube_Petit_Hardware_Interface::read(){
-  ROS_INFO("Cube_Petit_Hardware_Interface::read -> START");
+  // ROS_INFO("Cube_Petit_Hardware_Interface::read -> START");
   std::vector<double> status;
   status.resize(dji_can_.status_size_, 0);
 
   // 
   dji_can_.updateMotorStatus(status);
 
-  //モータの向きを逆にする
-  //atは引数番目の要素を取得する
-  if(direction_.at(LEFT) == false){
-    status.at(POSITION_LEFT) *= -1.0;
-    status.at(VELOCITY_LEFT) *= -1.0;
-    status.at(EFFORT_LEFT)   *= -1.0;
-    }
-
-  if(direction_.at(RIGHT) == false){
-    status.at(POSITION_RIGHT) *= -1.0;
-    status.at(VELOCITY_RIGHT) *= -1.0;
-    status.at(EFFORT_RIGHT)   *= -1.0;
-  }
   // copies and updates the status
   position_.at(LEFT)  = status.at(POSITION_LEFT);
   position_.at(RIGHT) = status.at(POSITION_RIGHT);
@@ -79,10 +69,20 @@ void Cube_Petit_Hardware_Interface::read(){
   effort_.at(LEFT)    = status.at(EFFORT_LEFT);
   effort_.at(RIGHT)   = status.at(EFFORT_RIGHT);
 
-  ROS_INFO("Cube_Petit_Hardware_Interface::read   -> position %f, %f", position_.at(LEFT), position_.at(RIGHT));
-  ROS_INFO("Cube_Petit_Hardware_Interface::read   -> velocity %f, %f", velocity_.at(LEFT), velocity_.at(RIGHT));
-  ROS_INFO("Cube_Petit_Hardware_Interface::read   -> effort %f, %f", effort_.at(LEFT), effort_.at(RIGHT));
-  ROS_INFO("Cube_Petit_Hardware_Interface::read -> FINISH");
+  //モータの向きを逆にする
+  //atは引数番目の要素を取得する
+  if(direction_.at(LEFT) == false){
+     position_.at(LEFT) *= -1.0;
+  }
+
+  if(direction_.at(RIGHT) == false){
+    velocity_.at(RIGHT) *= -1.0;
+  }
+
+  // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> position %f, %f", position_.at(LEFT), position_.at(RIGHT));
+  // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> velocity %f, %f", velocity_.at(LEFT), velocity_.at(RIGHT));
+  // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> effort %f, %f", effort_.at(LEFT), effort_.at(RIGHT));
+  // ROS_INFO("Cube_Petit_Hardware_Interface::read -> FINISH");
 
 }
 
@@ -90,7 +90,7 @@ void Cube_Petit_Hardware_Interface::read(){
 /*  write target Velocity Commamd to CAN          */
 ////////////////////////////////////////////////////
 void Cube_Petit_Hardware_Interface::write(){
-  ROS_INFO("Cube_Petit_Hardware_Interface::write -> START");
+  // ROS_INFO("Cube_Petit_Hardware_Interface::write -> START");
 
   // sets commands depending on its direction
   if(direction_.at(LEFT)) {
@@ -106,7 +106,7 @@ void Cube_Petit_Hardware_Interface::write(){
       dji_can_.sendVelocityCan(-velocity_command_.at(LEFT), -velocity_command_.at(RIGHT));
     }
   }
-  ROS_INFO("Cube_Petit_Hardware_Interface::write -> FINISH");
+  // ROS_INFO("Cube_Petit_Hardware_Interface::write -> FINISH");
 }
 
 /////////////////////////
@@ -135,16 +135,16 @@ Cube_Petit_Hardware_Interface::Cube_Petit_Hardware_Interface(){
   direction_.at(RIGHT) = false;
 
   // state_handleは引数()
-  hardware_interface::JointStateHandle state_handle_left ("wheel_left_joint",  &position_[LEFT],  &velocity_[LEFT],  &effort_[LEFT]);
-  hardware_interface::JointStateHandle state_handle_right("wheel_right_joint", &position_[RIGHT], &velocity_[RIGHT], &effort_[RIGHT]);
+  hardware_interface::JointStateHandle state_handle_left ("left_wheel_joint",  &position_[LEFT],  &velocity_[LEFT],  &effort_[LEFT]);
+  hardware_interface::JointStateHandle state_handle_right("right_wheel_joint", &position_[RIGHT], &velocity_[RIGHT], &effort_[RIGHT]);
 
   // あ
   joint_state_interface_.registerHandle(state_handle_left);
   joint_state_interface_.registerHandle(state_handle_right);
   registerInterface(&joint_state_interface_);
 
-  hardware_interface::JointHandle velocity_handle_left (joint_state_interface_.getHandle("wheel_left_joint"),  &velocity_command_[LEFT]);
-  hardware_interface::JointHandle velocity_handle_right(joint_state_interface_.getHandle("wheel_right_joint"), &velocity_command_[RIGHT]);
+  hardware_interface::JointHandle velocity_handle_left (joint_state_interface_.getHandle("left_wheel_joint"), &velocity_command_[LEFT]);
+  hardware_interface::JointHandle velocity_handle_right(joint_state_interface_.getHandle("right_wheel_joint"), &velocity_command_[RIGHT]);
 
   // 
   joint_velocity_interface_.registerHandle(velocity_handle_left);
@@ -161,3 +161,10 @@ void Cube_Petit_Hardware_Interface::initialize(ros::NodeHandle nh){
 Cube_Petit_Hardware_Interface::~Cube_Petit_Hardware_Interface(){
 }
 
+ros::Time Cube_Petit_Hardware_Interface::getTime() {
+    return ros::Time::now();
+}
+
+ros::Duration Cube_Petit_Hardware_Interface::getPeriod() {
+    return ros::Duration(0.01);
+}

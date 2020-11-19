@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf
+  hardware_interface
+  controller_manager
 )
 
 # Macro to generate ROS node with "add_executable" and "add_library"

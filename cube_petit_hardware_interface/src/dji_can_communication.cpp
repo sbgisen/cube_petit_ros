@@ -251,6 +251,6 @@ Dji_Can_Communication::~Dji_Can_Communication() {}
 ////////////////////////
 void Dji_Can_Communication::initialize(ros::NodeHandle nh) {
   ROS_INFO("dji_can_communication -> initialize");
-  sub_can = nh.subscribe<can_msgs::Frame>("/received_messages", 1000, &Dji_Can_Communication::receivedCanCallback, this);
+  sub_can = nh.subscribe<can_msgs::Frame>("received_messages", 1000, &Dji_Can_Communication::receivedCanCallback, this);
 }
 

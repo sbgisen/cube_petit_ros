@@ -59,6 +59,8 @@ public:
   void update();
   void write();// override;  //いらない
   void read();// override;
+  ros::Time getTime();
+  ros::Duration getPeriod();
 };
 
 #endif //CUBE_PETIT_HARDWARE_INTERFACE

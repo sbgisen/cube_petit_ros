@@ -18,10 +18,18 @@
     <rosparam file="$(find cube_petit_hardware_interface)/config/motor.yaml"/>
   </group>
   <!-- dji M2006-->
-  <!-- <group if="$(eval cube_petit_version=='2')"> -->
-    <node pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface_node" name="cube_petit_hardware_interface" output="screen" clear_params="true" required="true"/> 
-  <!-- </group> -->
-  
-  <!-- <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" clear_params="true" args="/motor_controllers/joint_state_controller /diff_drive_controller"/> -->
-  
+  <group if="$(arg cube_petit_version2)">
+    <node pkg="socketcan_bridge" name="socketcan_to_topic_node" type="socketcan_to_topic_node" required="true"  ns="cube_petit"/>
+    <node name="cube_petit"
+      pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface_node"
+      output="screen" clear_params="true" required="true"/>
+    <rosparam ns="cube_petit" file="$(find cube_petit_hardware_interface)/config/diff_drive_controller.yaml"/>
+    <node ns="cube_petit" name="controller_spawner"
+      pkg="controller_manager" type="spawner" respawn="false" output="screen"
+      args="joint_state_controller diff_drive_controller"/>
+  </group>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+		<remap from="joint_states" to="/cube_petit/joint_states"/>
+	</node>
+
 </launch>

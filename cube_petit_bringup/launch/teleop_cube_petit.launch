@@ -13,7 +13,7 @@
 
     <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
       <rosparam command="load" file="$(arg teleop_config)" />
-      <remap from="cmd_vel" to="/diff_drive_controller/cmd_vel"/>
+      <remap from="cmd_vel" to="/cube_petit/diff_drive_controller/cmd_vel"/>
     </node>
   
  </group>

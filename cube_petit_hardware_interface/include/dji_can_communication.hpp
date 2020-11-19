@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
+#include <regex>
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -30,6 +30,7 @@ private:
   // モータID1個毎のアクセス回数
   int AccessCount[8] = {0,0,0,0,0,0,0,0};
   ros::Subscriber sub_can;
+  int current_2_bit_10_;
 
   int motor_id;
   int motor_degree_now;
@@ -69,12 +70,11 @@ public:
   //Send_Velocity_Can(const std_msgs::String& msg);
   uint8_t can_data[8];
   // モータID1個毎のアクセス回数
-  void received_can_callback(const can_msgs::Frame::ConstPtr& msg);
-  int send_Can(uint16_t id, uint8_t* data);
-  int send_Velocity_Can(const double left_target_velocity, const double right_target_velocity);
-  int export_Velocity_To_Can(int id, double target_velocity);
+  void receivedCanCallback(const can_msgs::Frame::ConstPtr& msg);
+  int sendCan(uint16_t id, uint8_t* data);
+  int sendVelocityCan(const double left_target_velocity, const double right_target_velocity);
+  int exportCurrentToCan(int id, double send_current);
   void updateMotorStatus(std::vector<double>&);
-  void loop_ros();
   // constant values, initialized in contructor
   uint8_t status_size_;
   int velocityToCurrent(double velocity);

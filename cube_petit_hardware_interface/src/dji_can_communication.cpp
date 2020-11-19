@@ -21,9 +21,6 @@ int Dji_Can_Communication::sendVelocityCan(const double left_target_velocity, co
   // 受け取ったらCANに情報を送る　//左はid1、右はid2
   exportCurrentToCan(LEFT+1, velocityToCurrent(left_target_velocity));
   exportCurrentToCan(RIGHT+1, velocityToCurrent(right_target_velocity));  
-
-
-
   return 0;
 }
 
@@ -177,13 +174,14 @@ void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr&
   if(msg->id == (0x200 + 0x001) && msg->dlc == 8 || msg->id == (0x200 + 0x002) && msg->dlc == 8) {  // normal response from motor driver
     motor_id = msg->id;
     motor_degree_now = ((msg->data[0] << 8) | msg->data[1])*360/8191;
-    motor_degree_before = motor_degree_now;
     motor_rpm = (msg->data[2] << 8) | msg->data[3];
     motor_current = (msg->data[4] << 8) | msg->data[5];
     motor_temperature = msg->data[6];
     motor_torque = motor_current*TORQUE_COEFFICIENT/1000;
     motor_rad_per_sec = (double)motor_rpm/60*2*M_PI;
     motor_position = 0;
+
+    //ROS_INFO("motor_degree_now [%d], before [%d]", motor_degree_now, motor_degree_before);
  
     // 前回のモータ角度から現在のモータ角度を算出
     if (0<=motor_degree_now && motor_degree_now < 180){    // 角度が0度〜180度 
@@ -219,8 +217,14 @@ void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr&
       status_[EFFORT_RIGHT] = motor_torque;
     }
 
+  }else if(msg->id == (0x200) && msg->dlc == 8 ){
+    int current_1 = (msg->data[0] << 8) | msg->data[1];
+    int current_2 = (msg->data[2] << 8) | msg->data[3];
+    //ROS_INFO("/received_message id: %d ,data1: %d data2: %d", msg->id, current_1, current_2);
+  }else if(msg->id == (0x1FF) && msg->dlc == 8){
+  
   }else{
-    ROS_WARN("Invalid /received_message");
+    ROS_WARN("Invalid /received_message id: %d", msg->id);
   }
 }
 
@@ -234,6 +238,7 @@ Dji_Can_Communication::Dji_Can_Communication() {
   MAX_CURRENT = 10000;  //C610の最大電流
   status_size_ = 6;
   current_2_bit_10_ = 10000;
+  motor_degree_before = 0;
 
   status_.resize(status_size_,0);
   ROS_INFO("Dji_Can_Communication::Dji_Can_Communication() -> SUCCEED");

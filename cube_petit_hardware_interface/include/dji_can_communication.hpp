@@ -25,29 +25,44 @@
 
 class Dji_Can_Communication {
 private:
-  // データ
-  int Current_16[8] = {0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
+
   // モータID1個毎のアクセス回数
   int AccessCount[8] = {0,0,0,0,0,0,0,0};
   ros::Subscriber sub_can;
-  int current_2_bit_10_;
 
   int motor_id;
-  int motor_degree_now;
-  int motor_degree_before;
   int motor_rpm;
-  int motor_current;
+  double motor_current;
   int motor_temperature;
   double motor_torque;
   double motor_rad_per_sec;
+
   int motor_position;
+  int motor_position_right;
+  int motor_position_left;
+
+
+  double motor_position_rad;
+  double motor_rad_now;
+  double motor_rad_before_right;
+  double motor_rad_before_left;
+  double motor_rad_before;
 
   // constant values, initialized in contructor
-  double TORQUE_COEFFICIENT = 0.18;  //トルク計数
-  double REDUCTION_RATIO = 36;   //減速比
-  int MAX_CURRENT = 10000;  //C610の最大電流
+  double TORQUE_COEFFICIENT;  //トルク計数
+  double REDUCTION_RATIO;   //減速比
+  double MAX_CURRENT;  //C610の最大電流
 
 
+  std::vector<double> rad_vec;
+
+  enum PositionStatus {
+    RAD_NOW_LEFT,
+    RAD_BEFORE_LEFT,
+    RAD_NOW_RIGHT,
+    RAD_BEFORE_RIGHT
+    };
+  
   std::vector<double> status_;
   enum Params {
     POSITION_LEFT,
@@ -73,12 +88,13 @@ public:
   void receivedCanCallback(const can_msgs::Frame::ConstPtr& msg);
   int sendCan(uint16_t id, uint8_t* data);
   int sendVelocityCan(const double left_target_velocity, const double right_target_velocity);
-  int exportCurrentToCan(int id, double send_current);
+  int current2Data(double current_in);
+  int velocity2Data(double velocity_in);
+  int createCanPacketAndSend(int right_data,int left_data);
   void updateMotorStatus(std::vector<double>&);
   // constant values, initialized in contructor
   uint8_t status_size_;
-  int velocityToCurrent(double velocity);
-  
+ 
 
 };
 

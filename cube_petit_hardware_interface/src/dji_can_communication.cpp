@@ -19,74 +19,57 @@ Motor Controller: C610
 //////////////////////////////////////
 int Dji_Can_Communication::sendVelocityCan(const double left_target_velocity, const double right_target_velocity){
   // 受け取ったらCANに情報を送る　//左はid1、右はid2
-  exportCurrentToCan(LEFT+1, velocityToCurrent(left_target_velocity));
-  exportCurrentToCan(RIGHT+1, velocityToCurrent(right_target_velocity));  
+  int right_data = velocity2Data(right_target_velocity);
+  int left_data  = velocity2Data(left_target_velocity);
+  createCanPacketAndSend(right_data,left_data);  
   return 0;
+}
+// [謎]
+int Dji_Can_Communication::current2Data(double current_in){
+  // データ初期化
+  int data_out = 0;
+  //目標電流値が０以上の場合（正回転の場合？）
+  if (current_in >= 0){
+    data_out = (int)(current_in);
+  // 負回転の場合、符号なし8ビット整数に変換
+  }else if (current_in < 0){
+    data_out = 0xFFFF+(int)(current_in);
+  }
+  return data_out;
 }
 
 // [謎]
-int Dji_Can_Communication::exportCurrentToCan(int id, double send_current){
-  //目標電流値が０以上の場合（正回転の場合？）
-  if (send_current >= 0){
-    Current_16[id-1] = 0x0000+((send_current * current_2_bit_10_)/10000);
-    AccessCount[id-1] = 0;
-  // 負回転の場合、符号なし8ビット整数に変換
-  }else if (send_current < 0){
-    Current_16[id-1] = 0xFFFF+((send_current * current_2_bit_10_)/10000);
-    AccessCount[id-1] = 0;
-  }
+int Dji_Can_Communication::velocity2Data(double velocity_in){
   // データ初期化
-  for (int i = 0; i < 8; i++){
-    if (AccessCount[i] > 100){
-      Current_16[i] = 0x0000;
-    }
+  int data_out = 0;
+    // 角速度　回転速度　電流値を求める
+  double radparsec = REDUCTION_RATIO * velocity_in;
+  double rpm = radparsec * 60.0 / ( 2.0 * M_PI);
+  int velocity_data = (int)( rpm * 75.0 ); // what is 75mm ????
+  //目標電流値が０以上の場合（正回転の場合？）
+  if (velocity_data >= 0){
+    data_out = (int)(velocity_data);
+  // 負回転の場合、符号なし8ビット整数に変換
+  }else if (velocity_data < 0){
+    data_out = 0xFFFF+(int)(velocity_data);
   }
+  return data_out;
+}
 
-  //
-  can_data[0]                 = Current_16[0] >> 8 & 0xFF;
-  can_data[1]                 = Current_16[0] & 0xFF;
-  can_data[2]                 = Current_16[1] >> 8 & 0xFF;
-  can_data[3]                 = Current_16[1] & 0xFF;
-  can_data[4]                 = Current_16[2] >> 8 & 0xFF;
-  can_data[5]                 = Current_16[2] & 0xFF;
-  can_data[6]                 = Current_16[3] >> 8 & 0xFF;
-  can_data[7]                 = Current_16[3] & 0xFF;
+// [謎]
+int Dji_Can_Communication::createCanPacketAndSend(int right_data,int left_data){
+  can_data[0]                 = left_data >> 8 & 0xFF;
+  can_data[1]                 = left_data & 0xFF;
+  can_data[2]                 = right_data >> 8 & 0xFF;
+  can_data[3]                 = right_data & 0xFF;
+  can_data[4]                 = 0;
+  can_data[5]                 = 0;
+  can_data[6]                 = 0;
+  can_data[7]                 = 0;
   if(sendCan(0x200, can_data)) {
         ROS_WARN("write error");
   }
-  can_data[0]                 = Current_16[4] >> 8 & 0xFF;
-  can_data[1]                 = Current_16[4] & 0xFF;
-  can_data[2]                 = Current_16[5] >> 8 & 0xFF;
-  can_data[3]                 = Current_16[5] & 0xFF;
-  can_data[4]                 = Current_16[6] >> 8 & 0xFF;
-  can_data[5]                 = Current_16[6] & 0xFF;
-  can_data[6]                 = Current_16[7] >> 8 & 0xFF;
-  can_data[7]                 = Current_16[7] & 0xFF;
-  if(sendCan(0x1FF,can_data)) {
-        ROS_WARN("write error");
-  }
-  for (int i = 0; i < 8; i++)
-  {
-    AccessCount[i]++;
-  }
   return 0;
-
-}
-
-// 速度指令値から電流値に変換する
-int Dji_Can_Communication::velocityToCurrent(double velocity){
-  // 角速度　回転速度　電流値を求める
-  double radparsec = REDUCTION_RATIO * velocity;
-  int rpm = radparsec*60/(2*M_PI);
-  int current = 75 * rpm;   //75？
-
-  // 最大電流値を超えないようにする
-  if (current > MAX_CURRENT){
-    current = MAX_CURRENT;
-  }else if (current < -MAX_CURRENT){
-    current = -MAX_CURRENT;
-  }
-  return current;
 }
 
 // CANデータをデバイスに送信する。引数はコントローラIDと電流値
@@ -162,59 +145,75 @@ void Dji_Can_Communication::updateMotorStatus(std::vector<double>& status_arg){
 
 // モータからデータを受け取ったら値を格納するコールバック関数
 void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr& msg){
-  motor_id = 0;
-  motor_degree_now = 0;
-  motor_rpm = 0;
-  motor_current = 0;
-  motor_temperature = 0;
-  motor_torque = 0;
-  motor_rad_per_sec = 0;
-  motor_position = 0;
-
+  // motor_id = 0;
+  // motor_rad_now = 0;
+  // motor_rpm = 0;
+  // motor_current = 0;
+  // motor_temperature = 0;
+  // motor_torque = 0;
+  // motor_rad_per_sec = 0;
+  // motor_position = 0;
+  // motor_rad_before_left = 0;
+  // motor_rad_before_right = 0;
   if(msg->id == (0x200 + 0x001) && msg->dlc == 8 || msg->id == (0x200 + 0x002) && msg->dlc == 8) {  // normal response from motor driver
-    motor_id = msg->id;
-    motor_degree_now = ((msg->data[0] << 8) | msg->data[1])*360/8191;
-    motor_rpm = (msg->data[2] << 8) | msg->data[3];
-    motor_current = (msg->data[4] << 8) | msg->data[5];
-    motor_temperature = msg->data[6];
-    motor_torque = motor_current*TORQUE_COEFFICIENT/1000;
-    motor_rad_per_sec = (double)motor_rpm/60*2*M_PI;
-    motor_position = 0;
 
-    //ROS_INFO("motor_degree_now [%d], before [%d]", motor_degree_now, motor_degree_before);
- 
-    // 前回のモータ角度から現在のモータ角度を算出
-    if (0<=motor_degree_now && motor_degree_now < 180){    // 角度が0度〜180度 
-      if (motor_degree_now <= motor_degree_before && motor_degree_before <= motor_degree_now+180){  // 負回転した
-        motor_position -= (motor_degree_before-motor_degree_now);
-      }else{  // 正回転したとき1回転していたら360度を足す
-        if (motor_degree_now-motor_degree_before < 0){
-          motor_position += 360+motor_degree_now-motor_degree_before;
-        }else{
-          motor_position += motor_degree_now-motor_degree_before;
-        }
-      }
-    }else if (180<= motor_degree_now && motor_degree_now < 360){    // 角度が180度〜360度
-      if (motor_degree_now-180 <= motor_degree_before && motor_degree_before <= motor_degree_now){
-        motor_position += motor_degree_now-motor_degree_before;
-      }else{
-        if (motor_degree_before-motor_degree_now < 0){
-          motor_position -= (360+motor_degree_before-motor_degree_now);
-        }else{
-          motor_position -= (motor_degree_before-motor_degree_now);
-        }
-      }
-    }
-    motor_degree_before = motor_degree_now;
-
+    //左側
     if(msg->id == (0x200 + 0x001) ){
-      status_[VELOCITY_LEFT] = motor_rad_per_sec;
-      status_[POSITION_LEFT] = motor_position;
-      status_[EFFORT_LEFT] = motor_torque;
+      //減速前の値
+      double left_rad = ((msg->data[0] << 8) | msg->data[1]) * 2.0 * M_PI / 8191.0;
+      if(left_rad > M_PI){
+        left_rad -= (2.0 * M_PI) * (int)((left_rad + M_PI) / (2.0 * M_PI));
+      }else if(left_rad < -M_PI){
+       left_rad += (2.0 * M_PI) * (int)(-1.0 * (left_rad - M_PI) / (2.0 * M_PI));
+      }
+      //減速後の値を出すため、これまでに何回転したかカウントする
+
+      static double left_rad_prev = 0.0;
+      static int left_revolution_count = 0;
+      double left_rad_total;
+      if( (left_rad_prev - left_rad) > M_PI ){//TODO*BUGFIX
+         ROS_INFO("left_revolution_count = %f,%f,%f",left_revolution_count, left_rad, left_rad_prev);
+        left_revolution_count ++;
+      }else if((left_rad_prev - left_rad) < -1.0*M_PI){
+       ROS_INFO("left_revolution_count = %f,%f,%f",left_revolution_count, left_rad, left_rad_prev);
+        left_revolution_count --;
+      }
+      left_rad_prev = left_rad;
+      //減速後の値を出す
+      double left_rad_reduced = ( left_rad + (2*M_PI*left_revolution_count) ) / REDUCTION_RATIO;
+
+
+      double left_rpm = (msg->data[2] << 8) | msg->data[3];
+      double left_rad_per_sec = (double)left_rpm * 2.0 * M_PI / 60.0 ;
+
+      double left_current = ( (msg->data[4] << 8) | msg->data[5] ) / 1000.0;
+      double left_torque = left_current * TORQUE_COEFFICIENT;
+
+      double left_temperature = msg->data[6];
+
+      status_[POSITION_LEFT] = left_rad_reduced;
+      status_[VELOCITY_LEFT] = left_rad_per_sec ;
+      status_[EFFORT_LEFT] = left_torque;
+    //右側
     }else if(msg->id == (0x200 + 0x002) ){
-      status_[POSITION_RIGHT] = motor_position;
-      status_[VELOCITY_RIGHT] = motor_rad_per_sec;
-      status_[EFFORT_RIGHT] = motor_torque;
+      double right_rad = ((msg->data[0] << 8) | msg->data[1]) * 2.0 * M_PI / 8191.0;
+      if(right_rad > M_PI){
+        right_rad -= (2.0 * M_PI) * (int)( (right_rad + M_PI) / (2.0 * M_PI));
+      }else if(right_rad < -M_PI){
+       right_rad += (2.0 * M_PI) * (int)(-1.0 * (right_rad - M_PI) / (2.0 * M_PI));
+      }
+
+      double right_rpm = (msg->data[2] << 8) | msg->data[3];
+      double right_rad_per_sec = (double)right_rpm * 2.0 * M_PI / 60.0 ;
+
+      double right_current = ( (msg->data[4] << 8) | msg->data[5] ) / 1000.0;
+      double right_torque = right_current * TORQUE_COEFFICIENT;
+
+      double right_temperature = msg->data[6];
+
+      status_[POSITION_RIGHT] = right_rad;
+      status_[VELOCITY_RIGHT] = right_rad_per_sec ;
+      status_[EFFORT_RIGHT] = right_torque;
     }
 
   }else if(msg->id == (0x200) && msg->dlc == 8 ){
@@ -236,11 +235,13 @@ Dji_Can_Communication::Dji_Can_Communication() {
   TORQUE_COEFFICIENT = 0.18;  //トルク計数
   REDUCTION_RATIO = 36;   //減速比
   MAX_CURRENT = 10000;  //C610の最大電流
-  status_size_ = 6;
-  current_2_bit_10_ = 10000;
-  motor_degree_before = 0;
-
-  status_.resize(status_size_,0);
+  MAX_CURRENT = 3.0; //今だけ
+  // motor_degree_before = 0;
+  // motor_rad_before = 0;
+  // motor_rad_before_left = 0;
+  // motor_rad_before_right = 0;
+  status_.resize(6,0.0);
+  rad_vec.resize(4,0.0);
   ROS_INFO("Dji_Can_Communication::Dji_Can_Communication() -> SUCCEED");
 }
 

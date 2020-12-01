@@ -16,25 +16,33 @@ Motor Controller: C610
 int main(int argc, char **argv){
   ros::init(argc, argv, "cube_petit_hardware_interface");
   ros::NodeHandle nh("~");
-  int count =1;
 
+  // Cube_Petit_Hardware_Interfaceクラスの初期化
   Cube_Petit_Hardware_Interface hw_interface;
   hw_interface.initialize(nh);
+
+  // Controller_Managerクラスの初期化
   controller_manager::ControllerManager controller_manager(&hw_interface, nh);
+
+  // loop_rateは　1/0.01 = 100Hz
   ros::Rate loop_rate(1.0 / hw_interface.getPeriod().toSec());
-  // ros::Rate loop_rate(100);
-  ros::AsyncSpinner spinner(1);
+
+  // http://docs.ros.org/en/api/roscpp/html/classros_1_1AsyncSpinner.html
+  ros::AsyncSpinner spinner(1);           // 別スレッドを1つ立ててspinする　[TODO]排他処理必要
   spinner.start();
   while(ros::ok()){
+    // Update all active controllers. NEED REAL-TIME SAFE FUCTION
+    // http://docs.ros.org/en/jade/api/controller_manager/html/c++/classcontroller__manager_1_1ControllerManager.html
     controller_manager.update(hw_interface.getTime(), hw_interface.getPeriod());
-    ros::spinOnce();
-    hw_interface.update();
+    ros::spinOnce();                      // AsyncSpinnerを使わない場合は必要
+    hw_interface.update();                // ReadとWriteを呼び出す
     loop_rate.sleep();
   }
   spinner.stop();
   return 0;
 }
 
+// シェル実行
 std::string Cube_Petit_Hardware_Interface::execCmd(std::string system_cmd){ //static
   FILE *fp;
   //ROS_INFO("[%s]" system_cmd);
@@ -49,11 +57,11 @@ std::string Cube_Petit_Hardware_Interface::execCmd(std::string system_cmd){ //st
   return result;
 }
 
-
 ////////////////////////////////////////////
 /*  read Joint States from CAN          */
 ////////////////////////////////////////////
 void Cube_Petit_Hardware_Interface::read(){
+  //std::lock_guard<std::mutex> lock(mutex);  //ロックする
   // ROS_INFO("Cube_Petit_Hardware_Interface::read -> START");
   std::vector<double> status;
   status.resize(dji_can_.status_size_, 0);
@@ -74,11 +82,9 @@ void Cube_Petit_Hardware_Interface::read(){
   if(direction_.at(LEFT) == false){
      position_.at(LEFT) *= -1.0;
   }
-
   if(direction_.at(RIGHT) == false){
     velocity_.at(RIGHT) *= -1.0;
   }
-
   // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> position %f, %f", position_.at(LEFT), position_.at(RIGHT));
   // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> velocity %f, %f", velocity_.at(LEFT), velocity_.at(RIGHT));
   // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> effort %f, %f", effort_.at(LEFT), effort_.at(RIGHT));
@@ -90,6 +96,7 @@ void Cube_Petit_Hardware_Interface::read(){
 /*  write target Velocity Commamd to CAN          */
 ////////////////////////////////////////////////////
 void Cube_Petit_Hardware_Interface::write(){
+  //std::lock_guard<std::mutex> lock(mutex);  //ロックする
   // ROS_INFO("Cube_Petit_Hardware_Interface::write -> START");
 
   // sets commands depending on its direction
@@ -113,6 +120,7 @@ void Cube_Petit_Hardware_Interface::write(){
 /*  main loop          */
 /////////////////////////
 void Cube_Petit_Hardware_Interface::update(){
+  //std::lock_guard<std::mutex> lock(mutex);  //ロックする
   read();
   write();
 }
@@ -153,18 +161,20 @@ Cube_Petit_Hardware_Interface::Cube_Petit_Hardware_Interface(){
   registerInterface(&joint_velocity_interface_);
 }
 
+// Dji_Can_Communicationクラスのinitializeを呼び出す関数
 void Cube_Petit_Hardware_Interface::initialize(ros::NodeHandle nh){
-  //dji_can_.reset(new Dji_Can_Communication(nh));
   dji_can_.initialize(nh);
 }
 
 Cube_Petit_Hardware_Interface::~Cube_Petit_Hardware_Interface(){
 }
 
+// ROS上の現在時間をros::Time型で返す
 ros::Time Cube_Petit_Hardware_Interface::getTime() {
     return ros::Time::now();
 }
 
+// 0.01秒間をros::Duration型で返す
 ros::Duration Cube_Petit_Hardware_Interface::getPeriod() {
     return ros::Duration(0.01);
 }

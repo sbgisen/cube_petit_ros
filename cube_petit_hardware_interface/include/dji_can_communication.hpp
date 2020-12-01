@@ -7,7 +7,7 @@
 #include <sensor_msgs/JointState.h>
 #include "can_msgs/Frame.h"
 
-
+#include <mutex>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +21,7 @@
 #include <linux/can/raw.h>
 #include <math.h>  /* M_PI */
 
+#include <control_toolbox/pid.h>
 //#include <dji_esc_driver/cansend.hpp>
 
 class Dji_Can_Communication {

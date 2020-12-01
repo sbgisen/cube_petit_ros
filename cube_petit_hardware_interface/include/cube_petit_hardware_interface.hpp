@@ -8,7 +8,7 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <controller_manager/controller_manager.h>
-
+// #include <joint_velocity_controller.h>
 #include "dji_can_communication.hpp"
 #include <std_msgs/String.h>
 #include <iostream>
@@ -29,6 +29,9 @@ private:
   Dji_Can_Communication dji_can_;
   hardware_interface::JointStateInterface    joint_state_interface_;
   hardware_interface::VelocityJointInterface joint_velocity_interface_;
+  hardware_interface::EffortJointInterface effort_joint_interface_;
+
+  std::mutex mutex;
 
   std::vector<uint8_t> mode_;
   std::vector<double> position_, velocity_, effort_;
@@ -57,8 +60,8 @@ public:
   void initialize(ros::NodeHandle nh);
   std::string execCmd(std::string system_cmd);
   void update();
-  void write();// override;  //いらない
-  void read();// override;
+  void write();
+  void read();
   ros::Time getTime();
   ros::Duration getPeriod();
 };

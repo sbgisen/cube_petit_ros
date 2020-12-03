@@ -71,18 +71,22 @@ void Cube_Petit_Hardware_Interface::read(){
 
   // copies and updates the status
   position_.at(LEFT)  = status.at(POSITION_LEFT);
-  position_.at(RIGHT) = status.at(POSITION_RIGHT);
   velocity_.at(LEFT)  = status.at(VELOCITY_LEFT);
-  velocity_.at(RIGHT) = status.at(VELOCITY_RIGHT);
   effort_.at(LEFT)    = status.at(EFFORT_LEFT);
+  position_.at(RIGHT) = status.at(POSITION_RIGHT);
+  velocity_.at(RIGHT) = status.at(VELOCITY_RIGHT);
   effort_.at(RIGHT)   = status.at(EFFORT_RIGHT);
 
   //モータの向きを逆にする
   //atは引数番目の要素を取得する
   if(direction_.at(LEFT) == false){
      position_.at(LEFT) *= -1.0;
+     velocity_.at(LEFT) *= -1.0;
+     effort_.at(LEFT) *= - 1.0;
   }
   if(direction_.at(RIGHT) == false){
+    position_.at(RIGHT) *= -1.0;
+    effort_.at(RIGHT) *= - 1.0;
     velocity_.at(RIGHT) *= -1.0;
   }
   // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> position %f, %f", position_.at(LEFT), position_.at(RIGHT));

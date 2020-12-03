@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   hardware_interface
   controller_manager
+  control_toolbox
 )
 
 # Macro to generate ROS node with "add_executable" and "add_library"

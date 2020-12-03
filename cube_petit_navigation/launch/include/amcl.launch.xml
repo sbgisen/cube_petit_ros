@@ -1,0 +1,14 @@
+<launch>
+
+  <arg name="scan_topic"     default="pacecat_link/scan_filtered" />
+  <arg name="map_topic"      default="map" />
+  <arg name="use_map_topic"  default="false" />
+
+  <node pkg="amcl" type="amcl" name="amcl" required="true">
+    <remap from="scan" to="$(arg scan_topic)" />
+    <remap from="map" to="$(arg map_topic)" />
+    <param name="use_map_topic"  value="$(arg use_map_topic)" />
+	<rosparam file="$(find cube_petit_navigation)/config/navigation/amcl.yaml" command="load" />
+  </node>
+
+</launch>

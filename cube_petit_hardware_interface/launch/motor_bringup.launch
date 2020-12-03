@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="cube_petit_version1" default="false"/>
+  <arg name="cube_petit_version2" default="true"/>
+
+  <!-- Parameters for the hardware interface and controllers -->
+  <!-- <rosparam file="$(find cube_petit_navigation)/config/odom.yaml"/> -->
+
+  <!-- load cube_petit urdf -->
+  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
+
+  <!-- launch our hardware interface -->
+  <!-- dynamixel-->
+  <group if="$(arg cube_petit_version1)">
+    <arg name="protocol_version" default="p1"/> 
+    <node pkg="dynamixel_control_hw" type="dynamixel_control_$(arg protocol_version)" name="dynamixel_control" output="screen" clear_params="true" required="true"/>
+    <rosparam file="$(find cube_petit_hardware_interface)/config/motor.yaml"/>
+  </group>
+  <!-- dji M2006-->
+  <group if="$(arg cube_petit_version2)">
+    <node pkg="socketcan_bridge" name="socketcan_to_topic_node" type="socketcan_to_topic_node" required="true"  ns="cube_petit"/>
+    <node name="cube_petit"
+      pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface_node"
+      output="screen" clear_params="true" required="true"/>
+    <rosparam ns="cube_petit" file="$(find cube_petit_hardware_interface)/config/diff_drive_controller.yaml"/>
+    <node ns="cube_petit" name="controller_spawner"
+      pkg="controller_manager" type="spawner" respawn="false" output="screen"
+      args="joint_state_controller diff_drive_controller"/>
+  </group>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+		<remap from="joint_states" to="/cube_petit/joint_states"/>
+	</node>
+
+</launch>

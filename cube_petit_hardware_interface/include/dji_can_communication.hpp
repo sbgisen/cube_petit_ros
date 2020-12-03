@@ -54,7 +54,6 @@ private:
   double REDUCTION_RATIO;   //減速比
   double MAX_CURRENT;  //C610の最大電流
 
-
   std::vector<double> rad_vec;
 
   enum PositionStatus {
@@ -90,13 +89,20 @@ public:
   int sendCan(uint16_t id, uint8_t* data);
   int sendVelocityCan(const double left_target_velocity, const double right_target_velocity);
   int current2Data(double current_in);
-  int velocity2Data(double velocity_in);
   int createCanPacketAndSend(int right_data,int left_data);
   void updateMotorStatus(std::vector<double>&);
+  void timerCallback(const ros::TimerEvent& event);
   // constant values, initialized in contructor
   uint8_t status_size_;
- 
+  ros::Time last_time;
+  ros::Timer timer;
+  control_toolbox::Pid right_pid_;
+  control_toolbox::Pid left_pid_;
 
+  double right_target_velocity_;
+  double left_target_velocity_;
+  double right_target_current_;
+  double left_target_current_;
 };
 
 

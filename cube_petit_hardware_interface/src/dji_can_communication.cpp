@@ -18,50 +18,30 @@ Motor Controller: C610
 /*  Send Velocity to CAN */
 //////////////////////////////////////
 int Dji_Can_Communication::sendVelocityCan(const double left_target_velocity, const double right_target_velocity){
-  // 受け取ったら左右の速度指令値をデータに変換する　//左はid1、右はid2
-  int right_data = velocity2Data(right_target_velocity);
-  int left_data  = velocity2Data(left_target_velocity);
-  // パケットを生成してCANに送信する 
-  createCanPacketAndSend(right_data,left_data);  
+  // PID制御に使用する速度指令値を更新する
+  right_target_velocity_ = right_target_velocity;
+  left_target_velocity_ = left_target_velocity;
   return 0;
 }
-// [謎] 電流値をデータにする
+
+// [謎] 電流[A]を引数とし、データにする
+// -10[A]~10[A]の電流を-10000~10000で表現するため、1[A]で1000を送る
+// double型の引数電流値current_inからint型のdata_outを返す。 
+// [TODO]CASTしたら終わり？
 int Dji_Can_Communication::current2Data(double current_in){
-  // データ初期化
-  // double型の引数電流値current_inからint型のdata_outを返す。
   int data_out = 0;
   //目標電流値が０以上の場合（正回転の場合？）
   if (current_in >= 0){
-    data_out = (int)(current_in);
-  // 負回転の場合、符号なし8ビット整数に変換
+    data_out = (int)(current_in*1000);
+  // 負回転の場合、符号なし16ビット整数に変換
   }else if (current_in < 0){
-    data_out = 0xFFFF+(int)(current_in);
+    data_out = 0xFFFF+(int)(current_in*1000);
   }
   return data_out;
 }
 
-// [謎] 速度指令値をデータにする
-int Dji_Can_Communication::velocity2Data(double velocity_in){
-  // データ初期化
-  int data_out = 0;
-  // 角速度、回転速度から速度値を求める
-  double radparsec = REDUCTION_RATIO * velocity_in;
-  double rpm = radparsec * 60.0 / ( 2.0 * M_PI);
-  // https://rm-static.djicdn.com/tem/RM%20C610%E6%97%A0%E5%88%B7%E7%94%B5%E6%9C%BA%E8%B0%83%E9%80%9F%E5%99%A8%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E%20%E5%8F%91%E5%B8%83%E7%89%88.pdf
-  // p.9 P:出力の角度　[k*rpm*T]
-  int velocity_data = (int)( rpm * 75.0 ); // [調べる] what is 75mm ????
-  //目標電流値が０以上の場合（正回転の場合？）
-  if (velocity_data >= 0){
-    data_out = (int)(velocity_data);
-  // 負回転の場合、符号なし8ビット整数に変換
-  }else if (velocity_data < 0){
-    data_out = 0xFFFF+(int)(velocity_data);
-  }
-  return data_out;
-}
-
-// 左の右のモータのデータからパケットを生成する。[謎]
-int Dji_Can_Communication::createCanPacketAndSend(int right_data,int left_data){
+// 左の右のモータのデータからパケットを生成する
+int Dji_Can_Communication::createCanPacketAndSend(int left_data,int right_data){
   can_data[0]                 = left_data >> 8 & 0xFF;
   can_data[1]                 = left_data & 0xFF;
   can_data[2]                 = right_data >> 8 & 0xFF;
@@ -150,102 +130,86 @@ void Dji_Can_Communication::updateMotorStatus(std::vector<double>& status_arg){
 // モータからデータを受け取ったら値を格納するコールバック関数
 void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr& msg){
   if(msg->dlc == 8){
-    // 左側
+    // 左側 ////////////////////////////////////////////////////////////////
     if(msg->id == (0x200 + 0x001) ){
       //減速前の値
       double left_rad = ((msg->data[0] << 8) | msg->data[1]) * 2.0 * M_PI / 8191.0; //0から2*M_PIの範囲
-      // // -M_PIからM_PIの範囲に変換する
-      // if(left_rad >= M_PI){
-      //   //left_rad -= (2.0 * M_PI) * (int)((left_rad + M_PI) / (2.0 * M_PI));
-      //   left_rad -= (2.0 * M_PI);
-      // }else if(left_rad < -M_PI){
-      //   //left_rad += (2.0 * M_PI) * (int)(-1.0 * (left_rad - M_PI) / (2.0 * M_PI));
-      //   left_rad +=  2.0 * M_PI;
-      // }
 
       //減速後の値を出すため、これまでに何回転したかカウントする
-      static double left_rad_prev = 0.0;
-      static int left_revolution_count = 0;
-      double left_rad_total;
+      static double left_rad_prev = 0.0;        //前回の位置
+      static int left_revolution_count = 0;     //回転数(0〜35。減速比が36のため)
 
-      if( left_rad < 1.0 /4.0 * M_PI && 3.0 / 4.0 * M_PI < left_rad_prev){// && left_rad_prev - left_rad <= M_PI ){//TODO*BUGFIX
+      //正回転
+      if( left_rad < 1.0 /4.0 * M_PI && 3.0 / 4.0 * M_PI < left_rad_prev){
         left_revolution_count ++;
         if(left_revolution_count == 36){
           left_revolution_count = 0;
         }
-        ROS_INFO("left_revolution_count++ = %d : %f,%f",left_revolution_count, left_rad, left_rad_prev);
-      }else if(left_rad_prev < 1.0 /4.0 * M_PI && 3.0 / 4.0 * M_PI < left_rad){ // && left_rad - left_rad_prev <= M_PI){
+        // ROS_INFO("left_revolution_count++ = %d : %f,%f",left_revolution_count, left_rad, left_rad_prev);
+      //負回転
+      }else if(left_rad_prev < 1.0 /4.0 * M_PI && 3.0 / 4.0 * M_PI < left_rad){
           left_revolution_count --;
         if(left_revolution_count == -1){
           left_revolution_count = 35;
         }
-        ROS_INFO("left_revolution_count-- = %d : %f,%f",left_revolution_count, left_rad, left_rad_prev);
+        // ROS_INFO("left_revolution_count-- = %d : %f,%f",left_revolution_count, left_rad, left_rad_prev);
       }
-
-      // if( (left_rad_prev - left_rad) >= M_PI ){//TODO*BUGFIX
-      //   left_revolution_count ++;
-      //   ROS_INFO("left_revolution_count = %d,%f,%f",left_revolution_count, left_rad, left_rad_prev);
-      // }else if((left_rad_prev - left_rad) < -1.0*M_PI){
-      //   left_revolution_count --;
-      //   ROS_INFO("left_revolution_count = %d,%f,%f",left_revolution_count, left_rad, left_rad_prev);
-
-      // }
       left_rad_prev = left_rad;
-      //減速後の値(タイヤが何回転したか)を出す
-      //0から36*2*M_PIの値/36で0から2*M_PIまでの値になる
+      
+      // 減速後の値(タイヤが何回転したか)を出す
+      // 0から(36*2*M_PI)の範囲の値からREDUCTION_RARIOを割り、[0から2*M_PI]までの範囲にする
       double left_rad_reduced = ( left_rad + (2*M_PI*left_revolution_count) ) / REDUCTION_RATIO;
+      // Cuboidくん用DiffDriveControllerに合わせるため値の範囲を(-M_PIからM_PI)に変更する
       left_rad_reduced -= M_PI;
-      // static int print_count = 0;
-      // print_count++;
-      // if(print_count % 10 == 0){
-      //   ROS_INFO("left_rad_reduced = %f",left_rad_reduced);
-      // }
 
+      // タイヤのRPMを保存する
       int16_t left_rpm = (msg->data[2] << 8) | msg->data[3];
       double left_rad_per_sec = (double)left_rpm * 2.0 * M_PI / 60.0  / REDUCTION_RATIO;
-
+      // 電流値とトルクを保存する
       double left_current = ( (msg->data[4] << 8) | msg->data[5] ) / 1000.0;
       double left_torque = left_current * TORQUE_COEFFICIENT;
-
+      // 現在の温度を保存する
       double left_temperature = msg->data[6];
 
       status_[POSITION_LEFT] = left_rad_reduced;
       status_[VELOCITY_LEFT] = left_rad_per_sec ;
       status_[EFFORT_LEFT] = left_torque;
-    //右側
+    //右側 //////////////////////////////////////////////////////////////////////////
     }else if(msg->id == (0x200 + 0x002) ){
      //減速前の値
       double right_rad = ((msg->data[0] << 8) | msg->data[1]) * 2.0 * M_PI / 8191.0; //0から2*M_PIの範囲
       //減速後の値を出すため、これまでに何回転したかカウントする
       static double right_rad_prev = 0.0;
       static int right_revolution_count = 0;
-      double right_rad_total;
-
+      //正回転
       if( right_rad < 1.0 /4.0 * M_PI && 3.0 / 4.0 * M_PI < right_rad_prev){
         right_revolution_count ++;
         if(right_revolution_count == 36){
           right_revolution_count = 0;
         }
-        ROS_INFO("right_revolution_count++ = %d : %f,%f",right_revolution_count, right_rad, right_rad_prev);
+        // ROS_INFO("right_revolution_count++ = %d : %f,%f",right_revolution_count, right_rad, right_rad_prev);
+      //負回転
       }else if(right_rad_prev < 1.0 /4.0 * M_PI && 3.0 / 4.0 * M_PI < right_rad){
           right_revolution_count --;
         if(right_revolution_count == -1){
           right_revolution_count = 35;
         }
-        ROS_INFO("right_revolution_count-- = %d : %f,%f",right_revolution_count, right_rad, right_rad_prev);
+        // ROS_INFO("right_revolution_count-- = %d : %f,%f",right_revolution_count, right_rad, right_rad_prev);
       }
       right_rad_prev = right_rad;
-      //減速後の値(タイヤが何回転したか)を出す
-      //0から36*2*M_PIの値/36で0から2*M_PIまでの値になる
+      // 減速後の値(タイヤが何回転したか)を出す
+      // 0から(36*2*M_PI)の範囲の値からREDUCTION_RARIOを割り、[0から2*M_PI]までの範囲にする
       double right_rad_reduced = ( right_rad + (2*M_PI*right_revolution_count) ) / REDUCTION_RATIO;
+      // 値の範囲を(-M_PIからM_PI)に変更する
       right_rad_reduced -= M_PI;
 
-
-
+      // タイヤのRPMを保存する
       int16_t right_rpm = (msg->data[2] << 8) | msg->data[3];
       double right_rad_per_sec = (double)right_rpm * 2.0 * M_PI / 60.0  / REDUCTION_RATIO;
+      //電流値とトルクを保存する
       double right_current = ( (msg->data[4] << 8) | msg->data[5] ) / 1000.0;
       double right_torque = right_current * TORQUE_COEFFICIENT;
+      //現在の温度を保存する
       double right_temperature = msg->data[6];
 
       status_[POSITION_RIGHT] = right_rad_reduced;
@@ -267,25 +231,44 @@ void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr&
   }
 }
 
+// PID制御
+void Dji_Can_Communication::timerCallback(const ros::TimerEvent& event){
+  ros::Time time_now = ros::Time::now();
 
-/////////////////////////////
-/*  コンストラクタ         */
-/////////////////////////////
-Dji_Can_Communication::Dji_Can_Communication() {
-  TORQUE_COEFFICIENT = 0.18;  //トルク計数
-  REDUCTION_RATIO = 36;   //減速比
-  MAX_CURRENT = 10.000;  //C610の最大電流
-  MAX_CURRENT = 3.0; //今だけ
-  // motor_degree_before = 0;
-  // motor_rad_before = 0;
-  // motor_rad_before_left = 0;
-  // motor_rad_before_right = 0;
-  status_.resize(6,0.0);
-  rad_vec.resize(4,0.0);
-  ROS_INFO("Dji_Can_Communication::Dji_Can_Communication() -> SUCCEED");
+  // 現在の速度と目標速度の更新
+  double right_target_velocity = right_target_velocity_;
+  double right_velocity = status_[VELOCITY_RIGHT];
+  double left_target_velocity = left_target_velocity_;
+  double left_velocity = status_[VELOCITY_LEFT];
+
+  // PID制御
+  right_target_current_ = -1.0 * right_pid_.updatePid(right_target_velocity - right_velocity, time_now - last_time);
+  left_target_current_  = -1.0 *  left_pid_.updatePid(left_target_velocity  -  left_velocity, time_now - last_time);
+  //ROS_INFO("timerCallback: right: %f -> %f, left: %f -> %f",right_target_velocity , right_velocity, left_target_velocity  , left_velocity);
+
+  // モータに送る電流値[A]
+  double right_target_current = right_target_current_;
+  double left_target_current = left_target_current_;
+  // 最大電流値を超えないようにする
+  if(right_target_current >= MAX_CURRENT){
+    right_target_current = MAX_CURRENT;
+  }else if(-MAX_CURRENT >= right_target_current){
+    right_target_current = -MAX_CURRENT;
+  }
+  if(left_target_current >= MAX_CURRENT){
+    left_target_current = MAX_CURRENT;
+  }else if(-MAX_CURRENT >= left_target_current){
+    left_target_current = -MAX_CURRENT;
+  }
+
+  // 電流指令値をデータに変換する
+  double right_data = current2Data(right_target_current);
+  double left_data = current2Data(left_target_current);
+  // パケットを生成してCANに送信する 
+  createCanPacketAndSend(left_data, right_data);
+  last_time = time_now;
 }
 
-Dji_Can_Communication::~Dji_Can_Communication() {}
 
 ////////////////////////
 /* initialize */
@@ -293,5 +276,43 @@ Dji_Can_Communication::~Dji_Can_Communication() {}
 void Dji_Can_Communication::initialize(ros::NodeHandle nh) {
   ROS_INFO("dji_can_communication -> initialize");
   sub_can = nh.subscribe<can_msgs::Frame>("received_messages", 1000, &Dji_Can_Communication::receivedCanCallback, this);
+  // ゲインの初期値設定(p, i, d, i_max, i_min)
+  left_pid_.initPid(0.6, 0.0, 0.005, 0.3, -0.3);
+  right_pid_.initPid(0.6, 0.0, 0.005, 0.3, -0.3);
+  // 100HzでPID制御のコールバック関数を呼ぶタイマー
+  timer = nh.createTimer(ros::Duration(0.01),&Dji_Can_Communication::timerCallback,this);
+
 }
+
+/////////////////////////////
+/*  コンストラクタ         */
+/////////////////////////////
+Dji_Can_Communication::Dji_Can_Communication() {
+  TORQUE_COEFFICIENT = 0.18;    //トルク計数
+  REDUCTION_RATIO = 36;         //減速比
+  MAX_CURRENT = 10.000;         //C610の最大電流
+  MAX_CURRENT = 1.0;            //今だけ
+  status_.resize(6,0.0);
+  rad_vec.resize(4,0.0);
+  right_target_velocity_ = 0;   // 目標速度
+  left_target_velocity_ = 0;
+  right_target_current_ = 0;    // 目標速度に必要な電流
+  left_target_current_ = 0;
+
+  last_time = ros::Time::now();
+  ROS_INFO("Dji_Can_Communication::Dji_Can_Communication() -> SUCCEED");
+}
+
+Dji_Can_Communication::~Dji_Can_Communication() {
+  left_target_current_ = 0.0;
+  right_target_current_ = 0.0;
+  double right_data = current2Data(right_target_current_);
+  double left_data = current2Data(left_target_current_);
+  // パケットを生成してCANに送信する 
+  createCanPacketAndSend(left_data, right_data);
+  sleep(0.05);
+
+
+}
+
 

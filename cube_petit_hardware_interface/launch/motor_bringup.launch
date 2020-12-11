@@ -15,7 +15,8 @@
   <group if="$(arg cube_petit_version1)">
     <arg name="protocol_version" default="p1"/> 
     <node pkg="dynamixel_control_hw" type="dynamixel_control_$(arg protocol_version)" name="dynamixel_control" output="screen" clear_params="true" required="true"/>
-    <rosparam file="$(find cube_petit_hardware_interface)/config/motor.yaml"/>
+    <rosparam file="$(find cube_petit_hardware_interface)/config/dynamixel_motor.yaml"/>
+    <rosparam ns="cube_petit" file="$(find cube_petit_hardware_interface)/config/diff_drive_controller.yaml"/>
   </group>
   <!-- dji M2006-->
   <group if="$(arg cube_petit_version2)">
@@ -23,13 +24,15 @@
     <node name="cube_petit"
       pkg="cube_petit_hardware_interface" type="cube_petit_hardware_interface_node"
       output="screen" clear_params="true" required="true"/>
-    <rosparam ns="cube_petit" file="$(find cube_petit_hardware_interface)/config/diff_drive_controller.yaml"/>
-    <node ns="cube_petit" name="controller_spawner"
-      pkg="controller_manager" type="spawner" respawn="false" output="screen"
-      args="joint_state_controller diff_drive_controller"/>
+    <rosparam ns="cube_petit" file="$(find cube_petit_hardware_interface)/config/diff_drive_controller2.yaml"/>
   </group>
+
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
 		<remap from="joint_states" to="/cube_petit/joint_states"/>
 	</node>
+
+  <node ns="cube_petit" name="controller_spawner"
+    pkg="controller_manager" type="spawner" respawn="false" output="screen"
+    args="joint_state_controller diff_drive_controller"/>
 
 </launch>

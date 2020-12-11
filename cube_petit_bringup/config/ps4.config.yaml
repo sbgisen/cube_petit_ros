@@ -1,0 +1,14 @@
+axis_linear: 1
+scale_linear: 0.5
+scale_linear_turbo: 1.5
+
+axis_angular: 0
+scale_angular: 1.0
+
+enable_button: 1  # batu button
+enable_turbo_button: 6  # L2 shoulder button
+
+# 0:sikaku, 1:batu,   2:maru,     3:sankaku
+# 4:L1      5:R1      6:L2        7:R2
+# 8:share   9:options 10:leftJOY  11:rightJOY
+# 12:ps     13: sikakuibotan

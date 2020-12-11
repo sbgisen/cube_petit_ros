@@ -5,5 +5,11 @@ scale_linear_turbo: 1.5
 axis_angular: 0
 scale_angular: 1.0
 
-enable_button: 0  # L2 shoulder button
-enable_turbo_button: 6  # L1 shoulder button
+enable_button: 14  # batu button
+enable_turbo_button: 10  # L1 shoulder button
+
+# 0:select  1:leftJOY   2:rightJOY  3:start
+# 4:ue      5:migi      6:sita      7:hidari
+# 10:L1      11:R1      8:L2        9:R2
+# 15:sikaku 14:batu,   13:maru,     12:sankaku
+# 16:ps

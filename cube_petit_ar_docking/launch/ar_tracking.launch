@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <!-- real camera -->
+  <!-- <include file="$(find cube_petit_bringup)/launch/rear_camera_bringup.launch"/> -->
+
+  <arg name="marker_size" default="5.0"/>
+  <arg name="max_new_marker_error" default="0.075"/>
+  <arg name="max_track_error" default="0.01"/>
+
+
+  <arg name="camera_image" default="/rear_camera/rear_camera/image_raw"/>
+  <arg name="camera_info" default="/rear_camera/rear_camera/camera_info"/>
+  
+  <arg name="output_frame" default="rear_camera_optical_link"/>
+  <arg name="bundle_files" default="$(find cube_petit_ar_docking)/config/ar_markers/bundles/Marker012.xml"/>
+
+
+  <node name="ar_track_alvar" pkg="ar_track_alvar" type="findMarkerBundlesNoKinect" respawn="false" output="screen" 
+  args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) 
+  $(arg camera_image) $(arg camera_info) $(arg output_frame) $(arg bundle_files)"/>
+
+</launch>

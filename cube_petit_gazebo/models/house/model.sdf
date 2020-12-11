@@ -20,7 +20,7 @@
         </inertia>
       </inertial>
       <collision name="collision">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>1 0 0 1.57 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://house/bighouse.obj</uri>
@@ -28,7 +28,7 @@
         </geometry>
       </collision>
       <visual name="visual">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>1 0 0 1.57 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://house/bighouse.obj</uri>

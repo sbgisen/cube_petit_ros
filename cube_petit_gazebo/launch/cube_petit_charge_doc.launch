@@ -1,0 +1,16 @@
+<launch>
+  <arg name="model2" default="$(find cube_petit_gazebo)/models/charge_doc/cube_petit_charge_doc.xacro"/>   
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model2) --inorder"/>
+  <env name="GAZEBO_MODEL_PATH" value="$(find cube_petit_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)" />
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+    args="-urdf -model my_robo -param robot_description"/>
+
+  <!-- gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+  <arg name="paused" value="true"/>
+  </include>
+
+  <!-- rviz -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="" required="false"/>
+</launch>

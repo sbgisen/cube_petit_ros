@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<robot name="cube_petit" xmlns:xacro="http://ros.org/wiki/xacro">
+  <link name="base_link"/>
+  <joint name="body_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="body_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <link name="body_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+    	  <mesh filename="package://cube_petit_description/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.13725"/>
+      <!-- <origin rpy="0 0 0" xyz="0 0 0.11475"/> -->
+      <geometry>
+        <box size="0.221 0.2225 0.2705"/>
+        <!-- <box size="0.221 0.2225 0.2225"/> -->
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00440023 0.00053314 0.15283194"/>
+      <mass value="1.98239086"/>
+      <inertia
+        ixx="0.02351680"
+        ixy="0.00001868" iyy="0.02505713"
+        ixz="-0.00012952" iyz="-0.00004728" izz="0.02060399"/>
+    </inertial>
+  </link>
+  <gazebo reference="body_link">
+    <selfCollide>false</selfCollide>
+    <maxContacts>4</maxContacts>
+    <mu1 value="0.0"/>
+    <kp value="150000"/>
+    <kd value="0"/>
+  </gazebo>
+
+  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/lidar.xacro" />
+  
+  <!-- rear camera -->
+  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/camera.xacro" />
+  
+  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/depth.xacro" />
+
+  <xacro:include filename="$(find cube_petit_description)/urdf/wheels/tamiya_wheels.xacro" />
+  <!-- <xacro:include filename="$(find cube_petit_description)/urdf/wheels/turtlebot_wheels.xacro" /> -->
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/cube_petit</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo>
+</robot>
+

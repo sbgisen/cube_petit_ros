@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <joint name="laser_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="pacecat_link"/>
+    <origin rpy="0 0 3.14159" xyz="0.0 0 0.23975"/>
+  </joint>
+  <link name="pacecat_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.00208424"/>
+      <mass value="0.11166745"/>
+      <inertia
+        ixx="0.004391"
+        ixy="0.000000" iyy="0.004391"
+        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.025"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="pacecat_link">
+    <mu1 value="0.5"/>
+    <kp value="50000"/>
+    <kd value="0"/>
+    <sensor type="ray" name="pacecat">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>400</samples>
+            <resolution>1</resolution>
+            <min_angle>${radians(-180)}</min_angle>
+            <max_angle>${radians( 180)}</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.16</min>
+          <max>20.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_laser.so">
+        <topicName>/pacecat/scan</topicName>
+        <frameName>pacecat_link</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
+</robot>
+

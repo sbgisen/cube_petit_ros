@@ -84,4 +84,9 @@
     </node>
    </group>
 
+       <!-- Charging simulation -->
+    <include file="$(find cube_petit_gazebo)/launch/include/docking_station_simulation.launch">
+      <arg name="robot" value="cube-petit"/>
+    </include>
+
 </launch>

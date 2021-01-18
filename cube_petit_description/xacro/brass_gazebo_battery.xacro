@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="brass_gazebo_battery_plugin" params="parent_link voltage capacity_ah charge_current discharge_current">
+    <gazebo reference="${parent_link}">
+      <battery name="brass_battery">
+        <voltage>${voltage}</voltage>
+      </battery>
+    </gazebo>
+    <gazebo>
+      <plugin name="battery_discharge_plugin" filename="libbattery_discharge.so">
+        <ros_node>gazebo/battery_simulation</ros_node>
+        <link_name>${parent_link}</link_name>
+        <battery_name>brass_battery</battery_name>
+        <constant_coef>${voltage}</constant_coef>
+        <linear_coef>${-voltage/4}</linear_coef>
+        <initial_charge>${capacity_ah}</initial_charge>
+        <capacity>${capacity_ah}</capacity>
+        <resistance>0.061523</resistance>
+        <smooth_current_tau>1.9499</smooth_current_tau>
+        <charge_rate>${charge_current}</charge_rate>
+      </plugin>
+      <plugin name="battery_consumer_plugin" filename="libbattery_consumer.so">
+        <ros_node>gazebo/battery_simulation</ros_node>
+        <link_name>${parent_link}</link_name>
+        <battery_name>brass_battery</battery_name>
+        <power_load>${discharge_current * voltage}</power_load>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

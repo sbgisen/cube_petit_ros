@@ -1,0 +1,16 @@
+#Parameters for Action Server.
+#reference: https://github.com/strands-project/scitos_apps/blob/hydro-devel/scitos_docking/action/Charging.action
+
+#goal definition
+#marker_id:marker's name
+string marker_id
+#Command:"charge","undock","recharge"
+string Command
+---
+#result definition
+string Message
+---
+#feedback
+byte  Progress
+byte  Level
+string Message

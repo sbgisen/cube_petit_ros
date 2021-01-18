@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="publish_pose_plugin" params="link_name topic_out update_rate">
+    <!-- Publish position topic (which is used in simulation of charging station) -->  	
+    <gazebo>
+      <plugin name="${link_name}_pose_publisher_plugin" filename="libgazebo_ros_p3d.so">
+        <frameName>world</frameName>
+        <bodyName>${link_name}</bodyName>
+        <topicName>${topic_out}</topicName>
+        <updateRate>${update_rate}</updateRate>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

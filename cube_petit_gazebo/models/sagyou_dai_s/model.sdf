@@ -1,0 +1,43 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+<model name="sagyou_dai_s">
+    <link name="link">
+      <inertial>
+        <mass>100.0</mass>
+        <inertia>
+          <ixx>0.083</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.083</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.083</izz>
+          <!-- <ixx>0</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0</iyy>
+          <iyz>0</iyz>
+          <izz>0</izz> -->
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <pose>0 0 0 0 1.57 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://sagyou_dai/materials/sagyoudai2_mesh_yy.obj</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <pose>0 0 0 0 1.57 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://sagyou_dai/materials/sagyoudai2_mesh_yy.obj</uri>
+            <scale>0.98 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <static>1</static>
+  </model>
+  <!-- TODO　SDF　IS＿STATIC　gazebo タグをつける -->
+</sdf>

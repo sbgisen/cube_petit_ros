@@ -1,5 +1,8 @@
 <?xml version="1.0" ?>
-<robot name="cube_petit" xmlns:xacro="http://ros.org/wiki/xacro">
+<robot name="cube_petit" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="$(find cube_petit_description)/xacro/publish_pose.xacro"/>
+  <xacro:include filename="$(find cube_petit_description)/xacro/brass_gazebo_battery.xacro"/>
+
   <link name="base_link"/>
   <joint name="body_joint" type="fixed">
     <parent link="base_link"/>
@@ -38,6 +41,13 @@
     <kd value="0"/>
   </gazebo>
 
+  <link name="connector_link"/>
+  <joint name="connector_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="connector_link"/>
+    <origin rpy="0 0 3.14" xyz="-0.11 0 0.025"/>
+  </joint>
+
   <xacro:include filename="$(find cube_petit_description)/urdf/sensors/lidar.xacro" />
   
   <!-- rear camera -->
@@ -47,6 +57,12 @@
 
   <xacro:include filename="$(find cube_petit_description)/urdf/wheels/tamiya_wheels.xacro" />
   <!-- <xacro:include filename="$(find cube_petit_description)/urdf/wheels/turtlebot_wheels.xacro" /> -->
+
+  <!-- <xacro:brass_gazebo_battery_plugin parent_link="base_link" voltage="25.12" capacity_ah="2.0" charge_current="100.0" discharge_current="20.0" /> -->
+  <xacro:brass_gazebo_battery_plugin parent_link="base_link" voltage="15.12" capacity_ah="2.0" charge_current="100.0" discharge_current="20.0" />
+
+
+  <xacro:publish_pose_plugin link_name="base_link" topic_out="/gazebo/docking_station_simulation/robot_pose" update_rate="30" />
 
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">

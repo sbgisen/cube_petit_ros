@@ -16,12 +16,15 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf
+  tf2
   tf2_ros
   actionlib
   actionlib_msgs
   ar_track_alvar
   ar_track_alvar_msgs
   message_generation
+  move_base_msgs
+  std_srvs
 )
 
 add_action_files(

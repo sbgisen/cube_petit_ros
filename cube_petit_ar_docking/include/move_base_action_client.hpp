@@ -25,13 +25,31 @@
 #include <linux/can/raw.h>
 #include <math.h>  /* M_PI */
 
+#include <move_base_msgs/MoveBaseAction.h>
+#include <actionlib/client/simple_action_client.h>
+#include <std_srvs/Empty.h>//amcl or clearcostmap service
+
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+
 
 class Move_Base_Action_Client {
 private:
+  MoveBaseClient ac;
+  int setAndSendGoal(move_base_msgs::MoveBaseGoal goal, int duration);
 
 public:
   Move_Base_Action_Client(ros::NodeHandle nh);
   ~Move_Base_Action_Client();
+  void initialize(ros::NodeHandle nh);
+  void goAhead1();
+  move_base_msgs::MoveBaseGoal goal_;
+  actionlib::SimpleClientGoalState move_base_final_state{actionlib::SimpleClientGoalState::ABORTED};
+  int getResult();
+  int sendGoalToActionServer(move_base_msgs::MoveBaseGoal goal, int duration);
+  std::unique_ptr<ros::ServiceClient> clear_costmap;
+  void clearCostmap();
+  void cancelGoals();
+
 };
 
 

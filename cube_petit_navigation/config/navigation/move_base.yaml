@@ -1,6 +1,8 @@
 # Planner selection
 base_global_planner: "navfn/NavfnROS"
-base_local_planner: "base_local_planner/TrajectoryPlannerROS"
+# base_local_planner: "base_local_planner/TrajectoryPlannerROS"
+base_local_planner: "teb_local_planner/TebLocalPlannerROS"
+
 
 # Recovery behaviors are defined in robot folders
 
@@ -108,3 +110,82 @@ car_maneuver_recovery:
   timeout: 5.0
   display_costs: True
   extra_footprint_padding: 0.2
+
+
+TebLocalPlannerROS:
+
+ odom_topic: /cube_petit/diff_drive_controller/odom
+ map_frame: /odom
+    
+ # Trajectory
+  
+ teb_autosize: True # なぞ
+ dt_ref: 0.3        # 時間分解能
+ dt_hysteresis: 0.1 # 推奨はdt_refの10%
+ global_plan_overwrite_orientation: True
+ max_global_plan_lookahead_dist: 3.0    #global_planのサブセットの最大長
+ feasibility_check_no_poses: 0
+ allow_init_with_backwards_motion: True
+    
+ # Robot
+         
+ max_vel_x: 0.2
+ max_vel_x_backwards: 0.2
+ max_vel_theta: 0.5
+ acc_lim_x: 0.1 # 0.05
+ acc_lim_theta: 3.0 # 2.0
+ min_turning_radius: 0.1  # car-likeじゃないときは0.0
+ wheelbase: 0.1           # car-likeのみ 
+ footprint_model:
+   type: "polygon"
+   vertices: [[-0.11, 0.11], [0.11, 0.11], [0.11, -0.11], [-0.11, -0.11]] # for type "polygon"
+
+ # GoalTolerance
+    
+ xy_goal_tolerance: 0.1
+ yaw_goal_tolerance: 0.1
+ free_goal_vel: False       # Trueにするとゴールに最大速度で到達する
+    
+ # Obstacles
+    
+ min_obstacle_dist: 0.2
+ inflation_dist: 0.2
+ include_costmap_obstacles: True
+ costmap_obstacles_behind_robot_dist: 1.0
+ obstacle_poses_affected: 30    # 計算量増加、減らしてみる
+ costmap_converter_plugin: ""
+ costmap_converter_spin_thread: True
+ costmap_converter_rate: 5
+
+ # Optimization
+    
+ no_inner_iterations: 3
+ no_outer_iterations: 3
+ optimization_activate: True
+ optimization_verbose: False
+ penalty_epsilon: 0.01
+ weight_max_vel_x: 2
+ weight_max_vel_theta: 1
+ weight_acc_lim_x: 1
+ weight_acc_lim_theta: 1
+ weight_kinematics_nh: 1000
+ weight_kinematics_forward_drive: 1
+ weight_kinematics_turning_radius: 1
+ weight_optimaltime: 1
+ weight_obstacle: 50
+ weight_dynamic_obstacle: 10 # not in use yet
+ alternative_time_cost: False # not in use yet
+
+ # Homotopy Class Planner
+
+ enable_homotopy_class_planning: True # 並列処理。ＣＰＵ増加
+ enable_multithreading: True  # マルチスレッド化
+ simple_exploration: False
+ max_number_classes: 4
+ roadmap_graph_no_samples: 15
+ roadmap_graph_area_width: 5
+ h_signature_prescaler: 0.5
+ h_signature_threshold: 0.1
+ obstacle_keypoint_offset: 0.1
+ obstacle_heading_threshold: 0.45
+ visualize_hc_graph: False

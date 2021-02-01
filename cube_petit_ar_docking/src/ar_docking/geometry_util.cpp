@@ -21,13 +21,21 @@ void Geometry_Util::setPointStamped(geometry_msgs::PointStamped &point_stamped, 
   point_stamped.point = point;
 }
 
-void Geometry_Util::setPose2d(geometry_msgs::Pose &pose, float x, float y, float theta_rad){
+void Geometry_Util::convertXYTheta2Pose(geometry_msgs::Pose &pose, float x, float y, float theta_rad){
   setPoint(pose.position, x, y, 0);
   //https://qiita.com/srs/items/93d7cc671d206a07deae
   tf::Quaternion quat=tf::createQuaternionFromRPY(0, 0, theta_rad);
   geometry_msgs::Quaternion geometry_quat;
   quaternionTFToMsg(quat, geometry_quat);
   setQuaternion(pose.orientation, geometry_quat.x,geometry_quat.y,geometry_quat.z,geometry_quat.w);
+}
+
+void Geometry_Util::convertXYTheta2TransformStamped(geometry_msgs::TransformStamped &trans_stamped, std::string map_frame, std::string  frame_out_name, float x, float y, float theta_rad){
+  geometry_msgs::Pose map_to_ar_pose;
+  convertXYTheta2Pose(map_to_ar_pose,x,y,theta_rad);
+  geometry_msgs::TransformStamped map_to_ar_tf;
+  convertPose2TransformStamped(map_to_ar_tf, map_frame, frame_out_name, ros::Time(0), map_to_ar_pose);
+  trans_stamped = map_to_ar_tf;
 }
 
 void Geometry_Util::setPoseStamped(geometry_msgs::PoseStamped &pose_stamped, std::string frame_name, ros::Time stamp, geometry_msgs::Pose &pose){
@@ -56,7 +64,6 @@ void Geometry_Util::convertPose2TransformStamped(geometry_msgs::TransformStamped
 
   trans_stamped.transform.rotation = pose.orientation;
 }
-
 
 /////////////////////////////
 /*  コンストラクタ         */

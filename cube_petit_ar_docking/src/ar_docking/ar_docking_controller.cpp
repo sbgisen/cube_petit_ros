@@ -94,6 +94,8 @@ int AR_Docking_Controller::docking(){
 //なにをするやつ？
 //"docking_station_from_map"をpublishする
 double AR_Docking_Controller::docking_station_tf_map(std::string frame_in_name, std::string frame_out_name){
+  geometry_msgs::PointStamped map_to_ar_pointStamped;
+  geometry_msgs::PointStamped map_to_ar_normal_pointStamped;
   ROS_INFO("AR_Docking_Controller::docking_station_tf_map");
   //map_frame
   //robot_connector_frame
@@ -103,53 +105,42 @@ double AR_Docking_Controller::docking_station_tf_map(std::string frame_in_name, 
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
   }
-  //ロボットのコネクタから見たar_marker_Xの位置
+  //map_frameから見たar_marker_Xの位置
   ar_pointStamped.header.frame_id = frame_in_name;
   ar_pointStamped.header.stamp = ros::Time(0);
   ar_pointStamped.point.x = 0;
   ar_pointStamped.point.y = 0;
   ar_pointStamped.point.z = 0;
   try{
-    listener.transformPoint(robot_connector_frame, ar_pointStamped, robot_to_ar_pointStamped);
+    listener.transformPoint(map_frame, ar_pointStamped, map_to_ar_pointStamped);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
   }
-  //ロボットのコネクタから見たar_marker_Xの法線(normal)の位置
+  //map_frameから見たar_markerの正面から1m(z+=1.0)の位置
   ar_normal_pointStamped.header.frame_id = frame_in_name;
   ar_normal_pointStamped.header.stamp = ros::Time(0);
   ar_normal_pointStamped.point.x = 0;
   ar_normal_pointStamped.point.y = 0;
   ar_normal_pointStamped.point.z = 1.0;
   try{
-    listener.transformPoint(robot_connector_frame, ar_normal_pointStamped, robot_to_ar_normal_pointStamped);
+    listener.transformPoint(map_frame, ar_normal_pointStamped, map_to_ar_normal_pointStamped);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
   }
-  double ar_rotation_dx = robot_to_ar_normal_pointStamped.point.x - robot_to_ar_pointStamped.point.x;
-  double ar_rotation_dy = robot_to_ar_normal_pointStamped.point.y - robot_to_ar_pointStamped.point.y;
+  // 2点の位置からmap_frameからみたＡＲマーカーの角度を計算する
+  double ar_rotation_dx = map_to_ar_normal_pointStamped.point.x - map_to_ar_pointStamped.point.x;
+  double ar_rotation_dy = map_to_ar_normal_pointStamped.point.y - map_to_ar_pointStamped.point.y;
   double ar_rotaion_theta = atan2(ar_rotation_dy, ar_rotation_dx);
 
-  geometry_msgs::Pose tmp_pose;
-  geometry_util.setPose2d(tmp_pose, robot_to_ar_pointStamped.point.x, robot_to_ar_pointStamped.point.y, ar_rotaion_theta);
-  geometry_util.setPoseStamped( connector_to_station, robot_connector_frame, ros::Time(0), tmp_pose);
-  
-  try{
-    listener.waitForTransform(frame_in_name, robot_connector_frame, ros::Time(0) ,ros::Duration(10));
-  }
-  catch (tf::TransformException ex){
-    ROS_ERROR("%s",ex.what());
-  }
-
-
-  //void TransformListener::transformPose	(	const std::string & 	target_frame,
-  //                                        const geometry_msgs::PoseStamped & 	stamped_in,
-  //                                       geometry_msgs::PoseStamped & 	stamped_out	 
-  listener.transformPose(map_frame, connector_to_station, station_from_map);
-
-  geometry_util.convertPose2TransformStamped(tf_ar, map_frame, frame_out_name, ros::Time::now(), station_from_map.pose);
-  static_br_.sendTransform(tf_ar);
+  // 
+  geometry_msgs::Pose map_to_ar_pose;
+  geometry_util.convertXYTheta2Pose(map_to_ar_pose, map_to_ar_pointStamped.point.x, map_to_ar_pointStamped.point.y, ar_rotaion_theta);
+  geometry_msgs::TransformStamped map_to_ar_tf;
+  geometry_util.convertPose2TransformStamped(map_to_ar_tf, map_frame, frame_out_name, ros::Time(0), map_to_ar_pose);
+  // geometry_util.convertXYTheta2TransformStamped(map_to_ar_tf, map_frame, frame_out_name, map_to_ar_pointStamped.point.x, map_to_ar_pointStamped.point.y, ar_rotaion_theta);
+  static_br_.sendTransform(map_to_ar_tf);
   return ar_rotaion_theta;
 }
 

@@ -70,14 +70,11 @@ public:
   bool is_map2pregoal;
 
   geometry_msgs::TransformStamped transformStamped;
-  geometry_msgs::TransformStamped tf_ar;
   geometry_msgs::PoseStamped poseStamped;
   geometry_msgs::PoseStamped ar_poseStamped;
   geometry_msgs::PointStamped ar_pointStamped;
-  geometry_msgs::PointStamped robot_to_ar_pointStamped;
   geometry_msgs::PoseStamped ar_normal_poseStamped;
   geometry_msgs::PointStamped ar_normal_pointStamped;
-  geometry_msgs::PointStamped robot_to_ar_normal_pointStamped;
   geometry_msgs::PoseStamped connector_to_station;
   geometry_msgs::PoseStamped station_from_map;
 

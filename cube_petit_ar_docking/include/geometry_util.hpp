@@ -49,7 +49,8 @@ public:
   void setPoint(geometry_msgs::Point &point, float x, float y, float z);
   void setQuaternion(geometry_msgs::Quaternion &quatenion, float x, float y, float z, float w);
   void setPointStamped(geometry_msgs::PointStamped &point_stamped, std::string frame_name, ros::Time stamp, geometry_msgs::Point &point);
-  void setPose2d(geometry_msgs::Pose &pose, float x, float y, float theta_rad);
+  void convertXYTheta2Pose(geometry_msgs::Pose &pose, float x, float y, float theta_rad);
+  void convertXYTheta2TransformStamped(geometry_msgs::TransformStamped &trans_stamped, std::string map_frame, std::string  frame_out_name, float x, float y, float theta_rad);
   void setPoseStamped(geometry_msgs::PoseStamped &pose_stamped, std::string frame_name, ros::Time stamp, geometry_msgs::Pose &pose);
   void convertTransform2Posestamped(geometry_msgs::PoseStamped &pose_stamped, std::string frame_name, ros::Time stamp, geometry_msgs::Transform &transform);
   void convertPose2TransformStamped(geometry_msgs::TransformStamped &trans_stamped, std::string frame_name, std::string child_frame, ros::Time stamp, geometry_msgs::Pose &pose);

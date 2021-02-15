@@ -71,7 +71,6 @@ private:
   std::chrono::system_clock::time_point timeout_start_time_chrono;
 
   //TF
-  tf::TransformListener listener;
   tf2_ros::StaticTransformBroadcaster static_br_;
   tf2_ros::TransformBroadcaster dynamic_br_;
   tf2_ros::Buffer tfBuffer_;

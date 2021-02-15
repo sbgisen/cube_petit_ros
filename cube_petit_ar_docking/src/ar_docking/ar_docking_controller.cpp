@@ -50,9 +50,9 @@ int AR_Docking_Controller::goToPregoal(){
   ROS_INFO("AR_Docking_Controller::goToPregoal");
   //mapからpregoalの<geometry_msgs::TransformStamped>を取得する
   tf::StampedTransform map2pregoal;
-  geometry_msgs::Transform map2pregoal_msgs;
+  geometry_msgs::TransformStamped map2pregoal_msgs;
   try{
-    listener.lookupTransform("/map", "/pregoal", ros::Time(0), map2pregoal);
+    map2pregoal_msgs = tfBuffer_.lookupTransform("map", "pregoal", ros::Time(0));
     is_map2pregoal = true;
   }
   catch (tf::TransformException ex){
@@ -65,12 +65,9 @@ int AR_Docking_Controller::goToPregoal(){
     return 1;
   }
 
-  //<tf::StampedTransform>から<geometry_msgs::TransformStamped>に変換
-  tf::transformTFToMsg(map2pregoal,map2pregoal_msgs);
-
   //<geometry_msgs::TransformStamped>から<geometry_msgs::PoseStamped>に変換
   geometry_msgs::PoseStamped poseStamped;
-  geometry_util.convertTransform2Posestamped(poseStamped, "map", ros::Time(0),map2pregoal_msgs);
+  geometry_util.convertTransform2Posestamped(poseStamped, "map", ros::Time(0),map2pregoal_msgs.transform);
   move_base_msgs::MoveBaseGoal goal;
   goal.target_pose = poseStamped;
 
@@ -98,7 +95,7 @@ int AR_Docking_Controller::docking(){
   }
   // ARマーカーが見つかるか確認("ar_marker_0")
   try{
-    listener.waitForTransform("ar_marker_0", "base_link", ros::Time(0) ,ros::Duration(10));
+    tfBuffer_.lookupTransform("ar_marker_0", "base_link", ros::Time::now() ,ros::Duration(10));
   }
   catch (tf::TransformException ex){
     ROS_WARN("AR_Docking_Controller::docking(): AR Marker is not found retry...");
@@ -224,13 +221,6 @@ int AR_Docking_Controller::detectDockingFailture(){
   // コネクタからＡＲマーカーの中央値の中央値TFを待つ
   geometry_msgs::TransformStamped tf_robot2station;
 
-  // try{
-  //   bool can_transform = tfBuffer_.canTransform(tf_robot, tf_ar, ros::Time(0) ,ros::Duration(10));
-  // }
-  // catch (tf::TransformException ex){
-  //   ROS_ERROR("%s",ex.what());
-  // }
-
   try{
     tf_robot2station = tfBuffer_.lookupTransform(tf_robot, tf_ar, ros::Time(0));
   }catch (tf2::TransformException &ex) {
@@ -283,13 +273,6 @@ int AR_Docking_Controller::approachStationWithCurve(){
   // コネクタからＡＲマーカーの中央値TFを待つ
   geometry_msgs::TransformStamped tf_robot2station;  // ロボットのコネクタと充電ドッグのコネクタのTF変換
   
-  // try{
-  //   bool can_transform = tfBuffer_.canTransform(tf_robot, tf_ar, ros::Time(0) ,ros::Duration(10));
-  //   ROS_INFO("canTransform: %d", can_transform);
-  // }
-  // catch (tf::TransformException ex){
-  //   ROS_ERROR("%s",ex.what());
-  // }
   // コネクタからARマーカーの中央値のTF変換を取得
   try{
     tf_robot2station = tfBuffer_.lookupTransform(tf_robot, tf_ar, ros::Time(0));
@@ -344,12 +327,12 @@ int AR_Docking_Controller::approachStationWithCurve(){
                 sin(M_PI + theta_0) * cos(M_PI + theta_0) + target_from_robot.pose.position.y * pow(cos(M_PI + theta_0), 2);
     ROS_INFO("  nearest point: x[%f], y[%f]", nearest_point.point.x, nearest_point.point.y);
 
-    double tmp_x = tan(theta_0) * ( tan(theta_0) * target_from_robot.pose.position.x - target_from_robot.pose.position.y);
-    tmp_x = tmp_x / ( tan(theta_0) * tan(theta_0) + 1);
-    double tmp_y = target_from_robot.pose.position.y - tan(theta_0) * target_from_robot.pose.position.x;
-    tmp_y = tmp_y / ( tan(theta_0) *  tan(theta_0) + 1  );
+    // double tmp_x = tan(theta_0) * ( tan(theta_0) * target_from_robot.pose.position.x - target_from_robot.pose.position.y);
+    // tmp_x = tmp_x / ( tan(theta_0) * tan(theta_0) + 1);
+    // double tmp_y = target_from_robot.pose.position.y - tan(theta_0) * target_from_robot.pose.position.x;
+    // tmp_y = tmp_y / ( tan(theta_0) *  tan(theta_0) + 1  );
 
-    ROS_WARN("  nearest_point x[%f], y[%f]", tmp_x, tmp_y);
+    // ROS_WARN("  nearest_point x[%f], y[%f]", tmp_x, tmp_y);
 
     heading_point.point.x = (nearest_point.point.x + len_curve_heading * cos(theta_0));
     heading_point.point.y = (nearest_point.point.y + len_curve_heading * sin(theta_0));
@@ -419,7 +402,6 @@ int AR_Docking_Controller::tfMedian(bool init_flag){
     outlier_removal_list_counter = buffer_size - 1;
   }
   
-  // listener.clear();
 
   // "odom"からマップフレームから見たARマーカーの位置を見る
   geometry_msgs::TransformStamped tmp_ts;
@@ -427,7 +409,6 @@ int AR_Docking_Controller::tfMedian(bool init_flag){
   try{
     tfBuffer_.lookupTransform(tf_ar, tf_ar, ros::Time::now(), ros::Duration(5.0));
     tmp_ts = tfBuffer_.lookupTransform(tf_map, tf_ar, ros::Time(0));
-    // listener.lookupTransform(tf_map, tf_ar, ros::Time(0) ,tmp_ts_tf);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -543,11 +524,9 @@ double AR_Docking_Controller::dockingStationTfMap(std::string frame_in_name, std
   ar_pointStamped.point.y = 0;
   ar_pointStamped.point.z = 0;
 
-  // [BUG] エラー出る   
-  listener.clear();  
   try{
-    listener.waitForTransform(frame_in_name, map_frame, ros::Time(0) ,ros::Duration(10));
-    listener.transformPoint(map_frame, ar_pointStamped, map_to_ar_pointStamped);
+    tfBuffer_.lookupTransform(frame_in_name, map_frame, ros::Time::now() ,ros::Duration(10));
+    tfBuffer_.transform(ar_pointStamped, map_to_ar_pointStamped, map_frame);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -562,8 +541,8 @@ double AR_Docking_Controller::dockingStationTfMap(std::string frame_in_name, std
   ar_normal_pointStamped.point.y = 0;
   ar_normal_pointStamped.point.z = 1.0;
   try{
-    listener.transformPoint(map_frame, ar_normal_pointStamped, map_to_ar_normal_pointStamped);
-  }
+    tfBuffer_.transform(ar_normal_pointStamped, map_to_ar_normal_pointStamped, map_frame);
+   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
   }
@@ -591,7 +570,7 @@ int AR_Docking_Controller::goToStation(std::string tf_start_position, double dis
   std::string tf_map = map_frame;
   // "docking_station_from_map"から"map_frame"のTFを待つ
   try{
-    listener.waitForTransform(tf_ar, map_frame, ros::Time(0) ,ros::Duration(3));
+    tfBuffer_.lookupTransform(tf_ar, map_frame, ros::Time::now() ,ros::Duration(3));
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -608,7 +587,7 @@ int AR_Docking_Controller::goToStation(std::string tf_start_position, double dis
   
   //map_frameからみたＡＲマーカーの位置をar_origin_on_mapに保存する
   try{
-  listener.transformPoint(map_frame, ar_origin, ar_origin_on_map);
+     tfBuffer_.transform(ar_origin, ar_origin_on_map, map_frame);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -622,7 +601,7 @@ int AR_Docking_Controller::goToStation(std::string tf_start_position, double dis
   geometry_util.setPointStamped(ar_normal, tf_ar, ros::Time(0), tmp_point);
   
   try{
-    listener.transformPoint(map_frame, ar_normal, ar_normal_on_map);
+    tfBuffer_.transform(ar_normal, ar_normal_on_map, map_frame);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -635,7 +614,7 @@ int AR_Docking_Controller::goToStation(std::string tf_start_position, double dis
   geometry_util.setPoint(tmp_point, distance_from_station, 0, 0);
   geometry_util.setPointStamped(target_position, tf_ar, ros::Time(0), tmp_point);
   try{
-    listener.transformPoint(map_frame, target_position, target_on_map);
+    tfBuffer_.transform(target_position, target_on_map, map_frame);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -692,7 +671,6 @@ int AR_Docking_Controller::lookTowardsMarker(){
     tfBuffer_.lookupTransform(tf_ar, map_frame, ros::Time::now() ,ros::Duration(3));
     tfBuffer_.lookupTransform(tf_robot, map_frame, ros::Time::now() ,ros::Duration(3));
     tfBuffer_.transform(ar_origin, ar_from_robot, tf_robot);
-    //listener.transformPoint(tf_robot, ar_origin, ar_from_robot);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -714,7 +692,6 @@ int AR_Docking_Controller::lookTowardsMarker(){
 
   try{
     tfBuffer_.transform(target_from_robot, target_from_map, map_frame);
-    //listener.transformPose(map_frame, target_from_robot, target_from_map);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -743,7 +720,7 @@ void AR_Docking_Controller::convertPoseStamped2MoveBaseGoal(move_base_msgs::Move
 //////////////////////////////////////////////////////////////////
 int AR_Docking_Controller::turnInPlace(double theta_offset){
   try{
-    listener.waitForTransform("base_link", map_frame, ros::Time(0) ,ros::Duration(3));
+    tfBuffer_.lookupTransform("base_link", map_frame, ros::Time::now() ,ros::Duration(3));
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -755,11 +732,8 @@ int AR_Docking_Controller::turnInPlace(double theta_offset){
   geometry_util.convertXYTheta2Pose(tmp_pose, 0, 0, theta_offset);
   geometry_util.setPoseStamped(target_from_robot, "base_link", ros::Time(0), tmp_pose);
 
-  //  void TransformListener::transformPose	(	const std::string & 	target_frame,
-  //                                          const geometry_msgs::PoseStamped & 	stamped_in,
-  //                                          geometry_msgs::PoseStamped & 	stamped_out	 
   try{
-    listener.transformPose(map_frame, target_from_robot, target_from_map);
+    tfBuffer_.transform(target_from_robot, target_from_map, map_frame);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());

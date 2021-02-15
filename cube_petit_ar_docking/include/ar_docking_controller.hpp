@@ -1,6 +1,7 @@
 #ifndef AR_DOCKING_CONTROLLER
 #define AR_DOCKING_CONTROLLER
 
+#include <stdio.h>
 #include <cstdlib>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
@@ -15,6 +16,8 @@
 #include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <time.h>
+#include <chrono>
 
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/PointStamped.h>
@@ -43,8 +46,50 @@
 
 class AR_Docking_Controller {
 private:
+  // Publisher
   ros::Publisher cmd_vel_pub;
+  ros::Publisher connector_distance_pub;
   geometry_msgs::Twist twist;
+
+  // その他変数
+  double undock_sec;    //アンドックする時間
+  bool enable_go_ahead; //前にすすめるか・アンドック可能か
+  bool is_map2pregoal;  //mapからpregoalのTFが存在しているか
+
+  geometry_msgs::PointStamped heading_point;
+
+  // tfMedian関数用
+  int buffer_size;
+  int outlier_removal_list_counter;
+  double median_data[5] = {0};
+  geometry_msgs::PoseStamped map_to_ar_list[5];
+  double euler_list[5][3] = {{0},{0},{0},{0},{0}};
+
+  // checkTimeout関数用
+  bool timeout_counting_flag;
+  time_t timeout_start_time;
+  std::chrono::system_clock::time_point timeout_start_time_chrono;
+
+  //TF
+  tf::TransformListener listener;
+  tf2_ros::StaticTransformBroadcaster static_br_;
+  tf2_ros::TransformBroadcaster dynamic_br_;
+  tf2_ros::Buffer tfBuffer_;
+  tf2_ros::TransformListener tfListener_; 
+
+  int goAhead();
+  int goToPregoal();
+  void initialize(ros::NodeHandle nh);
+  double dockingStationTfMap(std::string frame_in_name, std::string frame_out_name);
+  int goToStation(std::string tf_start_position, double distance_from_station);
+  int turnInPlace(double theta_offset);
+  void convertPoseStamped2MoveBaseGoal(move_base_msgs::MoveBaseGoal &goal, geometry_msgs::PoseStamped &pose_stamped);
+  int lookTowardsMarker();
+  int tfMedian(bool init_flag);
+  void dockingStationOffset(std::string ar_frame_in, std::string ar_frame_out);
+  int checkTimeout(double distance_in, bool init_flag);
+  int approachStationWithCurve();
+  int detectDockingFailture();
 
 public:
   AR_Docking_Controller(ros::NodeHandle nh);
@@ -55,38 +100,9 @@ public:
 
   int undocking();
   int docking();
-  int goAhead();
-  int goToPregoal();
-  bool get_tf(geometry_msgs::TransformStamped& tf, const std::string parent_frame, const std::string child_frame, const float timeout);
-  void timerCallback(const ros::TimerEvent& event);
-  void initialize(ros::NodeHandle nh);
-  double docking_station_tf_map(std::string frame_in_name, std::string frame_out_name);
-  int goToStation(std::string tf_start_position, double distance_from_station);
-
-  double undock_sec;
-
-  bool is_docked;
-  bool enable_go_ahead;
-  bool is_map2pregoal;
-
-  geometry_msgs::TransformStamped transformStamped;
-  geometry_msgs::PoseStamped poseStamped;
-  geometry_msgs::PoseStamped ar_poseStamped;
-  geometry_msgs::PointStamped ar_pointStamped;
-  geometry_msgs::PoseStamped ar_normal_poseStamped;
-  geometry_msgs::PointStamped ar_normal_pointStamped;
-  geometry_msgs::PoseStamped connector_to_station;
-  geometry_msgs::PoseStamped station_from_map;
-
-  ros::Timer timer;
-  tf::TransformListener listener;
-  tf2_ros::StaticTransformBroadcaster static_br_;
-  tf2_ros::TransformBroadcaster dynamic_br_;
-
-  tf::StampedTransform map2pregoal;
-  geometry_msgs::Transform map2pregoal_msgs;
-
-  tf::StampedTransform map2connector;
+  
+  //その他変数
+  bool is_docked;       //ドッキングしているか
 
   // getParam
   double undock_velocity;
@@ -95,6 +111,14 @@ public:
   double start1_distance;
   std::string robot_connector_frame;
   std::string map_frame;
+  double acceptable_angle_error;
+  double station_offset_y;
+  double station_offset_x;
+  double curve_vel;
+  double curve_robot_connector_length;
+  double curve_l0;
+
+  //ros::Timer timer;
 };
 
 

@@ -37,41 +37,49 @@ int main(int argc, char **argv){
 // goalが呼ばれた時に動く
 void AR_Docking_Server::actionServerCallback(const cube_petit_ar_docking::ARDockingGoalConstPtr& goal, Server* as){  
   std::string goal_command = goal->Command.c_str();
-  // AR_Docking_Controller ar_docking_controller;
+
   if(goal_command == "charge"){
     //既にドッキングされている場合はワーニングをはいてresultに失敗を返す
-    // if(ar_docking_controller.battery_current_monitor.is_charging()){
-    //   ROS_WARN("IS ALREADY DOCKING");
-    //   actionFinish(FAILED, as);
-    // }else{
-    //   //ドッキングされていない場合はドッキングをする
-      ar_docking_controller.docking();
-      // if(ar_docking_controller.battery_current_monitor.is_charging()){
-      //   ROS_WARN("DOCKING PREMPED");
-      //   actionFinish(PREENMTED, as);
-      // }else{
-      //   ROS_INFO("DOCKING SUCCEED");
-        actionFinish(SUCCEED, as);
-      // }
-    // }
+    if(ar_docking_controller.battery_current_monitor.is_charging()){
+      ROS_WARN("IS ALREADY DOCKING");
+      actionFinish(FAILED, as);
+    }else{
+      //ドッキングされていない場合はドッキングをする
+      int docking_result = 0;
+      int loop_time = 0;
+      while(loop_time < 5){
+        loop_time++;
+        docking_result = ar_docking_controller.docking();
+        if(!docking_result){
+          ROS_INFO("DOCKING SUCCEED");
+          actionFinish(SUCCEED, as);
+          break;
+        }else{
+          ROS_INFO("DOCKING RETRY");
+        }
+        if(loop_time == 4){
+          ROS_WARN("DOCKING PREMPED");
+          actionFinish(PREENMTED, as);
+        }       
+      }
+    } 
   }else if(goal_command == "undock"){
     // //既にドッキングされている場合はワーニングをはいてresultに失敗を返す
-    // if(!ar_docking_controller.battery_current_monitor.is_charging()){
-    //   ROS_WARN("IS ALREADY UN DOCKING");
-    //   result.Message = "failed";
-    //   actionFinish(FAILED, as);
-    // }else{
-    //   //ドッキングされていない場合はドッキングをする
-      ar_docking_controller.undocking();
-    //   if(ar_docking_controller.battery_current_monitor.is_charging()){
-    //     ROS_WARN("UN DOCKING PREMPED");
-    //     actionFinish(PREENMTED, as);
-    //   }else{
-    //     ROS_INFO("UN DOCKING SUCCEED");
-    //     result.Message = "succeed";
+    if(!ar_docking_controller.battery_current_monitor.is_charging()){
+      ROS_WARN("IS ALREADY UN DOCKING");
+      result.Message = "failed";
+      actionFinish(FAILED, as);
+    }else{
+      //ドッキングされていない場合はドッキングをする
+      if( !ar_docking_controller.undocking() ){
+        ROS_INFO("UN DOCKING SUCCEED");
+        result.Message = "succeed";
         actionFinish(SUCCEED, as);
-    //   }
-    // }
+      }else{
+         ROS_WARN("UN DOCKING PREMPED");
+         actionFinish(PREENMTED, as);
+      }
+    }
   }else{
     ROS_WARN("goal->Command is Invalid");
     as->setAborted();

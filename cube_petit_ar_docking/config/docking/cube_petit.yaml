@@ -10,3 +10,13 @@ map_frame: "map" # map
 
 start0_distance: 0.5 #1.2
 start1_distance: 0.3 #0.8
+
+# 許容誤差、角度 (degree)
+acceptable_angle_error: 10.0
+
+station_offset_x: 0.06 #充電ステーションがARマーカから見てどれくらい前の位置に有るか
+station_offset_y: 0.00 #充電ステーションがARマーカから見てどれくらい左の位置に有るか
+
+curve_robot_connector_length: 0.11 #ロボットの中心からコネクタ(の先端)までの距離[m]
+curve_l0: 0.15 #突進時のカーブの曲率を調整するパラメータ。大きいほどカーブが緩やか：精度→下、安定性→上
+curve_vel: 0.1 #velocity[m/s]:(コネクタの)突入速度

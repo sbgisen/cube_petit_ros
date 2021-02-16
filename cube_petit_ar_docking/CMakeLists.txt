@@ -31,6 +31,10 @@ add_action_files(
     DIRECTORY action FILES ARDocking.action
 )
 
+add_service_files(
+  FILES
+  CubeSpeech.srv
+)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
@@ -61,6 +65,7 @@ add_executable(${PROJECT_NAME}_node
    src/ar_docking/geometry_util.cpp
    src/ar_docking/move_base_action_client.cpp
    src/ar_docking/ar_docking_controller.cpp
+   src/ar_docking/speech_util.cpp
 )
 
 # ビルド済みのライブラリ

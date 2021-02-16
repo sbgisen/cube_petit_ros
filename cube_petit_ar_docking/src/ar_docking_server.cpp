@@ -41,16 +41,19 @@ void AR_Docking_Server::actionServerCallback(const cube_petit_ar_docking::ARDock
   if(goal_command == "charge"){
     //既にドッキングされている場合はワーニングをはいてresultに失敗を返す
     if(ar_docking_controller.battery_current_monitor.is_charging()){
+      ar_docking_controller.speech_util.sayText("既に充電中です");
       ROS_WARN("IS ALREADY DOCKING");
       actionFinish(FAILED, as);
     }else{
       //ドッキングされていない場合はドッキングをする
+      ar_docking_controller.speech_util.sayText("ドッキングを開始します");
       int docking_result = 0;
       int loop_time = 0;
       while(loop_time < 5){
         loop_time++;
         docking_result = ar_docking_controller.docking();
         if(!docking_result){
+          ar_docking_controller.speech_util.sayText("ドッキングに成功しました");
           ROS_INFO("DOCKING SUCCEED");
           actionFinish(SUCCEED, as);
           break;
@@ -59,6 +62,7 @@ void AR_Docking_Server::actionServerCallback(const cube_petit_ar_docking::ARDock
         }
         if(loop_time == 4){
           ROS_WARN("DOCKING PREMPED");
+          ar_docking_controller.speech_util.sayText("ドッキングに失敗しました");
           actionFinish(PREENMTED, as);
         }       
       }
@@ -66,13 +70,16 @@ void AR_Docking_Server::actionServerCallback(const cube_petit_ar_docking::ARDock
   }else if(goal_command == "undock"){
     // //既にドッキングされている場合はワーニングをはいてresultに失敗を返す
     if(!ar_docking_controller.battery_current_monitor.is_charging()){
+      ar_docking_controller.speech_util.sayText("既にアンドッキングされています");
       ROS_WARN("IS ALREADY UN DOCKING");
       result.Message = "failed";
       actionFinish(FAILED, as);
     }else{
+      ar_docking_controller.speech_util.sayText("アンドッキングします");
       //ドッキングされていない場合はドッキングをする
       if( !ar_docking_controller.undocking() ){
         ROS_INFO("UN DOCKING SUCCEED");
+        ar_docking_controller.speech_util.sayText("アンドッキングに成功しました");
         result.Message = "succeed";
         actionFinish(SUCCEED, as);
       }else{

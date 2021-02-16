@@ -29,6 +29,7 @@
 # include "ar_docking_controller.hpp"
 # include "battery_current_monitor.hpp"
 # include "move_base_action_client.hpp"
+# include "speech_util.hpp"
 
 
 typedef actionlib::SimpleActionServer<cube_petit_ar_docking::ARDockingAction> Server;
@@ -41,7 +42,6 @@ private:
   float current_data[10];
   int current_data_count;
   cube_petit_ar_docking::ARDockingResult result;
-
 
 public:
   AR_Docking_Server(ros::NodeHandle nh);

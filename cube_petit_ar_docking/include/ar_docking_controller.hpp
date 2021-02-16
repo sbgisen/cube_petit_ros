@@ -43,6 +43,8 @@
 # include "battery_current_monitor.hpp"
 # include "move_base_action_client.hpp"
 # include "geometry_util.hpp"
+# include "speech_util.hpp"
+
 
 class AR_Docking_Controller {
 private:
@@ -96,6 +98,7 @@ public:
   Battery_Current_Monitor battery_current_monitor;
   Move_Base_Action_Client move_base_action_client;
   Geometry_Util geometry_util;
+  Speech_Util speech_util;
 
   int undocking();
   int docking();

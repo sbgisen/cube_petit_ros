@@ -31,6 +31,7 @@ int AR_Docking_Controller::goAhead(){
 //-------------------------------------//
 int AR_Docking_Controller::undocking(){
   ROS_INFO("AR_Docking_Controller::undocking");
+
   ROS_INFO("::: %d ", battery_current_monitor.is_charging());  
   enable_go_ahead = true;
   if(! goAhead()){
@@ -84,6 +85,7 @@ int AR_Docking_Controller::goToPregoal(){
 int AR_Docking_Controller::docking(){
   ROS_INFO("AR_Docking_Controller::docking");
   ROS_INFO("::: %d ", battery_current_monitor.is_charging());
+
   
   bool docking_success_flag = false;    //ドッキングに成功したか
   
@@ -758,6 +760,7 @@ void AR_Docking_Controller::initialize(ros::NodeHandle nh){
 AR_Docking_Controller::AR_Docking_Controller(ros::NodeHandle nh):
   battery_current_monitor(nh),
   move_base_action_client(nh),
+  speech_util(nh),
   tfBuffer_(ros::Duration(10.0)),
   tfListener_(tfBuffer_)
 {

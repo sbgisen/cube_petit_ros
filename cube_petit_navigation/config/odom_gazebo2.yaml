@@ -33,7 +33,7 @@ cube_petit/diff_drive_controller:
       max_acceleration       :  1.0  # rad/s^2
       min_acceleration       : -1.0 # rad/s^2
 
-/gazebo_ros_control:
+cube_petit/gazebo_ros_control:
   pid_gains:
     right_wheel_joint:
       p: 0.1

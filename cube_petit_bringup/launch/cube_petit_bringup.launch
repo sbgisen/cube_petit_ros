@@ -6,11 +6,10 @@
 
   <!-- launch teleop, dynamixel motor, pacecat lidar -->
   <include file="$(find cube_petit_bringup)/launch/teleop_cube_petit.launch"/>
-
-  <group ns="cube_petit">
-    <include file="$(find cube_petit_hardware_interface)/launch/motor_bringup.launch"/>
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-  </group>
+  <!-- <group ns="cube_petit"> -->
+  <include file="$(find cube_petit_hardware_interface)/launch/motor_bringup.launch"/>
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/> -->
+  <!-- </group> -->
 
   <!-- laser filter node ( cut data of cube-petit's pole) -->
   <group ns="/pacecat">

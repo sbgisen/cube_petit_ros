@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <!-- load cube_petit.xacro -->
-  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" />
+  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
   <!-- launch teleop, dynamixel motor, pacecat lidar -->
@@ -20,10 +20,28 @@
       <!-- v1 -->
       <!-- <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" /> -->
       <!-- v2 -->
-      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml" />
+      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml"/>
     </node>
   </group>
  
   <include file="$(find cube_petit_bringup)/launch/realsense_rgbd.launch"/>
+
+  <include file="$(find cube_petit_bringup)/launch/rear_camera_bringup.launch"/>
+
+  <include file="$(find jbd_battery_monitor)/launch/battery_monitor.launch"/>
+
+  <node name="robot_pose_publisher" pkg="robot_pose_publisher" type="robot_pose_publisher" launch-prefix="nice -n 19">
+    <param name="is_stamped" value="true"/>
+  </node>
+
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+    <arg name="port" value="9090"/>
+    <arg name="websocket_ping_interval" value="5" />
+    <arg name="websocket_ping_timeout" value="3" />
+  </include>
+
+  <include file="$(find cube_diagnostic)/launch/diagnostic.launch">
+      <arg name="config_file" value="cube_petit_analyzers.yaml"/>
+  </include>
 
 </launch>

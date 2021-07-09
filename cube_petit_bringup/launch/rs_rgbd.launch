@@ -67,7 +67,7 @@ Processing enabled by this node:
 
   <arg name="color_width"         default="320"/>
   <arg name="color_height"        default="180"/>
-  <arg name="enable_color"        default="true"/>
+  <arg name="enable_color"        default="false"/>
 
   <arg name="fisheye_fps"         default="30"/>
   <arg name="depth_fps"           default="30"/>
@@ -100,11 +100,11 @@ Processing enabled by this node:
   <arg name="respawn"                         default="$(arg bond)" />
 
   <!-- Processing Modules -->
-  <arg name="rgb_processing"                  default="true"/>
+  <arg name="rgb_processing"                  default="false"/>
   <arg name="debayer_processing"              default="false" />
   <arg name="ir_processing"                   default="false"/>
   <arg name="depth_processing"                default="false"/>
-  <arg name="depth_registered_processing"     default="true"/>
+  <arg name="depth_registered_processing"     default="false"/>
   <arg name="disparity_processing"            default="false"/>
   <arg name="disparity_registered_processing" default="false"/>
   <arg name="hw_registered_processing"        default="$(arg align_depth)" />
@@ -114,7 +114,7 @@ Processing enabled by this node:
   <group ns="$(arg camera)">
 
     <!-- Launch the camera device nodelet-->
-    <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+    <include file="$(find cube_petit_bringup)/launch/includes/nodelet.launch.xml">
       <arg name="external_manager"         value="$(arg external_manager)"/>
       <arg name="manager"                  value="$(arg manager)"/>
       <arg name="tf_prefix"                value="$(arg tf_prefix)"/>

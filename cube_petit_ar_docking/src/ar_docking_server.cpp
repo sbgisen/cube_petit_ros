@@ -59,10 +59,10 @@ void AR_Docking_Server::actionServerCallback(const cube_petit_ar_docking::ARDock
           break;
         }else{
           ROS_INFO("DOCKING RETRY");
+          ar_docking_controller.speech_util.sayText("ドッキングに失敗しました");
         }
         if(loop_time == 4){
           ROS_WARN("DOCKING PREMPED");
-          ar_docking_controller.speech_util.sayText("ドッキングに失敗しました");
           actionFinish(PREENMTED, as);
         }       
       }

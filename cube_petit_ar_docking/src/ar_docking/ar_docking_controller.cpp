@@ -137,6 +137,7 @@ int AR_Docking_Controller::docking(){
   }
 
   // 4: ARマーカーの位置の平均を取得？
+  // [TODO]見えなかった時に０からリスタートする
   ROS_INFO("---4: get ar marker average position"); 
   if(tfMedian(1)){
     ROS_WARN("tfMedian is failed. please retry");
@@ -161,7 +162,7 @@ int AR_Docking_Controller::docking(){
 
   int while_loop = 0;
 
-  while(ros::ok() && docking_success_flag == false && while_loop < 500){
+  while(ros::ok() && docking_success_flag == false){
     while_loop++;
     ros::Duration(0.01).sleep();   //[TODO] param
     // [TODO] preempted ??
@@ -169,6 +170,8 @@ int AR_Docking_Controller::docking(){
     // 充電ドッグに向かって突進する
     timeout = approachStationWithCurve();
     reached_goal = battery_current_monitor.is_charging();
+
+    ROS_INFO("*** timeout: %d, is_charging: %d", timeout, reached_goal);
 
     if(!reached_goal){  failed = detectDockingFailture();}
 
@@ -364,7 +367,7 @@ int AR_Docking_Controller::approachStationWithCurve(){
 int AR_Docking_Controller::checkTimeout(double distance_in, bool init_flag){
   double timer_start_distance = 0.2;
   double velocity = curve_vel;
-  double time_ofs = 0.5;  //0.5
+  double time_ofs = 5.5;  //0.5
   double distance_tmp = distance_in;
   
   if(init_flag){
@@ -414,6 +417,7 @@ int AR_Docking_Controller::tfMedian(bool init_flag){
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
+    ROS_INFO("どうにかする");
     return 1;
   }
   // <tf::StampedTransform>型から<geometry_msgs::TransformStamped>型に変換する
@@ -777,18 +781,18 @@ AR_Docking_Controller::AR_Docking_Controller(ros::NodeHandle nh):
   cmd_vel_pub= nh.advertise<geometry_msgs::Twist>("/cube_petit/diff_drive_controller/cmd_vel", 10);
   connector_distance_pub= nh.advertise<geometry_msgs::PoseStamped>("/distance_between_connector", 1);
 
-  nh.getParam("/ar_docking/undock_velocity", undock_velocity);  //launchから起動すること
-  nh.getParam("/ar_docking/undock_distance", undock_distance);  //launchから起動すること
-  nh.getParam("/ar_docking/robot_connector_frame", robot_connector_frame);
-  nh.getParam("/ar_docking/map_frame", map_frame);
-  nh.getParam("/ar_docking/start0_distance",start0_distance);
-  nh.getParam("/ar_docking/start1_distance",start1_distance);
-  nh.getParam("/ar_docking/acceptable_angle_error", acceptable_angle_error);
-  nh.getParam("/ar_docking/station_offset_x", station_offset_x);
-  nh.getParam("/ar_docking/station_offset_y", station_offset_y);
-  nh.getParam("/ar_docking/curve_vel", curve_vel);
-  nh.getParam("/ar_docking/curve_robot_connector_length", curve_robot_connector_length);
-  nh.getParam("/ar_docking/curve_l0", curve_l0);
+  nh.getParam("undock_velocity", undock_velocity);  //launchから起動すること
+  nh.getParam("undock_distance", undock_distance);  //launchから起動すること
+  nh.getParam("robot_connector_frame", robot_connector_frame);
+  nh.getParam("map_frame", map_frame);
+  nh.getParam("start0_distance",start0_distance);
+  nh.getParam("start1_distance",start1_distance);
+  nh.getParam("acceptable_angle_error", acceptable_angle_error);
+  nh.getParam("station_offset_x", station_offset_x);
+  nh.getParam("station_offset_y", station_offset_y);
+  nh.getParam("curve_vel", curve_vel);
+  nh.getParam("curve_robot_connector_length", curve_robot_connector_length);
+  nh.getParam("curve_l0", curve_l0);
 
   undock_sec = undock_distance/undock_velocity;  //10秒かけてアンドックする
   ROS_INFO("undock_sec is %f", undock_sec);

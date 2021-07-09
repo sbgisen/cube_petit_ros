@@ -5,6 +5,8 @@
   <!-- if cube_petit_v2, true -->
   <arg name="cube_petit_v2" default="true"/>
 
+  <arg name="once_flag" default="false"/>
+
   <!-- rostopic pub -->
   <group if="$(arg gazebo)">
     <node pkg="rostopic" type="rostopic" name="battery_remaining" args="pub -r 20 /gazebo_battery_monitor/battery_remaining std_msgs/Float64 9.0"  output="screen" />
@@ -14,6 +16,7 @@
 
   <group if="$(arg cube_petit_v2)">
     <node pkg="jbd_battery_monitor" type="jbd_battery_monitor_node" name="jbd_battery_monitor" output="screen">
+      <param name="once_flag" value="$(arg once_flag)" />
     </node>
   </group>
 

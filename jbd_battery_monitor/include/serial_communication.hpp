@@ -21,7 +21,7 @@
 #include <termios.h>
 #include <errno.h> // Error integer and strerror() function
 
-#define SERIAL_PORT "/dev/ttyUSB1"
+#define SERIAL_PORT "/dev/ttyJBDBM"
 #define BAUD_RATE    B9600                // RS232C通信ボーレート
 #define BUFF_SIZE    4096                 // 適当
 

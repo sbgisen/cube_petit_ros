@@ -26,9 +26,9 @@ int Serial_Communication::serial_parse(std::vector<uint8_t>& data){
 
   // Get Whole Volume, Current, Remaining
   if(data[1] == 0x03){
-    ROS_INFO("Serial_Communication::serial_parse::Battery Data");
+    ROS_DEBUG("Serial_Communication::serial_parse::Battery Data");
     uint16_t battery_voltage_16   = data[4] << 8 | data[5];
-    uint16_t charge_current_16    = data[6] << 8 | data[7];
+    int16_t charge_current_16    = data[6] << 8 | data[7];
     uint16_t battery_remaining_16 = data[8] << 8 | data[9];
 
     // [10mV]から[V]に変換する
@@ -36,9 +36,9 @@ int Serial_Communication::serial_parse(std::vector<uint8_t>& data){
     charge_current = ((int)charge_current_16*10)/1000.0;
     battery_remaining = ((int)battery_remaining_16*10)/1000.0;
 
-    ROS_INFO("Serial_Communication::Voltage: %f", battery_voltage);
-    ROS_INFO("Serial_Communication::Current: %f", charge_current);
-    ROS_INFO("Serial_Communication::Remain: %f", battery_remaining);
+    ROS_DEBUG("Serial_Communication::Voltage: %f", battery_voltage);
+    ROS_DEBUG("Serial_Communication::Current: %f", charge_current);
+    ROS_DEBUG("Serial_Communication::Remain: %f", battery_remaining);
 
   // Get Each Cell Volume
   }else if(data[1] == 0x04){

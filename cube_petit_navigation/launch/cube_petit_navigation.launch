@@ -1,4 +1,9 @@
 <launch>
+    <!-- Set and remove parameter for web console. -->
+  <arg name="map_info_file" default="/home/gisen/map/M20210525165127330/map_info.yaml"/>
+  <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/>
+  <rosparam command="delete" param="map_info/building_id"/>
+  <rosparam command="delete" param="map_info/floor_id"/>
   <group ns="navigation">
     
     <!--[EDIT] robot name-->
@@ -12,12 +17,17 @@
     <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
 
     <!-- <arg name="map_file" default="$(find cube_petit_gazebo)/map/floor_eight/map.yaml"/> -->
-    <arg name="map_file" default="$(find cube_petit_navigation)/map/airi_v2/map.yaml"/>
+    <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/airi_v2/map.yaml"/> -->
+    <arg name="map_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml"/>
 
     <!-- [EDIT] keepout map file name if you need -->
     <arg name="map_keepout_file" default="$(find cube_petit_gazebo)/map/map_keepout.yaml" />
     <arg name="use_keepout" default="false" />
     <param name="map_server/map_file" value="$(arg map_file)" />
+
+
+
+
 
     <!-- If "costmap_image = true" launch costmap_to_image node -->
     <arg name="costmap_image" default="false" />

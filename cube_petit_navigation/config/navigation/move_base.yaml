@@ -39,10 +39,10 @@ TrajectoryPlannerROS:
   acc_lim_y: 0.0
   acc_lim_theta: 0.8
   max_vel_x: 0.4
-  min_vel_x: 0.01
+  min_vel_x: 0.01 # 0.01
   max_vel_theta: 1.0
   min_vel_theta: -1.0
-  min_in_vel_place_theta: 0.5
+  min_in_vel_place_theta: 0.4 # 0.5 (21/04/14)
 
   # base vel/accel profile is in robot folders
   # tolerances (defaults)
@@ -58,7 +58,7 @@ TrajectoryPlannerROS:
   pdist_scale: 1.45
   gdist_scale: 1.9 #1.2 #0.4 #6.0
   occdist_scale: 0.1 # 0.06 #0.6
-  oscillation_reset_dist: 0.15
+  oscillation_reset_dist: 0.15 # 0.15
   escape_reset_dist: 0.05
   escape_reset_theta: 0.025
 
@@ -120,7 +120,7 @@ TebLocalPlannerROS:
  # Trajectory
   
  teb_autosize: True # なぞ
- dt_ref: 0.3        # 時間分解能
+ dt_ref: 0.1 #0.3        # 時間分解能
  dt_hysteresis: 0.1 # 推奨はdt_refの10%
  global_plan_overwrite_orientation: True
  max_global_plan_lookahead_dist: 3.0    #global_planのサブセットの最大長
@@ -128,7 +128,7 @@ TebLocalPlannerROS:
  allow_init_with_backwards_motion: True
     
  # Robot
-         
+
  max_vel_x: 0.2
  max_vel_x_backwards: 0.2
  max_vel_theta: 0.5

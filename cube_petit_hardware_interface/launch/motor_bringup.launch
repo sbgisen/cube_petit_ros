@@ -7,7 +7,7 @@
   <!-- <rosparam file="$(find cube_petit_navigation)/config/odom.yaml"/> -->
 
   <!-- load cube_petit urdf -->
-  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" />
+  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit_v2.xacro" />
   <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
 
   <!-- launch our hardware interface -->

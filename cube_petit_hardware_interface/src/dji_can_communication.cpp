@@ -277,8 +277,8 @@ void Dji_Can_Communication::initialize(ros::NodeHandle nh) {
   ROS_INFO("dji_can_communication -> initialize");
   sub_can = nh.subscribe<can_msgs::Frame>("received_messages", 1000, &Dji_Can_Communication::receivedCanCallback, this);
   // ゲインの初期値設定(p, i, d, i_max, i_min)
-  left_pid_.initPid(0.6, 0.0, 0.005, 0.3, -0.3);
-  right_pid_.initPid(0.6, 0.0, 0.005, 0.3, -0.3);
+  left_pid_.initPid(3, 10.0, 0.005, 10.0, -10.0); //i=0
+  right_pid_.initPid(3, 10.0, 0.005, 10.0, -10.0);  //i=0
   // 100HzでPID制御のコールバック関数を呼ぶタイマー
   timer = nh.createTimer(ros::Duration(0.01),&Dji_Can_Communication::timerCallback,this);
 
@@ -291,7 +291,7 @@ Dji_Can_Communication::Dji_Can_Communication() {
   TORQUE_COEFFICIENT = 0.18;    //トルク計数
   REDUCTION_RATIO = 36;         //減速比
   MAX_CURRENT = 10.000;         //C610の最大電流
-  MAX_CURRENT = 1.0;            //今だけ
+  // MAX_CURRENT = 1.0;            //今だけ
   status_.resize(6,0.0);
   rad_vec.resize(4,0.0);
   right_target_velocity_ = 0;   // 目標速度

@@ -49,19 +49,20 @@ void AR_Docking_Server::actionServerCallback(const cube_petit_ar_docking::ARDock
       ar_docking_controller.speech_util.sayText("ドッキングを開始します");
       int docking_result = 0;
       int loop_time = 0;
-      while(loop_time < 5){
+      while(loop_time < 20){
         loop_time++;
         docking_result = ar_docking_controller.docking();
         if(!docking_result){
           ar_docking_controller.speech_util.sayText("ドッキングに成功しました");
+          ROS_INFO("loop_time: %d", loop_time);
           ROS_INFO("DOCKING SUCCEED");
           actionFinish(SUCCEED, as);
           break;
         }else{
           ROS_INFO("DOCKING RETRY");
-          ar_docking_controller.speech_util.sayText("ドッキングに失敗しました");
+          // ar_docking_controller.speech_util.sayText("ドッキングに失敗しました");
         }
-        if(loop_time == 4){
+        if(loop_time == 20){
           ROS_WARN("DOCKING PREMPED");
           actionFinish(PREENMTED, as);
         }       

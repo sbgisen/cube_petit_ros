@@ -24,7 +24,7 @@
     </node>
   </group>
  
-  <include file="$(find cube_petit_bringup)/launch/realsense_rgbd.launch"/>
+  <!-- <include file="$(find cube_petit_bringup)/launch/realsense_rgbd.launch"/> -->
 
   <include file="$(find cube_petit_bringup)/launch/rear_camera_bringup.launch"/>
 

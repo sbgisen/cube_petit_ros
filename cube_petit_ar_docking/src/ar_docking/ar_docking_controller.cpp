@@ -218,7 +218,7 @@ int AR_Docking_Controller::docking(){
 int AR_Docking_Controller::detectDockingFailture(){
   ROS_INFO("AR_Docking_Controller::detectDockingFailture");
   std::string tf_ar="ar_average_ofs";
-  std::string tf_map="map";
+  std::string tf_map = map_frame;
   std::string tf_robot="connector_link";
   double detect_distance = 0.1;
 
@@ -319,7 +319,7 @@ visualization_msgs::Marker AR_Docking_Controller::PointsToMarkerArrow(std::strin
 int AR_Docking_Controller::approachStationWithCurve(){
   ROS_INFO("AR_Docking_Controller::approachStationWithCurve");
   std::string tf_ar="ar_average_ofs";     //充電ドックのコネクタ位置
-  std::string tf_map="map";           
+  std::string tf_map= map_frame;           
   std::string tf_robot="base_link_reverse"; //base_link_reverse //connector_link
 
   // ??
@@ -517,7 +517,7 @@ int AR_Docking_Controller::tfMedianRun(int median_times, std::string tf_in, std:
 int AR_Docking_Controller::tfMedian(bool init_flag, std::string tf_in, std::string tf_out){
   std::string tf_ar         = tf_in;
   std::string tf_camera     = "rear_camera_optical_link";
-  std::string tf_map        = map_frame; //or "map"
+  std::string tf_map        = map_frame;
   std::string tf_ar_average = tf_out;
   
   if(init_flag == 1){
@@ -853,7 +853,7 @@ void AR_Docking_Controller::convertPoseStamped2MoveBaseGoal(move_base_msgs::Move
 //////////////////////////////////////////////////////////////////
 int AR_Docking_Controller::turnInPlace(double theta_offset){
   try{
-    tfBuffer_.lookupTransform("base_link", map_frame, ros::Time::now() ,ros::Duration(3));
+    tfBuffer_.lookupTransform("base_link", "map", ros::Time::now() ,ros::Duration(3));
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());

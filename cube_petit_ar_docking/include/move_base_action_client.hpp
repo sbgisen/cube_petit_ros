@@ -36,6 +36,7 @@ class Move_Base_Action_Client {
 private:
   MoveBaseClient ac;
   int setAndSendGoal(move_base_msgs::MoveBaseGoal goal, int duration);
+  std::string map_frame;
 
 public:
   Move_Base_Action_Client(ros::NodeHandle nh);

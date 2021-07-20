@@ -33,7 +33,10 @@ void Move_Base_Action_Client::goAhead1(){
 
 int Move_Base_Action_Client::setAndSendGoal(move_base_msgs::MoveBaseGoal goal, int duration){
   ROS_INFO("Move_Base_Action_Client::setAndSendGoal");
-  goal_.target_pose.header.frame_id = "map";
+  if(map_frame != ""){
+    map_frame = "map";
+  }
+  goal_.target_pose.header.frame_id = map_frame;
   goal_.target_pose.header.stamp = ros::Time::now();
   goal_.target_pose.pose.position = goal.target_pose.pose.position;
   goal_.target_pose.pose.position.z = 0;
@@ -93,6 +96,8 @@ void Move_Base_Action_Client::initialize(ros::NodeHandle nh){
   while(!ac.waitForServer(ros::Duration(5.0))){
     ROS_INFO("Move_Base_Action_Client::initialize: Waiting for the move_base action server to come up");
   }
+  nh.getParam("map_frame", map_frame);
+  ROS_INFO("Move_Base_Action_Client::initialize: map_frame is %s", map_frame.c_str());
 
 }
 

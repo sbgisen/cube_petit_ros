@@ -53,7 +53,7 @@ int AR_Docking_Controller::goToPregoal(){
   tf::StampedTransform map2pregoal;
   geometry_msgs::TransformStamped map2pregoal_msgs;
   try{
-    map2pregoal_msgs = tfBuffer_.lookupTransform("map", "pregoal", ros::Time(0));
+    map2pregoal_msgs = tfBuffer_.lookupTransform(map_frame, "pregoal", ros::Time(0));
     is_map2pregoal = true;
   }
   catch (tf::TransformException ex){
@@ -68,7 +68,7 @@ int AR_Docking_Controller::goToPregoal(){
 
   //<geometry_msgs::TransformStamped>から<geometry_msgs::PoseStamped>に変換
   geometry_msgs::PoseStamped poseStamped;
-  geometry_util.convertTransform2Posestamped(poseStamped, "map", ros::Time(0),map2pregoal_msgs.transform);
+  geometry_util.convertTransform2Posestamped(poseStamped, map_frame, ros::Time(0),map2pregoal_msgs.transform);
   move_base_msgs::MoveBaseGoal goal;
   goal.target_pose = poseStamped;
 

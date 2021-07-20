@@ -8,7 +8,7 @@ undock_distance: 0.4 #終わったあと離れる距離
 undock_velocity: 0.1 #終わったあと離れる速さ
 
 robot_connector_frame: "connector_link" # コネクタのフレーム名
-map_frame: "map" # map
+map_frame: "odom" # map
 
 start0_distance: 0.5 # 0.4 (2021/07/13)
 start1_distance: 0.3 # 0.25 (2021/07/13)

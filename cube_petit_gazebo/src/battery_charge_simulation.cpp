@@ -1,5 +1,11 @@
 #include "battery_charge_simulation.hpp"
 
+///////////////////////////////////////////
+/*
+  battery_charge_simulation.cpp
+  2021/09/16    Airi Yokochi
+*/
+///////////////////////////////////////////
 
 /////////////////////////////
 /*  コンストラクタ         */
@@ -7,31 +13,27 @@
 
 Battery_Charge_Simulation::Battery_Charge_Simulation(ros::NodeHandle nh){
   ROS_INFO("Battery_Charge_Simulation::Battery_Charge_Simulation ->start");
-
-  ros::Rate loop_rate(20);
-  
-  docking_station_voltage_msg = *(ros::topic::waitForMessage<std_msgs::Float32>("docking_station_voltage_in", nh));
-
+  // load param
   brass_battery_service_name = "/gazebo/battery_simulation/cube_petit/set_charging";
-  voltage_threshold = 0.1;
-  current_charging_state = false;
-  docking_flag = false;
-  
+  voltage_threshold = 0.1;  
   nh.getParam("set_charging", brass_battery_service_name);
   nh.getParam("voltage_threshold", voltage_threshold);
+  // docking state
+  current_charging_state = false;
+  docking_flag = false;
 
-  ROS_INFO("------brass_battery_service_name: %s", brass_battery_service_name.c_str());
-  
+  docking_station_voltage_msg = *(ros::topic::waitForMessage<std_msgs::Float32>("docking_station_voltage_in", nh));
   voltage_sub = nh.subscribe("docking_station_voltage_in", 10, &Battery_Charge_Simulation::voltageSubscriberCallback, this);
+  
   brass_gazebo_battery_client = nh.serviceClient<brass_gazebo_battery::SetCharging>(brass_battery_service_name);
 
   ROS_INFO("Battery_Charge_Simulation::Battery_Charge_Simulation ->done");
 }
 
 Battery_Charge_Simulation::~Battery_Charge_Simulation() {
-
 }
 
+// ドッキングしているか確認する：充電状況と現在のロボットの電圧を見てチャージ関数を呼び出す
 void Battery_Charge_Simulation::checkDockingLoop(){
   if(docking_flag && !current_charging_state){
     ROS_INFO("brass_gazebo_battery::checkDockingLoop -> true");
@@ -44,20 +46,21 @@ void Battery_Charge_Simulation::checkDockingLoop(){
   }
 }
 
+// ロボットの電圧をSubscribeする関数
 void Battery_Charge_Simulation::voltageSubscriberCallback(const std_msgs::Float32& msg){
   docking_flag = bool(msg.data > voltage_threshold);
 }
 
+// brass_gazebo_batteryのset_chargingサービス呼び出す関数
 void Battery_Charge_Simulation::setChargingClient(bool charging_flag){
-  //service来るまで待つ
-  ros::service::waitForService(brass_battery_service_name);
 
+  ros::service::waitForService(brass_battery_service_name);  //service来るまで待つ
   brass_gazebo_battery::SetCharging srv;
   srv.request.charging = charging_flag;
 
   try{
     brass_gazebo_battery_client.call(srv);
-    ROS_INFO("brass_gazebo_battery::SetChaginf result:");// %f", srv.response.result);
+    ROS_INFO("brass_gazebo_battery::SetChaginf result: %s", (srv.response.result ? "true" : "false"));
   }catch(ros::Exception ex){
     ROS_ERROR("%s",ex.what());
   }

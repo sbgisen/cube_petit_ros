@@ -11,3 +11,4 @@ station_connector_offset: 0.121 #Distance from charging-station origin to the ch
 docking_area_radious: 0.1 #Radius of the area which publish the charging voltage [m] 0.15
 docking_area_angle: 0.5 #Range of angles to publish charging voltage (+- "publih_voltage_area_angle" [m])
 voltage: 36.0 #Charging voltage whole docking
+current: 5.0 # Charging current whole docking

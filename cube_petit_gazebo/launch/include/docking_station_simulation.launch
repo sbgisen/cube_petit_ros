@@ -27,10 +27,8 @@
   <node ns="gazebo" name="battery_charging_simulation" pkg="cube_petit_gazebo" type="battery_charge_simulation_node" output="screen" launch-prefix="nice -n 19">
     <remap from="~docking_station_voltage_in" to="/solar_voltage" />
     <param name="set_charging" type="string" value="/gazebo/battery_simulation/cube_petit/set_charging" />
+    <param name="voltage_threshold" type="double" value="0.1" />
   </node>
-
-
-
 
   <group ns="gazebo/topic_pipe">
     <node name="battery_remaining_throttler" type="throttle" pkg="topic_tools"

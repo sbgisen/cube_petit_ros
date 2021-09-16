@@ -3,7 +3,7 @@ scale_linear: 0.5
 scale_linear_turbo: 1.5
 
 axis_angular: 0
-scale_angular: 1.0
+scale_angular: 5.0
 
 enable_button: 1  # batu button
 enable_turbo_button: 10  # L1 shoulder button

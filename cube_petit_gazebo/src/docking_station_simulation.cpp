@@ -11,7 +11,6 @@
 /*  コンストラクタ         */
 /////////////////////////////
 
-
 Docking_Station_Simulation::Docking_Station_Simulation(ros::NodeHandle nh){
   ROS_INFO("Docking_Station_Simulation::Docking_Station_Simulation ->start");
   // get rosparam (debug)
@@ -73,6 +72,7 @@ void Docking_Station_Simulation::publishDataLoop(){
   output_volatage_pub.publish(voltage_message);
 }
 
+// robotのコネクタからみたstationのコネクタのPoseStampedを返す関数
 geometry_msgs::PoseStamped Docking_Station_Simulation::getConnectorDevitation(){
   geometry_msgs::Quaternion quaternion_world2robot;
   quaternion_world2robot.x = gazebo_robot_odom.pose.pose.orientation.x;
@@ -81,10 +81,8 @@ geometry_msgs::PoseStamped Docking_Station_Simulation::getConnectorDevitation(){
   quaternion_world2robot.w = gazebo_robot_odom.pose.pose.orientation.w;
 
   float yaw_world2robot = quaternion2yaw(quaternion_world2robot);  
-  Eigen::Matrix2f  rotation_matrix_world2robot_vec2;
-  Eigen::Matrix2f  rotation_matrix_world2robot_vec2_inv;
-  rotation_matrix_world2robot_vec2 = yaw2matrix2(yaw_world2robot);
-  rotation_matrix_world2robot_vec2_inv = yaw2matrix2(-yaw_world2robot);
+  Eigen::Matrix2f rotation_matrix_world2robot_vec2 = yaw2matrix2(yaw_world2robot);
+  Eigen::Matrix2f rotation_matrix_world2robot_vec2_inv = yaw2matrix2(-yaw_world2robot);
 
   Eigen::Vector2f world2robot_vec2;
   Eigen::Vector2f world2station_vec2;
@@ -117,26 +115,25 @@ geometry_msgs::PoseStamped Docking_Station_Simulation::getConnectorDevitation(){
   //robotからみたstationのPose
   geometry_msgs::PoseStamped robot2station;
 
-  Eigen::Vector2f robot2connector_vec;
+  Eigen::Vector2f robot2connector_vec;         //robotからみたrobotコネクタ
   robot2connector_vec(0) = robot_connector_offset;
   robot2connector_vec(1) = 0;
 
-  Eigen::Vector2f world2robot_connector_vec;
+  Eigen::Vector2f world2robot_connector_vec;    //worldからみたrobotコネクタ
   world2robot_connector_vec = world2robot_vec2 + rotation_matrix_world2robot_vec2 * robot2connector_vec;
 
-  Eigen::Vector2f station2connector_vec;
+  Eigen::Vector2f station2connector_vec;        //stationからみたstationコネクタ
   station2connector_vec(0) = station_connector_offset;
   station2connector_vec(1) = 0;
 
-  Eigen::Vector2f world2station_connector_vec;
+  Eigen::Vector2f world2station_connector_vec;    //worldからみたstationコネクタ
   world2station_connector_vec = world2station_vec2 + rotation_matrix_world2station2 * station2connector_vec;
 
-  Eigen::Vector2f robot_con2station_con_vec;
+  Eigen::Vector2f robot_con2station_con_vec;      //robotのコネクタからみたstationのコネクタ
   robot_con2station_con_vec = world2station_connector_vec - world2robot_connector_vec;
 
   Eigen::Vector2f rotated_robot_con2station_con_vec;
   rotated_robot_con2station_con_vec = rotation_matrix_world2robot_vec2_inv * robot_con2station_con_vec;
-  // ROS_INFO("vec x: %f, y: %f",rotated_robot2station_con_vec(0),rotated_robot2station_con_vec(1));
 
   geometry_msgs::Quaternion quaternion_robot2target;
   quaternion_robot2target = yaw2quaternion(yaw_robot2station + M_PI);
@@ -187,10 +184,9 @@ geometry_msgs::PoseStamped Docking_Station_Simulation::getConnectorDevitation(){
     robot2robot_con.pose.orientation.w = 1;
     
     //robotから見たstation connectorの位置をPublish
-
-    Eigen::Matrix2f rotation_matrix_robot2station = yaw2matrix2(yaw_robot2station);
-    Eigen::Vector2f rotated_station2con_vec = rotation_matrix_robot2station * station2connector_vec;
-    Eigen::Vector2f robot2station_con_vec = rotated_robot2station2 + rotated_station2con_vec;
+    Eigen::Matrix2f rotation_matrix_robot2station = yaw2matrix2(yaw_robot2station); //robotから見たstationの回転行列
+    Eigen::Vector2f rotated_station2con_vec = rotation_matrix_robot2station * station2connector_vec;  //コネクタ分回転する
+    Eigen::Vector2f robot2station_con_vec = rotated_robot2station2 + rotated_station2con_vec;   //robotからみたstaionのコネクタ
     geometry_msgs::PoseStamped robot2station_con;
     robot2station_con.header.frame_id = gazebo_robot_odom.child_frame_id;
     robot2station_con.header.stamp = gazebo_robot_odom.header.stamp;
@@ -213,23 +209,19 @@ geometry_msgs::PoseStamped Docking_Station_Simulation::getConnectorDevitation(){
 }
 
 bool Docking_Station_Simulation::validateDocking(geometry_msgs::PoseStamped robot2station_connectors){
+  // robotのコネクタからstationのコネクタの距離を計算する
   float translation_diff = sqrt(pow(robot2station_connectors.pose.position.x,2) + pow(robot2station_connectors.pose.position.y, 2));
-  
+
+  // robotのコネクタとstationのコネクタの角度を計算する  
   geometry_msgs::Quaternion anguler_diff_quaternion;
   anguler_diff_quaternion.x = robot2station_connectors.pose.orientation.x;
   anguler_diff_quaternion.y = robot2station_connectors.pose.orientation.y;
   anguler_diff_quaternion.z = robot2station_connectors.pose.orientation.z;
   anguler_diff_quaternion.w = robot2station_connectors.pose.orientation.w;
+  float anguler_diff = fabs(quaternion2yaw(anguler_diff_quaternion));
 
-  //absにintが返されるので違う気がする
-  float ang_diff_temp = quaternion2yaw(anguler_diff_quaternion);
-  float anguler_diff = fabs(ang_diff_temp);
   bool docking_flag = false;
-
-  // ROS_INFO("yaw: %f", quaternion2yaw(anguler_diff_quaternion));
-
-  // ROS_INFO("trans: %f ( < %f ), ang: %f (  > %f )", translation_diff, docking_area_radious, anguler_diff, docking_area_angle);
-
+  // 距離と角度がしきい値以内ならばdocking_fragをtrueにする
   if( translation_diff < docking_area_radious && anguler_diff < docking_area_angle){
     docking_flag = true;
   }
@@ -243,6 +235,7 @@ bool Docking_Station_Simulation::validateDocking(geometry_msgs::PoseStamped robo
   return docking_flag;
 }
 
+// Quaternionからyawに変換する
 float Docking_Station_Simulation::quaternion2yaw(geometry_msgs::Quaternion quoternion){
   float x = quoternion.x;
   float y = quoternion.y;
@@ -252,16 +245,7 @@ float Docking_Station_Simulation::quaternion2yaw(geometry_msgs::Quaternion quote
   return yaw_ret;
 }
 
-void Docking_Station_Simulation::yaw2matrix( std::vector<std::vector<float> > &rot, float yaw){
-  float cos_f = cos(yaw);
-  float sin_f = sin(yaw);
-  float rot_ret[2][2] = {{cos_f, -sin_f}, {sin_f, cos_f}};
-  rot[0][0] = cos_f;
-  rot[0][1] = -sin_f;
-  rot[1][0] = sin_f;
-  rot[1][1] = cos_f;
-}
-
+// yawから回転行列に変換する
 Eigen::Matrix2f Docking_Station_Simulation::yaw2matrix2(float yaw){
   Eigen::Matrix2f rot;
   float cos_f = cos(yaw);
@@ -274,6 +258,7 @@ Eigen::Matrix2f Docking_Station_Simulation::yaw2matrix2(float yaw){
   return rot;
 }
 
+// yawからQuaternionに変換する
 geometry_msgs::Quaternion Docking_Station_Simulation::yaw2quaternion(float yaw){
   geometry_msgs::Quaternion ret_quaternion;
   ret_quaternion.x = 0;

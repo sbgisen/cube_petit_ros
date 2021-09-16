@@ -58,7 +58,6 @@ public:
   geometry_msgs::PoseStamped getConnectorDevitation();
   bool validateDocking(geometry_msgs::PoseStamped robot2station_connectors);
   float quaternion2yaw(geometry_msgs::Quaternion quoternion);
-  void yaw2matrix(std::vector<std::vector<float> > &rot, float yaw);
   Eigen::Matrix2f yaw2matrix2(float yaw);
 };
 

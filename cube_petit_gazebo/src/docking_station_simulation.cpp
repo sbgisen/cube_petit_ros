@@ -1,4 +1,4 @@
-#include "../include/docking_station_simulation.hpp"
+#include "docking_station_simulation.hpp"
 
 /////////////////////////////
 /*  コンストラクタ         */

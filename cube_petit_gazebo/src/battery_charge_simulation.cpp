@@ -1,4 +1,4 @@
-#include "../include/battery_charge_simulation.hpp"
+#include "battery_charge_simulation.hpp"
 
 
 /////////////////////////////

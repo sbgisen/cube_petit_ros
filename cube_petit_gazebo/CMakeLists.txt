@@ -48,7 +48,7 @@ catkin_package(
 
 # 自分で作ったヘッダ＋使用するライブラリのヘッダ
 include_directories(
-include
+ include
  ${catkin_INCLUDE_DIRS}
  ${GAZEBO_INCLUDE_DIRS}
 )

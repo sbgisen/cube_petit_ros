@@ -19,7 +19,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <termios.h>
-
+#include <bitset>
 
 #define SERIAL_PORT "/dev/ttyUSB0"
 #define BAUD_RATE    B9600                // RS232C通信ボーレート

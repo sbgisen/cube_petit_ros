@@ -28,17 +28,63 @@ int Serial_Communication::serial_parse(std::vector<uint8_t>& data){
   if(data[1] == 0x03){
     ROS_INFO("Serial_Communication::serial_parse::Battery Data");
     uint16_t battery_voltage_16   = data[4] << 8 | data[5];
-    uint16_t charge_current_16    = data[6] << 8 | data[7];
+    int16_t charge_current_16    = data[6] << 8 | data[7];
     uint16_t battery_remaining_16 = data[8] << 8 | data[9];
 
     // [10mV]から[V]に変換する
     battery_voltage = ((int)battery_voltage_16*10)/1000.0;
     charge_current = ((int)charge_current_16*10)/1000.0;
     battery_remaining = ((int)battery_remaining_16*10)/1000.0;
-
+    ROS_INFO("--------------------------------------------------");
     ROS_INFO("Serial_Communication::Voltage: %f", battery_voltage);
     ROS_INFO("Serial_Communication::Current: %f", charge_current);
     ROS_INFO("Serial_Communication::Remain: %f", battery_remaining);
+
+    uint16_t kousyou_remaining = data[10] << 8 | data[11];
+    float kousyou_remaining_f = ((int)kousyou_remaining*10)/1000.0;
+    uint16_t cycle = data[12] << 8 | data[13];
+    uint16_t product_date = data[14] << 8 | data[15];
+    uint16_t equilibrium = data[16] << 8 | data[17];
+    uint16_t equilibrium_high = data[18] << 8 | data[19];
+    uint16_t protect_status = data[20] << 8 | data[21];
+    std::bitset<16> protect_status_high = data[20] << 8 | data[21];
+
+    bool monomer_overvoltage_protection   = protect_status_high[0];
+    bool monomer_undervoltage_protection  = protect_status_high[1];
+    bool group_overvoltage_protection     = protect_status_high[2];
+    bool group_undervoltage_protection    = protect_status_high[3];
+    bool overheat_protection              = protect_status_high[4];
+    bool cold_protection_charging         = protect_status_high[5];
+    bool overheat_protection_discharge    = protect_status_high[6];
+    bool cold_protection_discharge        = protect_status_high[7];
+    bool charge_overcurrent_protection    = protect_status_high[8];
+    bool discharge_overcurrent_protection = protect_status_high[9];
+    bool short_circuit_protection         = protect_status_high[10];
+    bool ic_error                         = protect_status_high[11];
+    bool softwarelock_mos                 = protect_status_high[12];
+
+    uint8_t software_version = data[22];
+    uint8_t rsoc = data[23];
+    uint8_t fet_status = data[24];
+    uint8_t battery_num = data[25];
+    uint8_t ntc_num = data[26];
+    uint16_t ntc_contents = (data[27] << 8 | data[28]) - 2731;
+
+    ROS_INFO("Serial_Communication::kousyou_remaining_f: %f", kousyou_remaining_f);
+    ROS_INFO("Serial_Communication::cycle: %d", cycle);
+    ROS_INFO("Serial_Communication::product_date: %d", product_date);
+    ROS_INFO("Serial_Communication::equilibrium: %d", equilibrium);
+    ROS_INFO("Serial_Communication::equilibrium_high: %d", equilibrium_high);
+    ROS_INFO("Serial_Communication::protect_status: %d", protect_status);
+    ROS_INFO("Serial_Communication::software_version: %d", software_version);
+    ROS_INFO("Serial_Communication::rsoc: %d", rsoc);
+    ROS_INFO("Serial_Communication::fet_status: %d", fet_status);
+    ROS_INFO("Serial_Communication::battery_num: %d", battery_num);
+    ROS_INFO("Serial_Communication::ntc_num: %d", ntc_num);
+    ROS_INFO("Serial_Communication::ntc_contents: %d", ntc_contents/10);
+
+    ROS_INFO("--------------------------------------------------");
+
 
   // Get Each Cell Volume
   }else if(data[1] == 0x04){

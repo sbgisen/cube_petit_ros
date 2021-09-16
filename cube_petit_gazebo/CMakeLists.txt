@@ -16,28 +16,74 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   control_toolbox
-  # brass_gazebo_battery
+  message_generation
+  std_srvs
+  brass_gazebo_battery
+)
+
+add_service_files(
+  DIRECTORY srv
+  FILES
+  SetCharging.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
 )
 
 # Macro to generate ROS node with "add_executable" and "add_library"
-catkin_package()
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME} brass_gazebo_battery
+  CATKIN_DEPENDS
+  roscpp
+  message_runtime
+)
+
 
 ###########
 ## Build ##
 ###########
 
 # 自分で作ったヘッダ＋使用するライブラリのヘッダ
-#include_directories(
-## include
-#  ${catkin_INCLUDE_DIRS}
-#)
+include_directories(
+include
+ ${catkin_INCLUDE_DIRS}
+ ${GAZEBO_INCLUDE_DIRS}
+)
+
 
 # add_executable(${PROJECT_NAME}_node
-# # src/cube_petit_gazebo_node.cpp
-# src/battery_charge_simulation.cpp
+#   src/battery_charge_simulation.cpp
+#   src/docking_station_simulation.cpp
 # )
 
-### Specify libraries to link a library or executable target against
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+# ### Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
+#   ${roscpp_LIBRARIES}
+#   ${GAZEBO_INCLUDE_DIRS}
 # )
+
+add_executable(docking_station_simulation_node
+  src/docking_station_simulation.cpp
+)
+add_dependencies(docking_station_simulation_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(docking_station_simulation_node
+  ${catkin_LIBRARIES}
+  ${roscpp_LIBRARIES}
+  ${GAZEBO_INCLUDE_DIRS}
+)
+
+add_executable(battery_charge_simulation_node
+  src/battery_charge_simulation.cpp
+)
+add_dependencies(battery_charge_simulation_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(battery_charge_simulation_node
+  ${catkin_LIBRARIES}
+  ${roscpp_LIBRARIES}
+  ${GAZEBO_INCLUDE_DIRS}
+)

@@ -10,6 +10,50 @@
 		<include>
 			<uri>model://takeshiba_room27</uri>			
 		</include>
+
+
+
+		<actor name="human_actor_yokochi">
+		<pose>0 0 0.8 0 0 1.57</pose>
+		<skin>
+			<filename>/home/gisen/Desktop/SenseScan1_all3-Walking/2.8WalkingZ-X-keepbind.dae</filename>
+			<scale>1</scale>
+		</skin>
+		<animation name="walking">
+			<filename>/home/gisen/Desktop/SenseScan1_all3-Walking/2.8WalkingZ-X-keepbind.dae</filename>
+			<scale>1</scale>
+			<interpolate_x>true</interpolate_x>
+		</animation>
+		<plugin name="actor_control" filename="libactor_control.so"/>
+		</actor>
+
+		<actor name="human_actor">
+		<pose>0 0 0.8 0 0 0</pose>
+		<skin>
+			<!-- <filename>/home/gisen/Desktop/SenseScan1_all3-Walking/2.8WalkingZ-X-keepbind.dae</filename> -->
+			<filename>/home/gisen/Desktop/20210316_numai/numai-default-Walking.dae</filename>
+			<scale>10</scale>
+		</skin>
+		<!-- <animation name="stand">
+			<filename>/home/gisen/Desktop/SenseScan1_all3-Walking/Walking5.dae</filename>
+			<scale>1.0</scale>
+		</animation> -->
+		<animation name="walking">
+			<!-- <filename>/home/gisen/Desktop/SenseScan1_all3-Walking/2.8WalkingZ-X-keepbind.dae</filename> -->
+			<filename>/home/gisen/Desktop/20210316_numai/numai-default-Walking.dae</filename>
+			<scale>1</scale>
+			<interpolate_x>true</interpolate_x>
+		</animation>
+		<!-- <animation name="running">
+			<filename>/home/gisen/Desktop/SenseScan1_all3-Walking/Walking5.dae</filename>
+			<scale>1.0</scale>
+			<interpolate_x>true</interpolate_x>
+		</animation> -->
+		<!-- <plugin name="actor_control" filename="libactor_control.so"/> -->
+		</actor>
+
+
+
 		<physics type='ode'>
 			<max_step_size>0.001</max_step_size>
 			<real_time_factor>1</real_time_factor>

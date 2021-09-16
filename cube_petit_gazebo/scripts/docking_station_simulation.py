@@ -43,6 +43,8 @@ class DockingStationSimulation:
         # Initialize publishers
         self.output_voltage_pub = rospy.Publisher(
             '~output_voltage', Float32, queue_size=5)
+        self.output_current_pub = rospy.Publisher(
+            '~output_current', Float32, queue_size=5)
         if self.publish_debug_topics:
             self.robot_connector_pose_pub = rospy.Publisher(
                 '~debug/robot_pose', PoseStamped, queue_size=5)
@@ -70,11 +72,15 @@ class DockingStationSimulation:
         docking_flag = self.validate_docking(
             self.get_connector_deviation())
         voltage_message = Float32()
+        current_message = Float32()
         if docking_flag:
             voltage_message.data = self.voltage
+            current_message.data = 5.0
         else:
             voltage_message.data = 0.0
+            current_message.data = -3.0
         self.output_voltage_pub.publish(voltage_message)
+        self.output_current_pub.publish(current_message)
 
     def get_connector_deviation(self):
         # Calculate position (robot to station) on x-y plane

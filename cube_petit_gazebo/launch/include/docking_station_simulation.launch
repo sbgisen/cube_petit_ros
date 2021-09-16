@@ -1,16 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <arg name="robot" default="cube-petit" />
-  <node ns="gazebo" name="docking_station_simulation" pkg="cube_petit_gazebo" type="docking_station_simulation.py" output="screen" launch-prefix="nice -n 19">
+
+
+  <!-- python -->
+  <!-- <node ns="gazebo" name="docking_station_simulation" pkg="cube_petit_gazebo" type="docking_station_simulation.py" output="screen" launch-prefix="nice -n 19">
     <rosparam file="$(find cube_petit_gazebo)/config/docking_station_simulation.yaml" command="load" />
     <remap from="~output_voltage" to="/solar_voltage" />
+    <remap from="~output_current" to="/output_current" />
     <remap from="~robot_odom" to="/gazebo/docking_station_simulation/robot_pose" />
     <remap from="~station_odom" to="/gazebo/docking_station_simulation/station_pose" />
   </node>
   <node ns="gazebo" name="battery_charging_simulation" pkg="cube_petit_gazebo" type="battery_charging_simulation.py" output="screen" launch-prefix="nice -n 19">
     <remap from="~docking_station_voltage_in" to="/solar_voltage" />
     <param name="set_charging" type="string" value="/gazebo/battery_simulation/cube_petit/set_charging" />
+  </node> -->
+
+  <!-- cpp -->
+  <node ns="gazebo" name="docking_station_simulation" pkg="cube_petit_gazebo" type="docking_station_simulation_node" output="screen" launch-prefix="nice -n 19">
+    <rosparam file="$(find cube_petit_gazebo)/config/docking_station_simulation.yaml" command="load" />
+    <remap from="~output_voltage" to="/solar_voltage" />
+    <remap from="~output_current" to="/output_current" />
+    <remap from="~robot_odom" to="/gazebo/docking_station_simulation/robot_pose" />
+    <remap from="~station_odom" to="/gazebo/docking_station_simulation/station_pose" />
   </node>
+  <node ns="gazebo" name="battery_charging_simulation" pkg="cube_petit_gazebo" type="battery_charge_simulation_node" output="screen" launch-prefix="nice -n 19">
+    <remap from="~docking_station_voltage_in" to="/solar_voltage" />
+    <param name="set_charging" type="string" value="/gazebo/battery_simulation/cube_petit/set_charging" />
+  </node>
+
+
+
 
   <group ns="gazebo/topic_pipe">
     <node name="battery_remaining_throttler" type="throttle" pkg="topic_tools"

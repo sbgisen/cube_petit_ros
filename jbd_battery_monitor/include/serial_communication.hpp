@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <bitset>
+#include <errno.h> // Error integer and strerror() function
 
 #define SERIAL_PORT "/dev/ttyUSB0"
 #define BAUD_RATE    B9600                // RS232C通信ボーレート

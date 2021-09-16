@@ -28,13 +28,17 @@ int main(int argc, char **argv){
   ros::init(argc, argv, "jbd_battery_monitor");
   
   ros::NodeHandle nh("~");
-  ros::Publisher battery_remaining_pub = nh.advertise<std_msgs::Float64>("battery_remaining", 10);
-  ros::Publisher battery_voltage_pub = nh.advertise<std_msgs::Float64>("battery_voltage", 10);
-  ros::Publisher charge_current_pub = nh.advertise<std_msgs::Float64>("charge_current", 10);
+  ros::Publisher battery_remaining_pub = nh.advertise<std_msgs::Float64>("/gazebo_battery_monitor/battery_remaining", 10);
+  ros::Publisher battery_voltage_pub = nh.advertise<std_msgs::Float64>("//gazebo_battery_monitor/battery_voltage", 10);
+  ros::Publisher charge_current_pub = nh.advertise<std_msgs::Float64>("/gazebo_battery_monitor/charge_current", 10);
   
   std_msgs::Float64 battery_remaining;
   std_msgs::Float64 battery_voltage;
   std_msgs::Float64 charge_current;
+
+  bool once_flag = true;
+  nh.getParam("/jbd_battery_monitor/once_flag", once_flag);  //launchから起動すること
+  ROS_INFO("once_flag %d", once_flag);
 
   Serial_Communication serial_comminication;
   if(serial_comminication.serial_initialize()){
@@ -46,10 +50,12 @@ int main(int argc, char **argv){
   serial_comminication.updateBatteryStatus(battery_status_); 
 
   int count = 0;
+  int loop_time = 0;
   while(ros::ok()){
     count = 0;
     while(!serial_comminication.serial_read()){
       count++;
+      //continue;
     }
 
   // 値を読み込むのは1Hz
@@ -63,6 +69,11 @@ int main(int argc, char **argv){
 
     ros::spinOnce();
     loop_rate.sleep();
+
+    if(once_flag && loop_time >10){
+      break;
+    }
+    loop_time++;
 
   }
   return 0;

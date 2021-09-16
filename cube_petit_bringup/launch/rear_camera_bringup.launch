@@ -4,7 +4,7 @@
   <group ns="/rear_camera/rear_camera">
     <!-- launch カメラ -->>
     <node pkg="uvc_camera" type="uvc_camera_node" name="usb_camera_node">
-        <param name="device" type="string" value="/dev/video1"/>
+        <param name="device" type="string" value="/dev/video0"/>
         <param name="pixel_format" value="YUYV"/>
         <param name="camera_frame_id" value="rear_camera"/>
         <param name="io_method" value="mmap"/>

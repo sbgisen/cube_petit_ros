@@ -33,7 +33,8 @@ void Move_Base_Action_Client::goAhead1(){
 
 int Move_Base_Action_Client::setAndSendGoal(move_base_msgs::MoveBaseGoal goal, int duration){
   ROS_INFO("Move_Base_Action_Client::setAndSendGoal");
-  goal_.target_pose.header.frame_id = "map";
+
+  goal_.target_pose.header.frame_id = goal.target_pose.header.frame_id;
   goal_.target_pose.header.stamp = ros::Time::now();
   goal_.target_pose.pose.position = goal.target_pose.pose.position;
   goal_.target_pose.pose.position.z = 0;

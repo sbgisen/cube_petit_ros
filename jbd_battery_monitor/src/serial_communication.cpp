@@ -26,7 +26,7 @@ int Serial_Communication::serial_parse(std::vector<uint8_t>& data){
 
   // Get Whole Volume, Current, Remaining
   if(data[1] == 0x03){
-    ROS_INFO("Serial_Communication::serial_parse::Battery Data");
+    ROS_DEBUG("Serial_Communication::serial_parse::Battery Data");
     uint16_t battery_voltage_16   = data[4] << 8 | data[5];
     int16_t charge_current_16    = data[6] << 8 | data[7];
     uint16_t battery_remaining_16 = data[8] << 8 | data[9];

@@ -48,5 +48,5 @@ diff_drive_controller:
     cmd_vel_timeout: 0.25
     # Base frame_id
     base_frame_id: base_link
-    odom_frame_id: /odom_2d
+    odom_frame_id: /odom
     # enable_odom_tf: false

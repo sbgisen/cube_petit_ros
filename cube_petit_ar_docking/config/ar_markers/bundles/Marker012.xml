@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <multimarker markers="3">
-    <marker index="0" status="1">
+    <!-- <marker index="0" status="1">
         <corner x="-7.5" y="2.5" z="0" />
         <corner x="-2.5" y="2.5" z="0" />
         <corner x="-2.5" y="7.5" z="0" />
@@ -17,6 +17,24 @@
         <corner x="7.5" y="-7.5" z="0" />
         <corner x="7.5" y="-2.5" z="0" />
         <corner x="2.5" y="-2.5" z="0" />
+    </marker> -->
+    <marker index="0" status="1">
+        <corner x="-5.0" y="1.7" z="0" />
+        <corner x="-1.7" y="1.7" z="0" />
+        <corner x="-1.7" y="5.0" z="0" />
+        <corner x="-5.0" y="5.0" z="0" />
+    </marker>
+    <marker index="1" status="1">
+        <corner x="1.7" y="1.7" z="0" />
+        <corner x="5.0" y="1.7" z="0" />
+        <corner x="5.0" y="5.0" z="0" />
+        <corner x="1.7" y="5.0" z="0" />
+    </marker>
+    <marker index="2" status="1">
+        <corner x="1.7" y="-5.0" z="0" />
+        <corner x="5.0" y="-5.0" z="0" />
+        <corner x="5.0" y="-1.7" z="0" />
+        <corner x="1.7" y="-1.7" z="0" />
     </marker>
 </multimarker>
 		

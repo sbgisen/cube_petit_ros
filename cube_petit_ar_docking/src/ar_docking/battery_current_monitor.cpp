@@ -42,13 +42,23 @@ int Battery_Current_Monitor::is_charging(){
   ROS_INFO("Battery_Current_Monitor::is_charging");
   if(!current_deque.empty()){
     for(int i=0; i<current_deque.size(); i++){
-      if(current_deque[i] <= 0.0){
+      if(current_deque[i] < 0.0){
         is_charging = 0;
         return is_charging;
       }
     }
     is_charging = 1;
   }
+
+  // if(!voltage_deque.empty()){
+  //   for(int i=0; i<voltage_deque.size(); i++){
+  //     if(voltage_deque[i] <= solar_voltage_min){
+  //       is_charging = 0;
+  //       return is_charging;
+  //     }
+  //   }
+  //   is_charging = 1;
+  // }
 
   return is_charging;
 }

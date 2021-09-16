@@ -45,6 +45,7 @@
 # include "geometry_util.hpp"
 # include "speech_util.hpp"
 
+#include <visualization_msgs/Marker.h>
 
 class AR_Docking_Controller {
 private:
@@ -52,6 +53,8 @@ private:
   ros::Publisher cmd_vel_pub;
   ros::Publisher connector_distance_pub;
   geometry_msgs::Twist twist;
+  ros::Publisher marker_pub;
+  ros::Publisher robot_heading_marker_pub, ar_heading_marker_pub, ar_nearest_marker_pub;
 
   // その他変数
   double undock_sec;    //アンドックする時間
@@ -86,11 +89,14 @@ private:
   int turnInPlace(double theta_offset);
   void convertPoseStamped2MoveBaseGoal(move_base_msgs::MoveBaseGoal &goal, geometry_msgs::PoseStamped &pose_stamped);
   int lookTowardsMarker();
-  int tfMedian(bool init_flag);
+  int tfMedian(bool init_flag, std::string tf_in, std::string tf_out);
+  int tfMedianRun(int median_times, std::string tf_in, std::string tf_out);
   void dockingStationOffset(std::string ar_frame_in, std::string ar_frame_out);
   int checkTimeout(double distance_in, bool init_flag);
   int approachStationWithCurve();
   int detectDockingFailture();
+  visualization_msgs::Marker PointsToMarkerArrow(std::string frame_id_string, std::string color_string, geometry_msgs::Point start_point, geometry_msgs::Point end_point);
+
 
 public:
   AR_Docking_Controller(ros::NodeHandle nh);
@@ -119,6 +125,7 @@ public:
   double curve_vel;
   double curve_robot_connector_length;
   double curve_l0;
+  bool visualization_markers;
 
   //ros::Timer timer;
 };

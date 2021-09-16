@@ -2,8 +2,10 @@
 <launch>
 
 	<node pkg="lh_laser_driver" type="lh_laser_publisher" name="LH_laser_publisher" output="screen">
-		<param name="port" value="/dev/ttyPACECAT2_3.4.4"/>
+		<param name="port" value="/dev/ttyPACECAT"/>
 		<param name="frame_id" value="pacecat_link"/>
 		<remap from="scan" to="/pacecat/scan"/>
 	</node>
+
+	
 </launch>

@@ -53,7 +53,7 @@ int AR_Docking_Controller::goToPregoal(){
   tf::StampedTransform map2pregoal;
   geometry_msgs::TransformStamped map2pregoal_msgs;
   try{
-    map2pregoal_msgs = tfBuffer_.lookupTransform("map", "pregoal", ros::Time(0));
+    map2pregoal_msgs = tfBuffer_.lookupTransform(map_frame, "pregoal", ros::Time(0));
     is_map2pregoal = true;
   }
   catch (tf::TransformException ex){
@@ -68,7 +68,7 @@ int AR_Docking_Controller::goToPregoal(){
 
   //<geometry_msgs::TransformStamped>から<geometry_msgs::PoseStamped>に変換
   geometry_msgs::PoseStamped poseStamped;
-  geometry_util.convertTransform2Posestamped(poseStamped, "map", ros::Time(0),map2pregoal_msgs.transform);
+  geometry_util.convertTransform2Posestamped(poseStamped, map_frame, ros::Time(0),map2pregoal_msgs.transform);
   move_base_msgs::MoveBaseGoal goal;
   goal.target_pose = poseStamped;
 
@@ -95,6 +95,7 @@ int AR_Docking_Controller::docking(){
     ROS_WARN("goToPregoal is failed...retry is 5s");
     ros::Duration(5.0).sleep();
   }
+  sleep(1.0);
   // ARマーカーが見つかるか確認("ar_marker_0")
   try{
     tfBuffer_.lookupTransform("ar_marker_0", "base_link", ros::Time::now() ,ros::Duration(10));
@@ -106,13 +107,18 @@ int AR_Docking_Controller::docking(){
   }
   // 1: ARマーカーの位置をPublishする
   ROS_INFO("---1: go to dock_start_position_0----------------");
-  dockingStationTfMap("ar_marker_0", "docking_station_from_map");
+  tfMedianRun(10, "ar_marker_0", "ar_marker_0_average");
+  dockingStationTfMap("ar_marker_0_average", "ar_marker_0_on_map");
   // ARマーカーから0.5m離れた位置に移動
   goToStation("dock_start_position_0", start0_distance);
 
+  sleep(1.0);
+
   // 2: もう一度ARマーカーの位置をPublishする
   ROS_INFO("---2: go to dock_start_position_1----------------");
-  double angle_between_robot_and_ar_normal_vector = dockingStationTfMap("ar_marker_0", "docking_station_from_map");
+
+  tfMedianRun(10, "ar_marker_0", "ar_marker_0_average");
+  double angle_between_robot_and_ar_normal_vector = dockingStationTfMap("ar_marker_0_average", "ar_marker_0_on_map");
   // コネクタとARマーカーの法線の角度が規定値以上ならば失敗
   if( angle_between_robot_and_ar_normal_vector > M_PI * (acceptable_angle_error / 180) ){
     ROS_WARN("angle_between_robot_and_ar_normal_vector is %f (accept under %f ) please retry", angle_between_robot_and_ar_normal_vector , M_PI * (acceptable_angle_error / 180));
@@ -123,36 +129,30 @@ int AR_Docking_Controller::docking(){
     ROS_WARN("goToStation is failed, please retry");
     return 1;
   }
+  sleep(0.2);
 
   // 3: 移動せずにマーカの方を見る
   ROS_INFO("---3: look towards marker ----------------");
   if(lookTowardsMarker()){
     ROS_WARN("lookTowardsMarker is failed, please retry");
+    return 1;
   }
+  sleep(0.8);
+
   // ロボットとARマーカーから垂直に出るベクトルの角度が規定値を越えてたら失敗
-  angle_between_robot_and_ar_normal_vector = dockingStationTfMap("ar_marker_0", "docking_station_from_map");
+  angle_between_robot_and_ar_normal_vector = dockingStationTfMap("ar_marker_0", "ar_marker_0_on_map");
   if( angle_between_robot_and_ar_normal_vector > M_PI * (acceptable_angle_error / 180) ){
     ROS_WARN("angle_between_robot_and_ar_normal_vector is %f (accept under %f ) please retry", angle_between_robot_and_ar_normal_vector , M_PI * (acceptable_angle_error / 180));
     return 1;
   }
 
   // 4: ARマーカーの位置の平均を取得？
+  // [TODO]見えなかった時に０からリスタートする
   ROS_INFO("---4: get ar marker average position"); 
-  if(tfMedian(1)){
-    ROS_WARN("tfMedian is failed. please retry");
-    return 1;
-  }
-  int while_roop = 0;
-  while(while_roop < 5){
-    if(tfMedian(0)){
-      ROS_WARN("tfMedian is failed. please retry");
-      return 1;
-    } 
-    dockingStationTfMap("ar_marker_0", "docking_station_from_map");
-    while_roop++;
-  }
+  tfMedianRun(10, "ar_marker_0", "ar_marker_0_average");
+  dockingStationTfMap("ar_marker_0_average", "ar_marker_0_on_map");
   // 充電ドックのコネクタの位置を"ar_average_ofs"
-  dockingStationOffset("ar_average", "ar_average_ofs");
+  dockingStationOffset("ar_marker_0_on_map", "ar_average_ofs");
 
   int reached_goal = battery_current_monitor.is_charging();
   int timeout = checkTimeout(0.0, true);
@@ -161,7 +161,7 @@ int AR_Docking_Controller::docking(){
 
   int while_loop = 0;
 
-  while(ros::ok() && docking_success_flag == false && while_loop < 500){
+  while(ros::ok() && docking_success_flag == false){
     while_loop++;
     ros::Duration(0.01).sleep();   //[TODO] param
     // [TODO] preempted ??
@@ -169,6 +169,8 @@ int AR_Docking_Controller::docking(){
     // 充電ドッグに向かって突進する
     timeout = approachStationWithCurve();
     reached_goal = battery_current_monitor.is_charging();
+
+    ROS_INFO("*** timeout: %d, is_charging: %d", timeout, reached_goal);
 
     if(!reached_goal){  failed = detectDockingFailture();}
 
@@ -216,7 +218,7 @@ int AR_Docking_Controller::docking(){
 int AR_Docking_Controller::detectDockingFailture(){
   ROS_INFO("AR_Docking_Controller::detectDockingFailture");
   std::string tf_ar="ar_average_ofs";
-  std::string tf_map="map";
+  std::string tf_map = map_frame;
   std::string tf_robot="connector_link";
   double detect_distance = 0.1;
 
@@ -260,13 +262,64 @@ int AR_Docking_Controller::detectDockingFailture(){
   return 0;
 
 }
+
+visualization_msgs::Marker AR_Docking_Controller::PointsToMarkerArrow(std::string frame_id_string, std::string color_string, geometry_msgs::Point start_point, geometry_msgs::Point end_point){
+  ROS_INFO("visualization_msgs::Marker AR_Docking_Controller::PointsToMarkerArrow");
+
+  visualization_msgs::Marker return_marker;
+
+  return_marker.header.stamp = ros::Time::now();
+  return_marker.header.frame_id = frame_id_string;
+  return_marker.ns = "PointsToMarkerArrow";
+  return_marker.id = 0;
+
+  return_marker.lifetime = ros::Duration();
+
+  return_marker.type = visualization_msgs::Marker::ARROW;
+  return_marker.action = visualization_msgs::Marker::ADD;
+
+  geometry_msgs::Vector3 arrow;  // config arrow shape
+  arrow.x = 0.02;
+  arrow.y = 0.04;
+  arrow.z = 0.1;
+  return_marker.scale = arrow;
+
+  return_marker.points.resize(2);
+  return_marker.points[0] = start_point;
+  return_marker.points[1] = end_point;
+
+  return_marker.color.r = 0.0f;
+  return_marker.color.g = 0.0f;
+  return_marker.color.b = 0.0f;
+  return_marker.color.a = 1.0f;
+
+  if(color_string == "b" || color_string == "blue"){
+    return_marker.color.b = 1.0f;
+  }else if(color_string == "r" || color_string == "red"){
+    return_marker.color.r = 1.0f;
+  }else if(color_string == "g" || color_string == "green"){
+    return_marker.color.g = 1.0f;
+  }else if(color_string == "w" || color_string == "white"){
+    return_marker.color.g = 0.0f;
+  }else{
+    return_marker.color.r = 1.0f;
+    return_marker.color.g = 1.0f;
+    return_marker.color.b = 1.0f;
+
+  }
+
+  return return_marker;
+}
+
+
+
 ////////////////////////////////////////////////////
 //
 ////////////////////////////////////////////////
 int AR_Docking_Controller::approachStationWithCurve(){
   ROS_INFO("AR_Docking_Controller::approachStationWithCurve");
   std::string tf_ar="ar_average_ofs";     //充電ドックのコネクタ位置
-  std::string tf_map="map";           
+  std::string tf_map= map_frame;           
   std::string tf_robot="base_link_reverse"; //base_link_reverse //connector_link
 
   // ??
@@ -327,6 +380,7 @@ int AR_Docking_Controller::approachStationWithCurve(){
        pow(sin(M_PI + theta_0), 2) - target_from_robot.pose.position.y * sin(M_PI + theta_0) * cos(M_PI + theta_0);
     nearest_point.point.y = - target_from_robot.pose.position.x * 
                 sin(M_PI + theta_0) * cos(M_PI + theta_0) + target_from_robot.pose.position.y * pow(cos(M_PI + theta_0), 2);
+    
     ROS_INFO("  nearest point: x[%f], y[%f]", nearest_point.point.x, nearest_point.point.y);
 
     // double tmp_x = tan(theta_0) * ( tan(theta_0) * target_from_robot.pose.position.x - target_from_robot.pose.position.y);
@@ -339,6 +393,55 @@ int AR_Docking_Controller::approachStationWithCurve(){
     heading_point.point.x = (nearest_point.point.x + len_curve_heading * cos(theta_0));
     heading_point.point.y = (nearest_point.point.y + len_curve_heading * sin(theta_0));
     ROS_INFO("  heading point: x[%f], y[%f]", heading_point.point.x, heading_point.point.y);
+
+    geometry_msgs::Point point_zero;
+    point_zero.x = 0;
+    point_zero.y = 0;
+    point_zero.z = 0;
+
+    geometry_msgs::TransformStamped tf_robot2connector;
+    try{
+      tf_robot2connector = tfBuffer_.lookupTransform(tf_robot, "connector_link", ros::Time(0));
+    }catch (tf2::TransformException &ex) {
+      ROS_WARN("%s",ex.what());
+    }
+    geometry_msgs::Point connector2heading_point; //robot2connector
+    connector2heading_point.x = tf_robot2connector.transform.translation.x;
+    connector2heading_point.y = tf_robot2connector.transform.translation.y;
+    connector2heading_point.z = 0;
+
+    visualization_msgs::Marker marker = PointsToMarkerArrow("/base_link_reverse", "b", connector2heading_point, heading_point.point);
+    robot_heading_marker_pub.publish(marker);
+   
+    geometry_msgs::TransformStamped tf_station2robot;
+    geometry_msgs::TransformStamped tf_station2nearest;
+
+    try{
+      tf_station2robot = tfBuffer_.lookupTransform(tf_ar, tf_robot, ros::Time(0));
+    }catch (tf2::TransformException &ex) {
+      ROS_WARN("%s",ex.what());
+    }
+    tf_station2nearest = tf_station2robot;
+    tf_station2nearest.transform.translation.y = 0;
+
+
+
+    geometry_msgs::Point ar2heading;
+    ar2heading.x = tf_station2robot.transform.translation.x;
+    ar2heading.y = tf_station2robot.transform.translation.y;
+    ar2heading.z = 0;
+
+    geometry_msgs::Point ar2nearest;
+    ar2nearest.x = tf_station2nearest.transform.translation.x;
+    ar2nearest.y = tf_station2nearest.transform.translation.y;
+    ar2nearest.z = 0;
+    
+
+    marker = PointsToMarkerArrow("/ar_average_ofs", "g", point_zero, ar2heading);
+    ar_heading_marker_pub.publish(marker);
+   
+    marker = PointsToMarkerArrow("/ar_average_ofs", "r", point_zero, ar2nearest);
+    ar_nearest_marker_pub.publish(marker);
 
     geometry_msgs::Twist target_vel;
 
@@ -362,9 +465,9 @@ int AR_Docking_Controller::approachStationWithCurve(){
 //
 ////////////////////////////////////////////////
 int AR_Docking_Controller::checkTimeout(double distance_in, bool init_flag){
-  double timer_start_distance = 0.2;
+  double timer_start_distance = 0.05;
   double velocity = curve_vel;
-  double time_ofs = 0.5;  //0.5
+  double time_ofs = 0.5;  //0.5 5.5
   double distance_tmp = distance_in;
   
   if(init_flag){
@@ -392,10 +495,30 @@ int AR_Docking_Controller::checkTimeout(double distance_in, bool init_flag){
 ////////////////////////////////////////////////////
 // ARマーカを5回見て中央値をＡＲマーカの位置として"ar_average"フレームをbroadcastする
 ////////////////////////////////////////////////
-int AR_Docking_Controller::tfMedian(bool init_flag){
-  std::string tf_ar         = "docking_station_from_map";
-  std::string tf_map        = map_frame; //or "map"
-  std::string tf_ar_average = "ar_average";
+
+int AR_Docking_Controller::tfMedianRun(int median_times, std::string tf_in, std::string tf_out){
+
+  if(tfMedian(1, tf_in, tf_out)){
+    ROS_WARN("tfMedian is failed. please retry");
+    return 1;
+  }
+  int while_roop = 0;
+  while(while_roop < median_times){
+    if(tfMedian(0, tf_in, tf_out)){
+      ROS_WARN("tfMedian is failed. please retry");
+      return 1;
+    } 
+    while_roop++;
+  }
+
+  return 0;
+}
+
+int AR_Docking_Controller::tfMedian(bool init_flag, std::string tf_in, std::string tf_out){
+  std::string tf_ar         = tf_in;
+  std::string tf_camera     = "rear_camera_optical_link";
+  std::string tf_map        = map_frame;
+  std::string tf_ar_average = tf_out;
   
   if(init_flag == 1){
     outlier_removal_list_counter = 0;
@@ -409,11 +532,13 @@ int AR_Docking_Controller::tfMedian(bool init_flag){
   geometry_msgs::TransformStamped tmp_ts;
   // tf::StampedTransform tmp_ts_tf;
   try{
-    tfBuffer_.lookupTransform(tf_ar, tf_ar, ros::Time::now(), ros::Duration(5.0));
+
+    tfBuffer_.lookupTransform(tf_ar, tf_camera, ros::Time::now(), ros::Duration(5.0));
     tmp_ts = tfBuffer_.lookupTransform(tf_map, tf_ar, ros::Time(0));
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
+    ROS_INFO("どうにかする");
     return 1;
   }
   // <tf::StampedTransform>型から<geometry_msgs::TransformStamped>型に変換する
@@ -505,7 +630,7 @@ void AR_Docking_Controller::dockingStationOffset(std::string ar_frame_in, std::s
 
 
 ///////////////////////////////////////////////////////////////
-//"docking_station_from_map"をpublishする
+//"ar_marker_0_on_map"をpublishする
 ///////////////////////////////////////////////////////////////
 double AR_Docking_Controller::dockingStationTfMap(std::string frame_in_name, std::string frame_out_name){
   geometry_msgs::PointStamped map_to_ar_pointStamped;
@@ -562,20 +687,21 @@ double AR_Docking_Controller::dockingStationTfMap(std::string frame_in_name, std
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-// 充電ドッグ"docking_station_from_map"から double distance_from_station[m]だけ指定した距離分離れた場所に移動する
+// 充電ドッグ"ar_marker_0_on_map"から double distance_from_station[m]だけ指定した距離分離れた場所に移動する
 // "dock_start_position_0", "dock_start_position_1"をPublishする
 /////////////////////////////////////////////////////////////////////////////////////
 int AR_Docking_Controller::goToStation(std::string tf_start_position, double distance_from_station){
   ROS_INFO("AR_Docking_Controller::goToStation(%s, %f)", tf_start_position.c_str(), distance_from_station);
 
-  std::string tf_ar = "docking_station_from_map";
+  std::string tf_ar = "ar_marker_0_on_map";
   std::string tf_map = map_frame;
-  // "docking_station_from_map"から"map_frame"のTFを待つ
+  // "ar_marker_0_on_map"から"map_frame"のTFを待つ
   try{
     tfBuffer_.lookupTransform(tf_ar, map_frame, ros::Time::now() ,ros::Duration(3));
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
+    return 0;
   }
 
   geometry_msgs::PointStamped ar_origin;          //ARマーカの位置
@@ -593,6 +719,7 @@ int AR_Docking_Controller::goToStation(std::string tf_start_position, double dis
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
+    return 0;
   }
   ROS_INFO("origin:trans_xyz: %f, %f, %f", ar_origin_on_map.point.x, ar_origin_on_map.point.y, ar_origin_on_map.point.z);
 
@@ -607,19 +734,23 @@ int AR_Docking_Controller::goToStation(std::string tf_start_position, double dis
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
+    return 0;
   }
   ROS_INFO("normal:trans_xyz: %f, %f, %f", ar_normal_on_map.point.x, ar_normal_on_map.point.y, ar_normal_on_map.point.z);
 
   // 
   geometry_msgs::PointStamped target_position;
   geometry_msgs::PointStamped target_on_map;   // map_frameからみた目標位置
-  geometry_util.setPoint(tmp_point, distance_from_station, 0, 0);
+  geometry_util.setPoint(tmp_point, distance_from_station + station_offset_x, station_offset_y, 0);
+  
+
   geometry_util.setPointStamped(target_position, tf_ar, ros::Time(0), tmp_point);
   try{
     tfBuffer_.transform(target_position, target_on_map, map_frame);
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
+    return 0;
   }
 
   // 2点の位置からmap_frameからみたＡＲマーカーの角度を計算する
@@ -722,7 +853,7 @@ void AR_Docking_Controller::convertPoseStamped2MoveBaseGoal(move_base_msgs::Move
 //////////////////////////////////////////////////////////////////
 int AR_Docking_Controller::turnInPlace(double theta_offset){
   try{
-    tfBuffer_.lookupTransform("base_link", map_frame, ros::Time::now() ,ros::Duration(3));
+    tfBuffer_.lookupTransform("base_link", "map", ros::Time::now() ,ros::Duration(3));
   }
   catch (tf::TransformException ex){
     ROS_ERROR("%s",ex.what());
@@ -776,19 +907,26 @@ AR_Docking_Controller::AR_Docking_Controller(ros::NodeHandle nh):
   
   cmd_vel_pub= nh.advertise<geometry_msgs::Twist>("/cube_petit/diff_drive_controller/cmd_vel", 10);
   connector_distance_pub= nh.advertise<geometry_msgs::PoseStamped>("/distance_between_connector", 1);
+  
+  robot_heading_marker_pub = nh.advertise<visualization_msgs::Marker>("robot_heading_marker", 1);
+  ar_heading_marker_pub = nh.advertise<visualization_msgs::Marker>("ar_heading_marker", 1);
+  ar_nearest_marker_pub = nh.advertise<visualization_msgs::Marker>("ar_nearest_marker", 1);
 
-  nh.getParam("/ar_docking/undock_velocity", undock_velocity);  //launchから起動すること
-  nh.getParam("/ar_docking/undock_distance", undock_distance);  //launchから起動すること
-  nh.getParam("/ar_docking/robot_connector_frame", robot_connector_frame);
-  nh.getParam("/ar_docking/map_frame", map_frame);
-  nh.getParam("/ar_docking/start0_distance",start0_distance);
-  nh.getParam("/ar_docking/start1_distance",start1_distance);
-  nh.getParam("/ar_docking/acceptable_angle_error", acceptable_angle_error);
-  nh.getParam("/ar_docking/station_offset_x", station_offset_x);
-  nh.getParam("/ar_docking/station_offset_y", station_offset_y);
-  nh.getParam("/ar_docking/curve_vel", curve_vel);
-  nh.getParam("/ar_docking/curve_robot_connector_length", curve_robot_connector_length);
-  nh.getParam("/ar_docking/curve_l0", curve_l0);
+
+  nh.getParam("undock_velocity", undock_velocity);  //launchから起動すること
+  nh.getParam("undock_distance", undock_distance);  //launchから起動すること
+  nh.getParam("robot_connector_frame", robot_connector_frame);
+  nh.getParam("map_frame", map_frame);
+  nh.getParam("start0_distance",start0_distance);
+  nh.getParam("start1_distance",start1_distance);
+  nh.getParam("acceptable_angle_error", acceptable_angle_error);
+  nh.getParam("station_offset_x", station_offset_x);
+  nh.getParam("station_offset_y", station_offset_y);
+  nh.getParam("curve_vel", curve_vel);
+  nh.getParam("curve_robot_connector_length", curve_robot_connector_length);
+  nh.getParam("curve_l0", curve_l0);
+
+  nh.getParam("visualization_markers", visualization_markers);
 
   undock_sec = undock_distance/undock_velocity;  //10秒かけてアンドックする
   ROS_INFO("undock_sec is %f", undock_sec);

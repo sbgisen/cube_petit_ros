@@ -43,7 +43,7 @@
     </include>
 
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model cube_petit -x 1 -y -2.5" />
-    <node name="spawn_urdf2" pkg="gazebo_ros" type="spawn_model" args="-param robot_description2 -urdf -model cube_petit_charge_doc -x 0 -y -2.5" />
+    <!-- <node name="spawn_urdf2" pkg="gazebo_ros" type="spawn_model" args="-param robot_description2 -urdf -model cube_petit_charge_doc -x 0 -y -2.5" /> -->
 
 
     <!-- load controller_manager and robot_state_publisher -->

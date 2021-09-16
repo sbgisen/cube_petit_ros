@@ -195,10 +195,7 @@ bool Docking_Station_Simulation::validateDocking(geometry_msgs::PoseStamped robo
 
   //absにintが返されるので違う気がする
   float ang_diff_temp = quaternion2yaw(anguler_diff_quaternion);
-  if(ang_diff_temp < 0.0){
-    ang_diff_temp = ang_diff_temp * (-1.0);
-  }
-  float anguler_diff = ang_diff_temp;
+  float anguler_diff = fabs(ang_diff_temp);
   bool docking_flag = false;
 
   // ROS_INFO("yaw: %f", quaternion2yaw(anguler_diff_quaternion));

@@ -1,6 +1,8 @@
 # Planner selection
 base_global_planner: "navfn/NavfnROS"
-base_local_planner: "base_local_planner/TrajectoryPlannerROS"
+# base_local_planner: "base_local_planner/TrajectoryPlannerROS"
+base_local_planner: "teb_local_planner/TebLocalPlannerROS"
+
 
 # Recovery behaviors are defined in robot folders
 
@@ -9,8 +11,8 @@ oscillation_timeout: 10.0
 oscillation_distance: 0.5
 
 # Local planner
-controller_frequency: 5.0 #10.0
-controller_patience: 5.0
+controller_frequency: 10.0 #10.0
+controller_patience: 3.0
 max_planning_retries: 5
 
 # Global planner
@@ -37,10 +39,10 @@ TrajectoryPlannerROS:
   acc_lim_y: 0.0
   acc_lim_theta: 0.8
   max_vel_x: 0.4
-  min_vel_x: 0.01
+  min_vel_x: 0.01 # 0.01
   max_vel_theta: 1.0
   min_vel_theta: -1.0
-  min_in_vel_place_theta: 0.5
+  min_in_vel_place_theta: 0.4 # 0.5 (21/04/14)
 
   # base vel/accel profile is in robot folders
   # tolerances (defaults)
@@ -56,7 +58,7 @@ TrajectoryPlannerROS:
   pdist_scale: 1.45
   gdist_scale: 1.9 #1.2 #0.4 #6.0
   occdist_scale: 0.1 # 0.06 #0.6
-  oscillation_reset_dist: 0.15
+  oscillation_reset_dist: 0.15 # 0.15
   escape_reset_dist: 0.05
   escape_reset_theta: 0.025
 
@@ -108,3 +110,130 @@ car_maneuver_recovery:
   timeout: 5.0
   display_costs: True
   extra_footprint_padding: 0.2
+
+
+TebLocalPlannerROS:
+ odom_topic: /cube_petit/diff_drive_controller/odom
+ map_frame: /odom
+
+ # Trajectory
+ teb_autosize: True # naze
+ dt_ref: 0.45 # 0.1 # 2021/07/16 #0.3        # zikan bunkai nou
+ dt_hysteresis: 0.1 # 0.01  # 2021/07/16 # suidyou ha dt_ref no 10%
+ global_plan_overwrite_orientation: False # True  # 2021/07/16
+ max_global_plan_lookahead_dist: 3.0    #global_plan subset max length
+ feasibility_check_no_poses: 5 # 0  # 2021/07/16
+ allow_init_with_backwards_motion: True
+
+ # Robot
+ max_vel_x: 0.2
+ max_vel_x_backwards: 0.2
+ max_vel_theta: 0.5
+ acc_lim_x: 0.1 # 0.05
+ acc_lim_theta: 3.0 # 2.0
+ min_turning_radius: 0.1  # if NON car-like, set 0.0
+ wheelbase: 0.1           # car-like Only
+ footprint_model:
+   type: "polygon"
+   vertices: [[-0.11, 0.11], [0.11, 0.11], [0.11, -0.11], [-0.11, -0.11]] # for type "polygon"
+
+ # GoalTolerance
+ xy_goal_tolerance: 0.05
+ yaw_goal_tolerance: 0.2
+ free_goal_vel: False       # If True, set max speed to reach goal
+ complete_global_plan: True # nazo  #(2021/07/16)  add
+    
+ # Obstacles   
+ min_obstacle_dist: 0.2
+ inflation_dist: 0.2
+ include_costmap_obstacles: True
+ costmap_obstacles_behind_robot_dist: 1.0
+ obstacle_poses_affected: 15  #30  # 2021/07/16  # CPU up
+ costmap_converter_plugin: ""
+ costmap_converter_spin_thread: True
+ costmap_converter_rate: 5
+#  include_dynamic_obstacles: True # 2021/07/16 add
+#  dynamic_obstacle_inflation_dist: 0.4 # 2021/07/16 add
+ 
+# Optimization
+ no_inner_iterations: 5
+ no_outer_iterations: 4
+ optimization_activate: True
+ optimization_verbose: False
+ penalty_epsilon: 0.09
+ obstacle_cost_exponent: 4
+ weight_max_vel_x: 2
+ weight_max_vel_theta: 1
+ weight_acc_lim_x: 1
+ weight_acc_lim_theta: 1
+ weight_kinematics_nh: 1000
+ weight_kinematics_forward_drive: 1
+ weight_kinematics_turning_radius: 1
+ weight_optimaltime: 1 # must be > 0
+ weight_shortest_path: 0
+ weight_obstacle: 100
+ weight_inflation: 0.2
+ weight_dynamic_obstacle: 10 # not in use yet
+ weight_dynamic_obstacle_inflation: 0.2
+ weight_viapoint: 1
+ weight_adapt_factor: 2
+
+#  no_inner_iterations: 3
+#  no_outer_iterations: 3
+#  optimization_activate: True
+#  optimization_verbose: False
+#  penalty_epsilon: 0.01
+#  weight_max_vel_x: 2
+#  weight_max_vel_theta: 1
+#  weight_acc_lim_x: 1
+#  weight_acc_lim_theta: 1
+#  weight_kinematics_nh: 1000
+#  weight_kinematics_forward_drive: 1
+#  weight_kinematics_turning_radius: 1
+#  weight_optimaltime: 1
+#  weight_obstacle: 50
+#  weight_dynamic_obstacle: 10 # not in use yet
+#  alternative_time_cost: False # not in use yet
+
+# Homotopy Class Planner
+
+ enable_homotopy_class_planning: False
+ enable_multithreading: True
+ max_number_classes: 4
+ selection_cost_hysteresis: 1.0
+ selection_prefer_initial_plan: 0.95
+ selection_obst_cost_scale: 1.0
+ selection_alternative_time_cost: False
+ roadmap_graph_no_samples: 15
+ roadmap_graph_area_width: 5
+ roadmap_graph_area_length_scale: 1.0
+ h_signature_prescaler: 0.5
+ h_signature_threshold: 0.1
+ obstacle_heading_threshold: 0.45
+ switching_blocking_period: 0.0
+ viapoints_all_candidates: True
+ delete_detours_backwards: True
+ max_ratio_detours_duration_best_duration: 3.0
+ visualize_hc_graph: False
+ visualize_with_time_as_z_axis_scale: False
+
+#  enable_homotopy_class_planning: True # heiretu syori increase cpu
+#  enable_multithreading: True  # multi thread
+#  simple_exploration: False
+#  max_number_classes: 4
+#  roadmap_graph_no_samples: 15
+#  roadmap_graph_area_width: 5
+#  h_signature_prescaler: 0.5
+#  h_signature_threshold: 0.1
+#  obstacle_keypoint_offset: 0.1
+#  obstacle_heading_threshold: 0.45
+#  visualize_hc_graph: False
+
+# Recovery
+ shrink_horizon_backup: True
+ shrink_horizon_min_duration: 10
+ oscillation_recovery: False
+ oscillation_v_eps: 0.1
+ oscillation_omega_eps: 0.1
+ oscillation_recovery_min_duration: 10
+ oscillation_filter_duration: 10

@@ -10,6 +10,11 @@
 		<include>
 			<uri>model://house</uri>			
 		</include>
+		<actor name="actor">
+      	<skin>
+       	 <filename>stand.dae</filename>
+      	</skin>
+    </actor>
 		<physics type='ode'>
 			<max_step_size>0.001</max_step_size>
 			<real_time_factor>1</real_time_factor>

@@ -1,0 +1,16 @@
+# Service for calling text-to-speech server
+
+# string item to be spoken
+string speech_text
+
+# method of speech
+# needs to be one of the following
+# - jtalk
+# - google
+string speech_method
+string emotion
+int32 emotion_level
+int32 pitch
+int32 speed
+---
+bool result

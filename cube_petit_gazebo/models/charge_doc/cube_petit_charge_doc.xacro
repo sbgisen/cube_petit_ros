@@ -6,9 +6,9 @@ As a workaround, you can add an extra dummy link to your URDF. -->
 
 
 <robot name="charge_doc" xmlns:xacro="http://ros.org/wiki/xacro">
-  <link name="base_link"/>
+  <link name="station_base_link"/>
   <joint name="base_joint" type="fixed">
-    <parent link="base_link"/>
+    <parent link="station_base_link"/>
     <child link="charge_doc_base_link"/>
   </joint>
   
@@ -66,7 +66,7 @@ As a workaround, you can add an extra dummy link to your URDF. -->
 
 
   <!-- Gazebo Physical Parameters -->
-  <gazebo reference="charge_doc_base_link">
+  <gazebo reference="station_base_link">
     <!-- <kp>100000.0</kp>
     <kd>100.0</kd>
     <mu1>1000</mu1>
@@ -83,7 +83,7 @@ As a workaround, you can add an extra dummy link to your URDF. -->
     <!-- Publish position topic (which is used in simulation of charging station) -->
     <plugin name="publish_station_pose" filename="libgazebo_ros_p3d.so">
       <frameName>world</frameName>
-      <bodyName>charge_doc_base_link</bodyName>
+      <bodyName>station_base_link</bodyName>
       <topicName>/gazebo/docking_station_simulation/station_pose</topicName>
       <updateRate>30.0</updateRate>
     </plugin>

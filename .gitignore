@@ -10,3 +10,5 @@ cube_petit/map/cube_petit/old/
 *.swp
 
 cube_petit/map/cube_petit/
+
+.vscode/

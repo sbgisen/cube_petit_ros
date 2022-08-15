@@ -1,0 +1,26 @@
+/map_info:
+  test_int: 1
+#  charging_station_pose: [-0.290, -0.029, 0.000, 0.000, 0.000, -0.040, 0.999]
+#  charging_station_pose: [-1.683, -0.028, 0.000, 0.000, 0.000, 0.692, 0.722]
+  charging_station_pose: [-1.987, -0.543, 0.000, 0.000, 0.000, 0.714, 0.700]
+  # charging_station_pose: [-1.995, -0.318, 0.000, 0.000, 0.000, 0.705, 0.709]
+undock_distance: 0.4 #終わったあと離れる距離
+undock_velocity: 0.1 #終わったあと離れる速さ
+
+robot_connector_frame: "connector_link" # コネクタのフレーム名
+map_frame: "odom" # map
+
+start0_distance: 0.5 # 0.4 (2021/07/13)
+start1_distance: 0.3 # 0.25 (2021/07/13)
+
+# 許容誤差、角度 (degree)
+acceptable_angle_error: 100.0
+
+station_offset_x: 0.068 #充電ステーションがARマーカから見てどれくらい前の位置に有るか
+station_offset_y: -0.0075 #充電ステーションがARマーカから見てどれくらい左の位置に有るか
+
+curve_robot_connector_length: 0.11 #ロボットの中心からコネクタ(の先端)までの距離[m]
+curve_l0: 0.12 #突進時のカーブの曲率を調整するパラメータ。大きいほどカーブが緩やか：精度→下、安定性→上
+curve_vel: 0.06 #velocity[m/s]:(コネクタの)突入速度
+
+visualization_markers: true # デバッグ用：curve関数の内部変数を表示する

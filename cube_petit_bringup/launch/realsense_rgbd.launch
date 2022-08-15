@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+    <include file="$(find cube_petit_bringup)/launch/rs_rgbd.launch">
         <remap from="depth_registered/points" to="points"/>
         <remap from="color/image_raw" to="points"/>
     </include>

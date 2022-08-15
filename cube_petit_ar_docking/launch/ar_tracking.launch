@@ -20,4 +20,13 @@
   args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) 
   $(arg camera_image) $(arg camera_info) $(arg output_frame) $(arg bundle_files)"/>
 
+  <!-- <node pkg="rostopic" type="rostopic" name="battery_remaining" args="pub -r 20 /gazebo_battery_monitor/battery_remaining std_msgs/Float64 9.0"  output="screen" />
+  <node pkg="rostopic" type="rostopic" name="battery_voltage" args="pub -r 20 /gazebo_battery_monitor/battery_voltage std_msgs/Float64 13.0"  output="screen"/>
+  <node pkg="rostopic" type="rostopic" name="charge_current" args="pub -r 20 /gazebo_battery_monitor/charge_current std_msgs/Float64 1.0"  output="screen"/>
+ -->
+  <node name="ar_docking_server" pkg="cube_petit_ar_docking" type="cube_petit_ar_docking_node" output="screen">
+    <rosparam command="load" file="$(find cube_petit_ar_docking)/config/docking/cube_petit.yaml"/>
+  </node> 
+  <include file="$(find cube_speech)/launch/speech_server.launch"/>
+
 </launch>

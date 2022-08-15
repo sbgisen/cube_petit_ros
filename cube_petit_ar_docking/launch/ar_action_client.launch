@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <node name="ar_docking_client" pkg="cube_petit_ar_docking" type="ar_docking_action_client.py" ns ="ar_docking_server" output="screen"/>
+</launch>

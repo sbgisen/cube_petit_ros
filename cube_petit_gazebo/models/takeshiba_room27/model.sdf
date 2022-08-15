@@ -1,0 +1,917 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='takeshiba_room27'>
+    <!-- +++++++++++++++++++++ WALL +++++++++++++++++++++++++++++++++++++ -->>
+    <link name='Wall_z1'>
+      <pose frame=''>-6 17 0 0 -0 0</pose>
+      <collision name='Wall_z1_Collision'>
+        <geometry>
+          <box>
+            <size>4 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z1_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>4 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z2'>
+      <pose frame=''>-9 16 0 0 -0 0</pose>
+      <collision name='Wall_z2_Collision'>
+        <geometry>
+          <box>
+            <size>2 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z2_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>2 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z3'>
+      <pose frame=''>1.875 15.5 0 0 -0 0</pose>
+      <collision name='Wall_z3_Collision'>
+        <geometry>
+          <box>
+            <size>2.25 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z3_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>2.25 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z4'>
+      <pose frame=''>-1.625 13.5 0 0 -0 0</pose>
+      <collision name='Wall_z4_Collision'>
+        <geometry>
+          <box>
+            <size>4.75 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z4_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>4.75 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z5'>
+      <pose frame=''>6.5 13.5 0 0 -0 0</pose>
+      <collision name='Wall_z5_Collision'>
+        <geometry>
+          <box>
+            <size>7 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z5_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>7 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <!-- pose:  壁の中心点 -->
+    <link name='Wall_z6'>
+      <pose frame=''>-7.75 10 0 0 -0 0</pose>
+      <collision name='Wall_z6_Collision'>
+        <geometry>
+          <box>
+            <size>4.65 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z6_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>4.65 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z7'>
+      <pose frame=''>-3 10 0 0 -0 0</pose>
+      <collision name='Wall_z7_Collision'>
+        <geometry>
+          <box>
+            <size>2 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z7_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>2 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z8'>
+      <pose frame=''>0 10 0 0 -0 0</pose>
+      <collision name='Wall_z8_Collision'>
+        <geometry>
+          <box>
+            <size>2 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z8_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>2 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z9'>
+      <pose frame=''>7.25 10 0 0 -0 0</pose>
+      <collision name='Wall_z9_Collision'>
+        <geometry>
+          <box>
+            <size>5.5 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z9_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>5.5 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_z10'>
+      <pose frame=''>0 -10 0 0 -0 0</pose>
+      <collision name='Wall_z10_Collision'>
+        <geometry>
+          <box>
+            <size>20 0.15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_z10_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>20 0.15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <!-- ***********************縦軸の壁**************************  -->
+    <link name='Wall_x1'>
+      <pose frame=''>-10 3 0 0 -0 0</pose>
+      <collision name='Wall_x1_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 26 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x1_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 26 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x2'>
+      <pose frame=''>-8 16.5 0 -0 0</pose>
+      <collision name='Wall_x2_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 1 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x2_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 1 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x3'>
+      <pose frame=''>-4 13.5 0 0 -0 0</pose>
+      <collision name='Wall_x3_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 7 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x3_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 7 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x4'>
+      <pose frame=''>-1 11.75 0 0 -0 0</pose>
+      <collision name='Wall_x4_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 3.5 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x4_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 3.5 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x5'>
+      <pose frame=''>3 12.75 0 0 -0 0</pose>
+      <collision name='Wall_x5_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 5.5 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x5_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 5.5 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x51'>
+      <pose frame=''>0.75 14.5 0 0 -0 0</pose>
+      <collision name='Wall_x51_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 2 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x51_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 2 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x6'>
+      <pose frame=''>10 11.75 0 0 -0 0</pose>
+      <collision name='Wall_x6_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 3.5 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x6_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 3.5 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x7'>
+      <pose frame=''>10 1 0 0 -0 0</pose>
+      <collision name='Wall_x7_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 15 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x7_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 15 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Wall_x8'>
+      <pose frame=''>10 -8.75 0 0 -0 0</pose>
+      <collision name='Wall_x8_Collision'>
+        <geometry>
+          <box>
+            <size>0.15 2.5 2.5</size>
+            <!-- collision geometry size: 長さ, 厚さ0.15m固定, 高さ2.5m固定 -->
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Wall_x8_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.15 2.5 2.5</size>
+            <!-- visual geometry pose: 高さの半分 -->
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+
+    <!-- 6POLES -->
+    <link name='Pole_1'>
+      <pose frame=''>-8.75 10 0 0 -0 0</pose>
+      <collision name='Pole_1_Collision'>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Pole_1_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Pole_2'>
+      <pose frame=''>-8.75 3.7 0 0 -0 0</pose>
+      <collision name='Pole_2_Collision'>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Pole_2_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Pole_3'>
+      <pose frame=''>-8.75 -2.5 0 0 -0 0</pose>
+      <collision name='Pole_3_Collision'>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Pole_3_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+        <link name='Pole_4'>
+      <pose frame=''>-9.75 -8.75 0 0 -0 0</pose>
+      <collision name='Pole_4_Collision'>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Pole_4_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+        <link name='Pole_5'>
+      <pose frame=''>-2.5 -8.75 0 0 -0 0</pose>
+      <collision name='Pole_1_Collision'>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Pole_5_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+    <link name='Pole_6'>
+      <pose frame=''>3.75 -8.75 0 0 -0 0</pose>
+      <collision name='Pole_6_Collision'>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <!-- collistion: pose: 高さの半分 -->
+      </collision>
+      <visual name='Pole_6_Visual'>
+        <pose frame=''>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/CeilingTiled</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+    </link>
+
+
+    <!-- INCLUDE OFFICE TABLE -->
+    <!-- <link name='office_table_1'> -->
+    <!-- <include>
+      <pose>-5.1 -3 0 0 0 0</pose>
+      <uri>model://table</uri>
+    </include> -->
+    <!-- <link name='office_table_2'> -->
+    <!-- <include>
+      <pose>-2.1 -3 0 0 0 0</pose>
+      <uri>model://table</uri>
+    </include> -->
+    <!-- <link name='office_table_3'> -->
+    <include>
+      <pose>0.6 -3 0 0 0 0</pose>
+      <uri>model://table</uri>
+    </include>
+    <!--  <link name='office_table_4'> -->
+    <include>
+      <pose>-5.1 4.5 0 0 0 0</pose>
+      <uri>model://table</uri>
+    </include>
+    <!-- <link name='office_table_5'> -->
+    <include>
+      <pose>-2.1 4.5 0 0 0 0</pose>
+      <uri>model://table</uri>
+    </include>
+    <!-- <link name='office_table_6'> -->
+    <include>
+      <pose>0.6 4.5 0 0 0 0</pose>
+      <uri>model://table</uri>
+    </include>
+
+    <!-- INCLUDE WORKING TABLE -->
+    <!-- <link name='working_table_1'> -->
+    <include>
+      <pose>3.25 -3 0 0 0 0</pose>
+      <uri>model://sagyou_dai</uri>
+    </include>
+    <!-- <link name='working_table_2'> -->
+    <include>
+      <pose>3.25 2.5 0 0 0 0</pose>
+      <uri>model://sagyou_dai_s</uri>
+    </include>
+    <!-- INCLUDE FLOOR -->
+    <!-- <link name='floor'> -->
+    <!-- <include>
+      <pose>0 3.5 0 0 0 0</pose>
+      <uri>model://Floor_room</uri>
+    </include> -->
+    <!-- INCLUDE BIG CONF ROOM -->
+    <!-- <link name='big_conf_table'> -->
+    <include>
+      <pose>-6.75 13.25 0 0 0 1.57</pose>
+      <uri>model://table_conference_2</uri>
+    </include>
+    <!-- <link name='big_conf_side_table'> -->
+    <include>
+      <pose>-5 16 0 0 0 0</pose>
+      <uri>model://side_table_3</uri>
+    </include>
+    <!-- INCLUDE SMALL CONF ROOM -->
+    <include>
+      <pose>-2.5 11.75 0 0 0 0</pose>
+      <uri>model://coffee_table_set_2</uri>
+    </include>
+
+    <!-- INCLUDE OFFICE_CHAIR -->
+    <!-- <include>
+      <pose>-6 4.5 0 0 0 0</pose>
+      <uri>model://office_chair_low</uri>
+    </include> -->
+    <!-- <include>
+      <pose>-6 -3 0 0 0 0</pose>
+      <uri>model://office_chair_low_one</uri>
+    </include> -->
+
+    <!-- INCLUDE 2LARGE SHELF -->
+    <include>
+      <pose>9.5 -3 0 0 0 -1.57</pose>
+      <uri>model://bookshelf_large</uri>
+    </include>
+    <include>
+      <pose>9.5 -1 0 0 0 -1.57</pose>
+      <uri>model://bookshelf_large</uri>
+    </include>
+
+    <!-- INCLUDE PC CASE -->
+    <include>
+      <pose>0.5 -5.65 0 0 0 -1.57</pose>
+      <uri>model://computer_case</uri>
+    </include>
+
+    <!-- INCLUDE LAPTOP -->
+    <include>
+      <pose>0.5 -0.5 0.7 0 0 1.57</pose>
+      <uri>model://laptop_pc_2</uri>
+    </include>
+
+    <!-- INCLUDE MAILBOX -->
+    <!-- <include>
+      <pose>0 9.5 0 0 0 0</pose>
+      <uri>model://mailbox_blue</uri>
+    </include> -->
+
+    <!-- INCLUDE Cuboid -->
+    <!-- <include>
+      <pose>8 7 0 0 -1.57 0</pose>
+      <uri>model://cuboid_model</uri>
+    </include>
+
+    <include>
+      <pose>8 6 0 0 -1.57 0</pose>
+      <uri>model://signage_model</uri>
+    </include> -->
+
+
+    <static>1</static>
+  </model>
+</sdf>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="cube_petit_speech_to_text" name="cube_petit_speech_to_text" type="julius.py" output="screen"/>
+</launch>

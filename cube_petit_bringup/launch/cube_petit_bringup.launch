@@ -4,12 +4,12 @@
   <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
-  <!-- launch teleop, dynamixel motor, pacecat lidar -->
-  <include file="$(find cube_petit_bringup)/launch/teleop_cube_petit.launch"/>
   <!-- <group ns="cube_petit"> -->
   <include file="$(find cube_petit_hardware_interface)/launch/motor_bringup.launch"/>
     <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/> -->
   <!-- </group> -->
+  <!-- launch teleop, dynamixel motor, pacecat lidar -->
+  <include file="$(find cube_petit_bringup)/launch/teleop_cube_petit.launch"/>
 
   <!-- laser filter node ( cut data of cube-petit's pole) -->
   <group ns="/pacecat">
@@ -43,5 +43,11 @@
   <include file="$(find cube_diagnostic)/launch/diagnostic.launch">
       <arg name="config_file" value="cube_petit_analyzers.yaml"/>
   </include>
+
+  <include file="$(find cube_speech)/launch/speech_server.launch"/>
+
+  <include file="$(find cube_petit_text_to_speech)/launch/cube_petit_text_to_speech.launch"/>
+  <include file="$(find cube_petit_speech_to_text)/launch/cube_petit_speech_to_text.launch"/>
+
 
 </launch>

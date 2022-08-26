@@ -1,4 +1,4 @@
-# raspberrypi_cube_moc
+# cube_petit_ros
 
 Cube Petit is a desktop-sized Cuboid-kun that is intended to be sold at low cost and widely distributed around the world.
 
@@ -13,39 +13,68 @@ There are ivory, clear blue, and yellow color variations.
 ## Packages
 
 1. cube_petit_ros
-1. cube_petit_hardware_interface
-1. cube_petit_bringup
-1. cube_petit_description
-1. cube_petit_gazebo
-1. cube_petit_navigation
+2. cube_petit_ar_docking (auto charging)
+3. cube_petit_bringup
+4. cube_petit_description (urdf/xacro)
+5. cube_petit_gazebo
+6. cube_petit_hardware_interface (motor)
+7. cube_petit_navigation
+8. jbd_battery_monitor (battery monitor)
+9.  navigation_goals
+10. cube_petit_text_to_speech
+11. cube_petit_speech_to_text
 
+## Software
+- Ubuntu18.04
+- ROS(Melodic)
+
+## Sensors(v3)
+- LiDAR (LDS-50C)
+- Depth Camera (Intel RealSense Depth Camera SR305)
+- Infrared Camera(ELP-USBFHD01M-KRL156)
+- Air pressure meter and 9-axis IMU(Witmotion wt901b)
 
 ## Invtoduction1(for cube_petit/Ubuntu18)
 
 ```
-git clone cube_petit_setup
+git clone git@github.com:AiriYokochi/setup_cube_petit.git
 cd cube_petit_setup
-setupscript
+source setup.bash
 ```
 
 ## Introduction2(for other PC/Ubuntu16or18)
+
 ```
-git clone @@@@@@@
+git clone git@github.com:sbgisen/cube_petit_ros.git
 cd cube_petit_ros/cube_petit_ros
 catkin bt
 source ~/.bashrc
 ```
-## Usage
+## Quick Usage
 
-terminal1
+### 1. bringup
+On real robot
 ```
 roslaunch cube_petit_bringup cube_petit_bringup.launch
 ```
 
-terminal2
+On Gazebo9
+```
+roslaunch cube_petit_gazebo cube_petit_gazebo_pc.launch
+```
+### 2. slam
+
+```
+roslaunch cube_petit_navigation cube_petit_gmapping.launch 
+```
+
+### 3. navigation
+
 ```
 roslaunch cube_petit_navigation cube_petit_naviagation.launch
 ```
+
+---
 
 ## Hardware Changes
 

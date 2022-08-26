@@ -15,7 +15,7 @@
   </group>
 
   <group if="$(arg cube_petit_v2)">
-    <node pkg="jbd_battery_monitor" type="jbd_battery_monitor_node" name="jbd_battery_monitor" output="screen">
+    <node pkg="jbd_battery_monitor" type="jbd_battery_monitor_node" name="jbd_battery_monitor">
       <param name="once_flag" value="$(arg once_flag)" />
     <remap from="~charge_current" to="/output_current" />
     </node>

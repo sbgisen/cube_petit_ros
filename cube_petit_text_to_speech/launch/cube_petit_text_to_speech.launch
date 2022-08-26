@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+    <node pkg="cube_petit_text_to_speech" name="cube_petit_text_to_speech" type="jtalk.py" output="screen"/>
+</launch>

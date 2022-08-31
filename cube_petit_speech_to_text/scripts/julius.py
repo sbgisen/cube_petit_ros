@@ -50,18 +50,16 @@ class juliusSpeechToText:
             if find_text_flag != -1 and find_short_text_flag == -1:
                 text_string = out_string.replace("sentence1:", "")
                 text_string = text_string.replace(" ", "")
-                if text_string != '。' and text_string != '':
-                    # None
+                if text_string != '。' and len(text_string) > 4:
                     # rospy.loginfo('\njulius_text: OUTPUT\n'+ text_string + '\n')
                     publish.publish(text_string)
-            elif find_pass_flag != -1:
+            elif find_pass_flag != -1 and find_short_text_flag != -1:
                 # rospy.loginfo('\njulius_text SHORT RAW ->:\n'+ out_string + '\n<-:julius_text SHORT RAW\n')
                 text_string = out_string.replace("pass1_best:", "")
                 text_string = text_string.replace("<input rejected by short input>", "")
                 text_string = text_string.replace(" ", "")
-                if text_string != '。' and text_string != '':
-                    # None
-                    # rospy.loginfo('\njulius_text SHORT OUTPUT:\n'+ text_string + '\n')
+                if text_string != '。' and len(text_string) > 4:
+                    # rospy.loginfo('\njulius_text SHORT OUTPUT:\n'+ text_string + '\n' + str(len(text_string)) + '\n')
                     publish.publish(text_string)
             text_string=''
 
@@ -73,9 +71,9 @@ def callback(data):
 
 def main():
     julius = juliusSpeechToText()
-    print("Juliusによる音声認識を開始")
+    rospy.loginfo("Juliusによる音声認識を開始")
     status = os.system('amixer -D pulse sset Capture 0')
-    print('マイクオフ:'+ str(status))
+    rospy.loginfo('マイクオフ:'+ str(status))
     julius.textStreaming()
     rospy.spin()
 

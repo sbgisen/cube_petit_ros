@@ -28,8 +28,7 @@ class juliusSpeechToText:
     def startListening(self):
         cmd = 'cd ~/lib/ssr-kit-v4.5;bash run-linux.sh'
         self.julius_process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,shell=True)
-        rospy.loginfo('julius:started\n'), 
-
+        rospy.loginfo('julius:started\n')
     def stopListening(self):
         rospy.loginfo('julius:successfully finished\n')
         self.julius_process.kill()
@@ -72,7 +71,7 @@ def main():
     julius = juliusSpeechToText()
     print("Juliusによる音声認識を開始")
     status = os.system('amixer -D pulse sset Capture 0')
-    print('マイクオフ:'+ status)
+    print('マイクオフ:'+ str(status))
     julius.textStreaming()
     rospy.spin()
 

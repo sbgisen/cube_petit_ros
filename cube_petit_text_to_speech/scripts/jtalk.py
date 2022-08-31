@@ -2,16 +2,18 @@
 # coding: UTF-8
 
 import sys
+from tokenize import String
 import rospy
 from cube_speech.srv import CallSpeech
 import subprocess
 from datetime import datetime
 import struct, time
 import os
+from std_msgs.msg import String
 
 # 
 from sensor_msgs.msg import Joy
-
+from std_msgs.msg import Int32
 
 # module_name, package_name, ClassName, method_name, 
 # ExceptionName, function_name, GLOBAL_CONSTANT_NAME
@@ -72,8 +74,35 @@ def text_to_jtalk_shout(phrase):
         rospy.loginfo('Robot speech: {}'.format(phrase))
     # rospy.sleep(2.0)
 
+
+julius_text = ''
+
+hight_height_flag = 0
+low_height_flag = 0
+middle_height_flag = 0
+
+
+def julius_callback(phrase):
+    global julius_text
+    julius_text = phrase.data
+
+def imu_callback(data):
+    global hight_height_flag
+    global low_height_flag
+    if(data.data > 50 and hight_height_flag == 0):
+        text_to_jtalk("高いよう")
+        hight_height_flag = 1
+    elif(data.data < -50 and  low_height_flag == 0):
+        text_to_jtalk("低いよう")
+        low_height_flag = 1
+    elif(data.data <= 30 and data.data >= -30):
+        hight_height_flag = 0
+        low_height_flag = 0
+
+
 # Class method2: joyCallback [TODO] MUTEX
 def callback(data):
+    global julius_text
     if data.buttons[0] == 1:      # batu
         rospy.loginfo("X")
         text_to_jtalk('こんにちは')
@@ -97,6 +126,23 @@ def callback(data):
         rospy.loginfo("R2")
     elif data.buttons[8] == 1:    # SHARE
         rospy.loginfo("SHARE")
+        text_to_jtalk('好きな野菜はなんですか〜？')
+        text_to_jtalk('ポンッ！')
+        julius_text = ''
+        status = os.system('amixer -D pulse sset Capture 40000')
+        rospy.loginfo('unmute mic')
+        rospy.sleep(5.5)
+        status = os.system('amixer -D pulse sset Capture 0')
+        rospy.loginfo('mute mic')
+        rospy.sleep(0.5)
+        if julius_text != '':
+            julius_text = julius_text + "ですね？"
+            text_to_jtalk(julius_text)
+            julius_text = ''
+        else:
+            text_to_jtalk_sadness("わかりませんでした")
+
+
     elif data.buttons[9] == 1:    # OPTION
         rospy.loginfo("OPTION")
     elif data.buttons[10] == 1:    # PS
@@ -141,7 +187,12 @@ else:
     rospy.loginfo('Robot speech: {}'.format(phrase1))
 
 rospy.Subscriber("/joystick/joy",Joy,callback, queue_size=1)
+rospy.Subscriber("/imu_height",Int32,imu_callback, queue_size=10)
+rospy.Subscriber("/julius_result_text", String, julius_callback, queue_size=1) 
 
+
+status = os.system('amixer -D pulse sset Capture 0')
+rospy.loginfo('mute mic')
 
 
 rospy.spin()

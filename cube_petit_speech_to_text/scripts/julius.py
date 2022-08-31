@@ -50,7 +50,8 @@ class juliusSpeechToText:
             if find_text_flag != -1 and find_short_text_flag == -1:
                 text_string = out_string.replace("sentence1:", "")
                 text_string = text_string.replace(" ", "")
-                if text_string != '。' and len(text_string) > 4:
+                text_string = text_string.replace("。", "")
+                if text_string != '。' and len(text_string) > 3:
                     # rospy.loginfo('\njulius_text: OUTPUT\n'+ text_string + '\n')
                     publish.publish(text_string)
             elif find_pass_flag != -1 and find_short_text_flag != -1:
@@ -58,10 +59,13 @@ class juliusSpeechToText:
                 text_string = out_string.replace("pass1_best:", "")
                 text_string = text_string.replace("<input rejected by short input>", "")
                 text_string = text_string.replace(" ", "")
-                if text_string != '。' and len(text_string) > 4:
+                text_string = text_string.replace("。", "")
+                if text_string != '。' and len(text_string) > 3:
                     # rospy.loginfo('\njulius_text SHORT OUTPUT:\n'+ text_string + '\n' + str(len(text_string)) + '\n')
                     publish.publish(text_string)
             text_string=''
+            out_string=''
+        line=''
 
 def callback(data):
     rospy.loginfo('Julius Start: 音声認識結果だよ')

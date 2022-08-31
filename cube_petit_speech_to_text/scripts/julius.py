@@ -26,7 +26,7 @@ class juliusSpeechToText:
         self.stopListening()
         self.pkill_julius()
     def startListening(self):
-        cmd = 'cd ~/lib/ssr-kit-v4.5;bash run-linux.sh'
+        cmd = 'cd ~/lib/julius_libs/dictation-kit/;bash run-linux-dnn.sh'
         self.julius_process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,shell=True)
         rospy.loginfo('julius:started\n')
     def stopListening(self):

@@ -40,26 +40,30 @@ class juliusSpeechToText:
             pid = int(line.split(None, 1)[0])
             os.kill(pid, signal.SIGKILL)
 
-
     def textStreaming(self):
         for line in iter(self.julius_process.stdout.readline, ""):
-            out_string = line.rstrip('\n')
-            # print(out_string)
-            find_text_flag = out_string.find('sentence1:  ')
+            out_string = line.replace("\n", " ")
+            # rospy.loginfo('\njulius_text RAW ->:\n' + out_string + '\n<-:julius_text RAW\n' )
+            find_text_flag = out_string.find('sentence1:')
+            find_pass_flag = out_string.find('pass1_best:')
             find_short_text_flag = out_string.find('<input rejected by short input>')
-            if find_text_flag != -1:
-                text_string = out_string.lstrip('sentence1:  ')
-                if text_string != '。' and text_string != '' and text_string != '\n':
+            if find_text_flag != -1 and find_short_text_flag == -1:
+                text_string = out_string.replace("sentence1:", "")
+                text_string = text_string.replace(" ", "")
+                if text_string != '。' and text_string != '':
                     # None
-                    rospy.loginfo('julius_text:'+ text_string)
+                    # rospy.loginfo('\njulius_text: OUTPUT\n'+ text_string + '\n')
                     publish.publish(text_string)
-            if find_short_text_flag != -1:
-                text_string = out_string.rstrip('<input rejected by short input>')
-                text_string = text_string.lstrip('pass1_best:  ')
-                if text_string != '。' and text_string != '' and text_string != '\n':
+            elif find_pass_flag != -1:
+                # rospy.loginfo('\njulius_text SHORT RAW ->:\n'+ out_string + '\n<-:julius_text SHORT RAW\n')
+                text_string = out_string.replace("pass1_best:", "")
+                text_string = text_string.replace("<input rejected by short input>", "")
+                text_string = text_string.replace(" ", "")
+                if text_string != '。' and text_string != '':
                     # None
-                    rospy.loginfo('julius_text:'+ text_string)
+                    # rospy.loginfo('\njulius_text SHORT OUTPUT:\n'+ text_string + '\n')
                     publish.publish(text_string)
+            text_string=''
 
 def callback(data):
     rospy.loginfo('Julius Start: 音声認識結果だよ')

@@ -7,17 +7,29 @@
 
   <arg name="once_flag" default="false"/>
 
+  <arg name="custom_voltage_remain" default="true"/>
+  <arg name="max_voltage" default="13.35"/>
+  <arg name="min_voltage" default="12.00"/>
+
   <!-- rostopic pub -->
   <group if="$(arg gazebo)">
-    <node pkg="rostopic" type="rostopic" name="battery_remaining" args="pub -r 20 /gazebo_battery_monitor/battery_remaining std_msgs/Float64 9.0"  output="screen" />
-    <node pkg="rostopic" type="rostopic" name="battery_voltage" args="pub -r 20 /gazebo_battery_monitor/battery_voltage std_msgs/Float64 13.0"  output="screen"/>
-    <node pkg="rostopic" type="rostopic" name="charge_current" args="pub -r 20 /gazebo_battery_monitor/charge_current std_msgs/Float64 0.0"  output="screen"/>
+    <node pkg="rostopic" type="rostopic" name="battery_remaining"
+      args="pub -r 20 /gazebo_battery_monitor/battery_remaining std_msgs/Float64 9.0"
+      output="screen"/>
+    <node pkg="rostopic" type="rostopic" name="battery_voltage"
+      args="pub -r 20 /gazebo_battery_monitor/battery_voltage std_msgs/Float64 13.0" output="screen"/>
+    <node pkg="rostopic" type="rostopic" name="charge_current"
+      args="pub -r 20 /gazebo_battery_monitor/charge_current std_msgs/Float64 0.0" output="screen"/>
   </group>
 
   <group if="$(arg cube_petit_v2)">
-    <node pkg="jbd_battery_monitor" type="jbd_battery_monitor_node" name="jbd_battery_monitor" output="screen">
-      <param name="once_flag" value="$(arg once_flag)" />
-    <remap from="~charge_current" to="/output_current" />
+    <node pkg="jbd_battery_monitor" type="jbd_battery_monitor_node" name="jbd_battery_monitor">
+      <param name="once_flag" value="$(arg once_flag)"/>
+      <param name="max_voltage" value="$(arg max_voltage)"/>
+      <param name="min_voltage" value="$(arg min_voltage)"/>
+      <param name="custom_voltage_remain" value="$(arg custom_voltage_remain)"/>
+
+      <remap from="~charge_current" to="/output_current"/>
     </node>
   </group>
 

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include "serial_communication.hpp"
 
 

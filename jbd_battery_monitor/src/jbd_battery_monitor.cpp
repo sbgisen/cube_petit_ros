@@ -77,9 +77,11 @@ int main(int argc, char **argv){
     // Batteryの MAX & MIN 電圧からバッテリの残量を算出する(現在BMSからのbattery_remainingが微妙なので)
     if( custom_voltage_remain ){
         double battery_remaining_num = 100 * (battery_status_[BATTERY_VOLTAGE] - min_voltage) / (max_voltage - min_voltage);
-        if (battery_remaining_num > 100){
-            battery_remaining_num = 100;
+        battery_remaining_num = std::ceil(f * 100) / 100;   //小数点2桁にする
+        if (battery_remaining_num > 100.00){
+            battery_remaining_num = 100.00;
         }
+
         battery_remaining.data = battery_remaining_num;
 
     }

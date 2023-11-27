@@ -1,11 +1,11 @@
 <launch>
     <!-- Set and remove parameter for web console. -->
-  <arg name="map_info_file" default="/home/gisen/map/M20210525165127330/map_info.yaml"/>
+  <!-- <arg name="map_info_file" default="/home/gisen/map/M20210525165127330/map_info.yaml"/>
   <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/>
   <rosparam command="delete" param="map_info/building_id"/>
-  <rosparam command="delete" param="map_info/floor_id"/>
-  <group ns="navigation">
-    
+  <rosparam command="delete" param="map_info/floor_id"/> -->
+  <!-- <group ns="navigation"> -->
+
     <!--[EDIT] robot name-->
     <arg name="robot" default="cube_petit"/>
     <!--[EDIT] topic name of /scan-->
@@ -15,19 +15,28 @@
 
     <!-- [EDIT] map file name-->
     <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
+    <arg name="map_info_file" default="(find cube_petit)/map/daikaigisitu/map.yaml"/>
+    <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/>
 
     <!-- <arg name="map_file" default="$(find cube_petit_gazebo)/map/floor_eight/map.yaml"/> -->
     <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/airi_v2/map.yaml"/> -->
     <arg name="map_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml"/>
 
+
+    <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/maker_fair/map.yaml"/> -->
+    <!-- <arg name="map_file" default="/home/gisen/map_24/map2/map.yaml"/> -->
+
+
     <!-- [EDIT] keepout map file name if you need -->
     <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml" />
+    <!-- <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/maker_fair/map.yaml" /> -->
+    <!-- <arg name="map_keepout_file" default="/home/gisen/map_24/map2/map.yaml"/> -->
     <arg name="use_keepout" default="true" />
     <param name="map_server/map_file" value="$(arg map_file)" />
 
+    <!-- <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/> -->
 
-
-
+    <!-- <node pkg="tf" type="static_transform_publisher" name="odom_tf" args="0 0 0 0 0 0 map odom 100" /> -->
 
     <!-- If "costmap_image = true" launch costmap_to_image node -->
     <arg name="costmap_image" default="false" />
@@ -51,14 +60,14 @@
     <!-- localize the robot -->
 
     <include file="$(arg amcl_include)">
-      <arg name="scan_topic" value="$(arg scan)"/>  
+      <arg name="scan_topic" value="$(arg scan)"/>
     </include>
 
-    <group ns="rviz_topics_relay">
-      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /navigation/clicked_point"/>
-      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /navigation/initialpose"/>
-      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /navigation/move_base_simple/goal"/>
-    </group>
+    <!-- <group ns="rviz_topics_relay">
+      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /clicked_point"/>
+      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /initialpose"/>
+      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /move_base_simple/goal"/>
+    </group> -->
 
 
     <!-- move the robot -->
@@ -68,12 +77,12 @@
       <!-- [EDIT] topic name of /odom -->
       <arg name="odom_topic" value="$(arg odom)" />
       <arg name="costmap_image" value="$(arg costmap_image)" />
-      <remap from="move_base_simple/goal" to="/move_base_simple/goal"/>
+      <!-- <remap from="move_base_simple/goal" to="/move_base_simple/goal"/>
       <remap from="initial_pose" to="/initial_pose"/>
-      <remap from="clicked_point" to="/clicked_point"/>
-      
+      <remap from="clicked_point" to="/clicked_point"/> -->
+
     </include>
-  </group>
+  <!-- </group> -->
 
 
 </launch>

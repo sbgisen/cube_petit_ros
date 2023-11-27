@@ -5,7 +5,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <sensor_msgs/JointState.h>
-#include "can_msgs/Frame.h"
+#include <can_msgs/Frame.h>
 
 #include <mutex>
 #include <stdio.h>
@@ -19,83 +19,84 @@
 
 #include <linux/can.h>
 #include <linux/can/raw.h>
-#include <math.h>  /* M_PI */
+#include <math.h> /* M_PI */
 
 #include <control_toolbox/pid.h>
 //#include <dji_esc_driver/cansend.hpp>
 
-class Dji_Can_Communication {
+class DjiCanCommunication
+{
 private:
-
   // モータID1個毎のアクセス回数
-  int AccessCount[8] = {0,0,0,0,0,0,0,0};
-  ros::Subscriber sub_can;
+  int AccessCount_[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  ros::Subscriber sub_can_;
 
-  int motor_id;
-  int motor_rpm;
-  double motor_current;
-  int motor_temperature;
-  double motor_torque;
-  double motor_rad_per_sec;
+  int motor_id_;
+  int motor_rpm_;
+  double motor_current_;
+  int motor_temperature_;
+  double motor_torque_;
+  double motor_rad_per_sec_;
 
-  int motor_position;
-  int motor_position_right;
+  int motor_position_;
+  int motor_position_right_;
   int motor_position_left;
 
-
-  double motor_position_rad;
-  double motor_rad_now;
-  double motor_rad_before_right;
-  double motor_rad_before_left;
-  double motor_rad_before;
+  double motor_position_rad_;
+  double motor_rad_now_;
+  double motor_rad_before_right_;
+  double motor_rad_before_left_;
+  double motor_rad_before_;
 
   // constant values, initialized in contructor
-  double TORQUE_COEFFICIENT;  //トルク計数
-  double REDUCTION_RATIO;   //減速比
-  double MAX_CURRENT;  //C610の最大電流
+  double TORQUE_COEFFICIENT_;  //トルク計数
+  double REDUCTION_RATIO_;     //減速比
+  double MAX_CURRENT_;         // C610の最大電流
 
-  std::vector<double> rad_vec;
+  std::vector<double> rad_vec_;
 
-  enum PositionStatus {
+  enum PositionStatus
+  {
     RAD_NOW_LEFT,
     RAD_BEFORE_LEFT,
     RAD_NOW_RIGHT,
     RAD_BEFORE_RIGHT
-    };
-  
+  };
+
   std::vector<double> status_;
-  enum Params {
+  enum Params
+  {
     POSITION_LEFT,
     VELOCITY_LEFT,
     EFFORT_LEFT,
     POSITION_RIGHT,
     VELOCITY_RIGHT,
     EFFORT_RIGHT
-    };
-  enum Side {
+  };
+  enum Side
+  {
     LEFT,
     RIGHT
   };
 
-
 public:
-  Dji_Can_Communication();
-  void initialize(ros::NodeHandle nh);
-  ~Dji_Can_Communication();
-  //Send_Velocity_Can(const std_msgs::String& msg);
-  uint8_t can_data[8];
+  DjiCanCommunication();
+  void initialize(const ros::NodeHandle nh);
+  ~DjiCanCommunication();
+  // Send_Velocity_Can(const std_msgs::String& msg);
+  uint8_t can_data_[8];
   // モータID1個毎のアクセス回数
   void receivedCanCallback(const can_msgs::Frame::ConstPtr& msg);
   int sendCan(uint16_t id, uint8_t* data);
   int sendVelocityCan(const double left_target_velocity, const double right_target_velocity);
   int current2Data(double current_in);
-  int createCanPacketAndSend(int right_data,int left_data);
+  int createCanPacketAndSend(int right_data, int left_data);
   void updateMotorStatus(std::vector<double>&);
   void timerCallback(const ros::TimerEvent& event);
   // constant values, initialized in contructor
   uint8_t status_size_;
-  ros::Time last_time;
-  ros::Timer timer;
+  ros::Time last_time_;
+  ros::Timer timer_;
   control_toolbox::Pid right_pid_;
   control_toolbox::Pid left_pid_;
 
@@ -105,6 +106,4 @@ public:
   double left_target_current_;
 };
 
-
-
-#endif //DJI_CAN_COMMUNICATION
+#endif  // DJI_CAN_COMMUNICATION

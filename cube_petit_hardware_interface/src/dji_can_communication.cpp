@@ -17,7 +17,7 @@ Motor Controller: C610
 //////////////////////////////////////
 /*  Send Velocity to CAN */
 //////////////////////////////////////
-int Dji_Can_Communication::sendVelocityCan(const double left_target_velocity, const double right_target_velocity){
+int DjiCanCommunication::sendVelocityCan(const double left_target_velocity, const double right_target_velocity){
   // PID制御に使用する速度指令値を更新する
   right_target_velocity_ = right_target_velocity;
   left_target_velocity_ = left_target_velocity;
@@ -28,7 +28,7 @@ int Dji_Can_Communication::sendVelocityCan(const double left_target_velocity, co
 // -10[A]~10[A]の電流を-10000~10000で表現するため、1[A]で1000を送る
 // double型の引数電流値current_inからint型のdata_outを返す。 
 // [TODO]CASTしたら終わり？
-int Dji_Can_Communication::current2Data(double current_in){
+int DjiCanCommunication::current2Data(double current_in){
   int data_out = 0;
   //目標電流値が０以上の場合（正回転の場合？）
   if (current_in >= 0){
@@ -41,23 +41,23 @@ int Dji_Can_Communication::current2Data(double current_in){
 }
 
 // 左の右のモータのデータからパケットを生成する
-int Dji_Can_Communication::createCanPacketAndSend(int left_data,int right_data){
-  can_data[0]                 = left_data >> 8 & 0xFF;
-  can_data[1]                 = left_data & 0xFF;
-  can_data[2]                 = right_data >> 8 & 0xFF;
-  can_data[3]                 = right_data & 0xFF;
-  can_data[4]                 = 0;
-  can_data[5]                 = 0;
-  can_data[6]                 = 0;
-  can_data[7]                 = 0;
-  if(sendCan(0x200, can_data)) {
+int DjiCanCommunication::createCanPacketAndSend(int left_data,int right_data){
+  can_data_[0]                 = left_data >> 8 & 0xFF;
+  can_data_[1]                 = left_data & 0xFF;
+  can_data_[2]                 = right_data >> 8 & 0xFF;
+  can_data_[3]                 = right_data & 0xFF;
+  can_data_[4]                 = 0;
+  can_data_[5]                 = 0;
+  can_data_[6]                 = 0;
+  can_data_[7]                 = 0;
+  if(sendCan(0x200, can_data_)) {
         ROS_WARN("write error");
   }
   return 0;
 }
 
 // CANデータをデバイスに送信する。引数はコントローラIDと電流値
-int Dji_Can_Communication::sendCan(uint16_t dst_id, uint8_t* data) {
+int DjiCanCommunication::sendCan(uint16_t dst_id, uint8_t* data) {
     int                 s; /* can raw socket */
     int                 required_mtu = CAN_MTU;
     int                 enable_canfd = 1;
@@ -116,7 +116,7 @@ int Dji_Can_Communication::sendCan(uint16_t dst_id, uint8_t* data) {
 //////////////////////////////////////
 /*  Received Joint State from CAN */
 //////////////////////////////////////
-void Dji_Can_Communication::updateMotorStatus(std::vector<double>& status_arg){
+void DjiCanCommunication::updateMotorStatus(std::vector<double>& status_arg){
   //引数のポインタの値を書き換える
   status_arg[VELOCITY_LEFT] = status_[VELOCITY_LEFT];
   status_arg[POSITION_LEFT] = status_[POSITION_LEFT];
@@ -128,7 +128,7 @@ void Dji_Can_Communication::updateMotorStatus(std::vector<double>& status_arg){
 }
 
 // モータからデータを受け取ったら値を格納するコールバック関数
-void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr& msg){
+void DjiCanCommunication::receivedCanCallback(const can_msgs::Frame::ConstPtr& msg){
   if(msg->dlc == 8){
     // 左側 ////////////////////////////////////////////////////////////////
     if(msg->id == (0x200 + 0x001) ){
@@ -158,16 +158,16 @@ void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr&
       
       // 減速後の値(タイヤが何回転したか)を出す
       // 0から(36*2*M_PI)の範囲の値からREDUCTION_RARIOを割り、[0から2*M_PI]までの範囲にする
-      double left_rad_reduced = ( left_rad + (2*M_PI*left_revolution_count) ) / REDUCTION_RATIO;
+      double left_rad_reduced = ( left_rad + (2*M_PI*left_revolution_count) ) / REDUCTION_RATIO_;
       // Cuboidくん用DiffDriveControllerに合わせるため値の範囲を(-M_PIからM_PI)に変更する
       left_rad_reduced -= M_PI;
 
       // タイヤのRPMを保存する
       int16_t left_rpm = (msg->data[2] << 8) | msg->data[3];
-      double left_rad_per_sec = (double)left_rpm * 2.0 * M_PI / 60.0  / REDUCTION_RATIO;
+      double left_rad_per_sec = (double)left_rpm * 2.0 * M_PI / 60.0  / REDUCTION_RATIO_;
       // 電流値とトルクを保存する
       double left_current = ( (msg->data[4] << 8) | msg->data[5] ) / 1000.0;
-      double left_torque = left_current * TORQUE_COEFFICIENT;
+      double left_torque = left_current * TORQUE_COEFFICIENT_;
       // 現在の温度を保存する
       double left_temperature = msg->data[6];
 
@@ -199,16 +199,16 @@ void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr&
       right_rad_prev = right_rad;
       // 減速後の値(タイヤが何回転したか)を出す
       // 0から(36*2*M_PI)の範囲の値からREDUCTION_RARIOを割り、[0から2*M_PI]までの範囲にする
-      double right_rad_reduced = ( right_rad + (2*M_PI*right_revolution_count) ) / REDUCTION_RATIO;
+      double right_rad_reduced = ( right_rad + (2*M_PI*right_revolution_count) ) / REDUCTION_RATIO_;
       // 値の範囲を(-M_PIからM_PI)に変更する
       right_rad_reduced -= M_PI;
 
       // タイヤのRPMを保存する
       int16_t right_rpm = (msg->data[2] << 8) | msg->data[3];
-      double right_rad_per_sec = (double)right_rpm * 2.0 * M_PI / 60.0  / REDUCTION_RATIO;
+      double right_rad_per_sec = (double)right_rpm * 2.0 * M_PI / 60.0  / REDUCTION_RATIO_;
       //電流値とトルクを保存する
       double right_current = ( (msg->data[4] << 8) | msg->data[5] ) / 1000.0;
-      double right_torque = right_current * TORQUE_COEFFICIENT;
+      double right_torque = right_current * TORQUE_COEFFICIENT_;
       //現在の温度を保存する
       double right_temperature = msg->data[6];
 
@@ -232,7 +232,7 @@ void Dji_Can_Communication::receivedCanCallback(const can_msgs::Frame::ConstPtr&
 }
 
 // PID制御
-void Dji_Can_Communication::timerCallback(const ros::TimerEvent& event){
+void DjiCanCommunication::timerCallback(const ros::TimerEvent& event){
   ros::Time time_now = ros::Time::now();
 
   // 現在の速度と目標速度の更新
@@ -242,23 +242,23 @@ void Dji_Can_Communication::timerCallback(const ros::TimerEvent& event){
   double left_velocity = status_[VELOCITY_LEFT];
 
   // PID制御
-  right_target_current_ = -1.0 * right_pid_.updatePid(right_target_velocity - right_velocity, time_now - last_time);
-  left_target_current_  = -1.0 *  left_pid_.updatePid(left_target_velocity  -  left_velocity, time_now - last_time);
+  right_target_current_ = -1.0 * right_pid_.updatePid(right_target_velocity - right_velocity, time_now - last_time_);
+  left_target_current_  = -1.0 *  left_pid_.updatePid(left_target_velocity  -  left_velocity, time_now - last_time_);
   //ROS_INFO("timerCallback: right: %f -> %f, left: %f -> %f",right_target_velocity , right_velocity, left_target_velocity  , left_velocity);
 
   // モータに送る電流値[A]
   double right_target_current = right_target_current_;
   double left_target_current = left_target_current_;
   // 最大電流値を超えないようにする
-  if(right_target_current >= MAX_CURRENT){
-    right_target_current = MAX_CURRENT;
-  }else if(-MAX_CURRENT >= right_target_current){
-    right_target_current = -MAX_CURRENT;
+  if(right_target_current >= MAX_CURRENT_){
+    right_target_current = MAX_CURRENT_;
+  }else if(-MAX_CURRENT_ >= right_target_current){
+    right_target_current = -MAX_CURRENT_;
   }
-  if(left_target_current >= MAX_CURRENT){
-    left_target_current = MAX_CURRENT;
-  }else if(-MAX_CURRENT >= left_target_current){
-    left_target_current = -MAX_CURRENT;
+  if(left_target_current >= MAX_CURRENT_){
+    left_target_current = MAX_CURRENT_;
+  }else if(-MAX_CURRENT_ >= left_target_current){
+    left_target_current = -MAX_CURRENT_;
   }
 
   // 電流指令値をデータに変換する
@@ -266,44 +266,44 @@ void Dji_Can_Communication::timerCallback(const ros::TimerEvent& event){
   double left_data = current2Data(left_target_current);
   // パケットを生成してCANに送信する 
   createCanPacketAndSend(left_data, right_data);
-  last_time = time_now;
+  last_time_ = time_now;
 }
 
 
 ////////////////////////
 /* initialize */
 ////////////////////////
-void Dji_Can_Communication::initialize(ros::NodeHandle nh) {
+void DjiCanCommunication::initialize(ros::NodeHandle nh) {
   ROS_INFO("dji_can_communication -> initialize");
-  sub_can = nh.subscribe<can_msgs::Frame>("received_messages", 1000, &Dji_Can_Communication::receivedCanCallback, this);
+  sub_can_ = nh.subscribe<can_msgs::Frame>("received_messages", 1000, &DjiCanCommunication::receivedCanCallback, this);
   // ゲインの初期値設定(p, i, d, i_max, i_min)
   left_pid_.initPid(3, 10.0, 0.005, 10.0, -10.0); //i=0
   right_pid_.initPid(3, 10.0, 0.005, 10.0, -10.0);  //i=0
   // 100HzでPID制御のコールバック関数を呼ぶタイマー
-  timer = nh.createTimer(ros::Duration(0.01),&Dji_Can_Communication::timerCallback,this);
+  timer_ = nh.createTimer(ros::Duration(0.01),&DjiCanCommunication::timerCallback,this);
 
 }
 
 /////////////////////////////
 /*  コンストラクタ         */
 /////////////////////////////
-Dji_Can_Communication::Dji_Can_Communication() {
-  TORQUE_COEFFICIENT = 0.18;    //トルク計数
-  REDUCTION_RATIO = 36;         //減速比
-  MAX_CURRENT = 10.000;         //C610の最大電流
-  // MAX_CURRENT = 1.0;            //今だけ
+DjiCanCommunication::DjiCanCommunication() {
+  TORQUE_COEFFICIENT_ = 0.18;    //トルク計数
+  REDUCTION_RATIO_ = 36;         //減速比
+  MAX_CURRENT_ = 10.000;         //C610の最大電流
+  // MAX_CURRENT_ = 1.0;            //今だけ
   status_.resize(6,0.0);
-  rad_vec.resize(4,0.0);
+  rad_vec_.resize(4,0.0);
   right_target_velocity_ = 0;   // 目標速度
   left_target_velocity_ = 0;
   right_target_current_ = 0;    // 目標速度に必要な電流
   left_target_current_ = 0;
 
-  last_time = ros::Time::now();
-  ROS_INFO("Dji_Can_Communication::Dji_Can_Communication() -> SUCCEED");
+  last_time_ = ros::Time::now();
+  ROS_INFO("DjiCanCommunication::DjiCanCommunication() -> SUCCEED");
 }
 
-Dji_Can_Communication::~Dji_Can_Communication() {
+DjiCanCommunication::~DjiCanCommunication() {
   left_target_current_ = 0.0;
   right_target_current_ = 0.0;
   double right_data = current2Data(right_target_current_);
@@ -314,5 +314,3 @@ Dji_Can_Communication::~Dji_Can_Communication() {
 
 
 }
-
-

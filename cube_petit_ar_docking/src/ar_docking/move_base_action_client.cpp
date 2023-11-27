@@ -39,7 +39,7 @@ int Move_Base_Action_Client::setAndSendGoal(move_base_msgs::MoveBaseGoal goal, i
   goal_.target_pose.pose.position = goal.target_pose.pose.position;
   goal_.target_pose.pose.position.z = 0;
   goal_.target_pose.pose.orientation = goal.target_pose.pose.orientation;
-  
+
   ac.sendGoal(goal_);
   bool result = ac.waitForResult(ros::Duration(duration));
   actionlib::SimpleClientGoalState status = ac.getState();
@@ -59,7 +59,7 @@ int Move_Base_Action_Client::sendGoalToActionServer(move_base_msgs::MoveBaseGoal
 }
 
 // コストマップをクリアする
-void Move_Base_Action_Client::clearCostmap(){ 
+void Move_Base_Action_Client::clearCostmap(){
   std_srvs::Empty cl_cm;
   if(clear_costmap->call(cl_cm)){
     ROS_WARN("move_base:Costmaps have been cleared!");
@@ -98,14 +98,12 @@ void Move_Base_Action_Client::initialize(ros::NodeHandle nh){
 }
 
 Move_Base_Action_Client::Move_Base_Action_Client(ros::NodeHandle nh):
-  ac("/navigation/move_base", true)
+  ac("/move_base", true)
   {
-      clear_costmap.reset(new ros::ServiceClient(nh.serviceClient<std_srvs::Empty>("/navigation/move_base/clear_costmaps")));
+      clear_costmap.reset(new ros::ServiceClient(nh.serviceClient<std_srvs::Empty>("/move_base/clear_costmaps")));
     initialize(nh);
 }
 
 Move_Base_Action_Client::~Move_Base_Action_Client() {
 
 }
-
-

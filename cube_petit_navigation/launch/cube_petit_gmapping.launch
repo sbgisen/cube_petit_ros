@@ -9,7 +9,7 @@
 
 	<!-- launch gmapping node and make map -->
 
-	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" required="true" output="screen" ns="/gmapping"> 		
+	<node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" required="true" output="screen">
 		<remap from="scan" to="$(arg scan)"/>
 		<param name="linearUpdate" value="0.1"/>
 		<param name="angularUpdate" value="0.125"/>
@@ -21,9 +21,8 @@
 
 	<!-- map convert to image node -->
 	<param name="gmapping/map_image/full/compressed/format" value="png" />
-	<node name="map_to_image" pkg="hector_compressed_map_transport" type="map_to_image_node" output="screen" ns="/gmapping">
+	<node name="map_to_image" pkg="hector_compressed_map_transport" type="map_to_image_node" output="screen">
 		<remap from="pose" to="robot_pose" />
 	</node>
 
 </launch>
-

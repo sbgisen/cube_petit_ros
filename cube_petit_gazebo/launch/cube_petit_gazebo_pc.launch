@@ -28,7 +28,7 @@
       <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml" />
     </node>
 
-    <arg name="model2" default="$(find cube_petit_gazebo)/models/charge_doc/cube_petit_charge_doc.xacro"/>   
+    <arg name="model2" default="$(find cube_petit_gazebo)/models/charge_doc/cube_petit_charge_doc.xacro"/>
     <param name="robot_description2" command="$(find xacro)/xacro $(arg model2) --inorder"/>
 
     <!-- launch gazebo -->
@@ -53,13 +53,13 @@
 
     <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/cube_petit" args="joint_state_controller diff_drive_controller"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/cube_petit"/>
-    
+
     <!-- launch rviz -->
     <node name="rviz" pkg="rviz" type="rviz" args="" required="false"/>
     <group ns="rviz_topics_relay">
-      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /navigation/clicked_point"/>
-      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /navigation/initialpose"/>
-      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /navigation/move_base_simple/goal"/>
+      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /clicked_point"/>
+      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /initialpose"/>
+      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /move_base_simple/goal"/>
     </group>
 
     <!-- launch teleop -->

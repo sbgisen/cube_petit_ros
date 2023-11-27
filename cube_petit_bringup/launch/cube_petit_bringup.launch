@@ -4,44 +4,71 @@
   <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
 
-  <!-- launch teleop, dynamixel motor, pacecat lidar -->
-  <include file="$(find cube_petit_bringup)/launch/teleop_cube_petit.launch"/>
-  <!-- <group ns="cube_petit"> -->
   <include file="$(find cube_petit_hardware_interface)/launch/motor_bringup.launch"/>
-    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/> -->
-  <!-- </group> -->
+    <node name="robot_state_publisher2" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
+  <!-- launch teleop -->
+  <include file="$(find cube_petit_bringup)/launch/teleop_cube_petit.launch"/>
+
+  <!-- launch LiDAR -->
   <!-- laser filter node ( cut data of cube-petit's pole) -->
   <group ns="/pacecat">
     <include file="$(find cube_petit_bringup)/launch/lidar_bringup.launch"/>
     <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="cube_petit_pacecat_filter">
+      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml"/>
+    </node>
+  </group>
+
+  <!-- launch IMU -->
+  <!-- <include file="$(find wt901B_ros)/launch/wt901B_ros.launch"/> -->
+
       <!-- <remap from="scan" to="scan" /> -->
       <!-- <remap from="scan_filtered" to="scan_filtered"/> -->
       <!-- v1 -->
       <!-- <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" /> -->
       <!-- v2 -->
-      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml"/>
-    </node>
-  </group>
- 
-  <!-- <include file="$(find cube_petit_bringup)/launch/realsense_rgbd.launch"/> -->
 
+  <!-- imaha iranai -->
+  <include file="$(find cube_petit_bringup)/launch/realsense_rgbd.launch"/>
+
+  <!-- launch CAMERA -->
   <include file="$(find cube_petit_bringup)/launch/rear_camera_bringup.launch"/>
 
+  <!-- launch BMS -->
   <include file="$(find jbd_battery_monitor)/launch/battery_monitor.launch"/>
 
   <node name="robot_pose_publisher" pkg="robot_pose_publisher" type="robot_pose_publisher" launch-prefix="nice -n 19">
     <param name="is_stamped" value="true"/>
   </node>
 
+  <!-- launch WEB_APP -->
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
     <arg name="port" value="9090"/>
     <arg name="websocket_ping_interval" value="5" />
     <arg name="websocket_ping_timeout" value="3" />
   </include>
-
-  <include file="$(find cube_diagnostic)/launch/diagnostic.launch">
+  <include file="$(find cube_diagnostic)/launch/diagnostic_aggregator.launch">
       <arg name="config_file" value="cube_petit_analyzers.yaml"/>
   </include>
+
+  <!-- launch SPEECH -->
+  <include file="$(find cube_petit_bringup)/launch/talk_and_listen.launch"/>
+
+
+  <!-- <include file="$(find cube_chat/launch/cube_chat.launch"/> -->
+
+  <!-- launch FACE -->
+  <include file="$(find cube_facial_animation)/launch/web.launch"/>
+
+  <!-- launch ARDUINO -->
+  <!-- <node name="rosserial_python" pkg="rosserial_python" type="serial_node.py" launch-prefix="nice -n 19">
+    <param name="port" value="/dev/ttyARDUINO_IR"/>
+    <param name="baud" value="57600"/>
+  </node> -->
+
+  <!-- <node name="rosserial_python2" pkg="rosserial_python" type="serial_node.py" launch-prefix="nice -n 19">
+    <param name="port" value="/dev/ttyARDUINO_FAN"/>
+    <param name="baud" value="57600"/>
+  </node> -->
 
 </launch>

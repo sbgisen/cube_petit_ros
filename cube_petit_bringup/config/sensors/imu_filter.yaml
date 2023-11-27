@@ -1,0 +1,9 @@
+publish_debug_topics: false
+yaw_only_mode: true
+drift_wait_time: 4.0
+drift_lpf_time_constant: 3.96
+thresh_imu_gyro_stop: 0.5
+thresh_imu_jerk_stop: 20.0
+thresh_odom_twist_stop: 0.2
+thresh_cmd_vel_stop: 0.01
+cmd_vel_timeout: 3.0

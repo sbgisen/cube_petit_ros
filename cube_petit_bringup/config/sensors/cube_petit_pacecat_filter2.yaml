@@ -1,11 +1,16 @@
 scan_filter_chain:
-- name: angle0    # left side
+- name: angle0    # right front
   type: laser_filters/LaserScanAngularBoundsFilterInPlace
   params:
-    lower_angle:  -1.5708
-    upper_angle:  -0.6098
-- name: angle1   # right side
+    lower_angle:  -1.2217
+    upper_angle:  -0.5236
+- name: angle1   # left behind
   type: laser_filters/LaserScanAngularBoundsFilterInPlace
   params:
-    lower_angle: 1.5708
-    upper_angle: 2.5418
+    lower_angle: 1.9199
+    upper_angle: 2.6180
+
+# with zero angle being forward along the x axis
+# COUNTERclockwise (right+, left-)
+# range is - 3.1415 to 3.1415 [rad]
+# 30deg = 0.5236 70deg = 1.2217 110de = 1.0199 120de = 2.0944 150de = 2.6180

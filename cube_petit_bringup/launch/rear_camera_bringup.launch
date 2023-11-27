@@ -3,30 +3,34 @@
 
   <group ns="/rear_camera/rear_camera">
     <!-- launch カメラ -->>
-    <node pkg="uvc_camera" type="uvc_camera_node" name="usb_camera_node">
-        <param name="device" type="string" value="/dev/video0"/>
+    <!-- <node pkg="uvc_camera" type="uvc_camera_node" name="usb_camera_node">
+        <param name="device" type="string" value="/dev/rear_camera"/>
         <param name="pixel_format" value="YUYV"/>
         <param name="camera_frame_id" value="rear_camera"/>
         <param name="io_method" value="mmap"/>
         <param name="frame_id" value="rear_camera_optical_link"/>
+        <param name="camera_info_url" type="string" value="file://$(find cube_petit_bringup)/config/sensors/rear_camera/camera.yaml"/> </node>  -->
+    <node pkg="usb_cam" type="usb_cam_node" name="usb_cam">
+        <param name="device" type="string" value="/dev/rear_camera"/>
+        <param name="pixel_format" value="yuyv"/>
+        <param name="camera_frame_id" value="rear_camera"/>
+        <param name="io_method" value="mmap"/>
+        <param name="frame_id" value="rear_camera_optical_link"/>
         <param name="camera_info_url" type="string" value="file://$(find cube_petit_bringup)/config/sensors/rear_camera/camera.yaml"/> -->
-    </node> 
-    <node name="image_raw_view" pkg="image_view" type="image_view" >
-      <remap from="image" to="image_raw"/>
     </node>
   </group>
 
     <!-- ARマーカー Settings --><!-- marker size [cm]-->
-    <!-- <arg name="marker_size" default="5.5" /> 
+    <!-- <arg name="marker_size" default="5.5" />
     <arg name="max_new_marker_error" default="0.08" />
     <arg name="max_track_error" default="0.2" />
     <arg name="cam_image_topic" default="/rear_camera/image_raw" />
     <arg name="cam_info_topic" default="/rear_camera/camera_info" />
     <arg name="output_frame" default="/rear_cameras" /> -->
-    
+
     <!-- launch AR_TRACK_ALVAR -->
     <!-- <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen"
-    args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) 
+    args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error)
           $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame)" /> -->
 
 
@@ -64,7 +68,7 @@ Format Video Capture:
 	Transfer Function : Default
 	YCbCr Encoding    : Default
 	Quantization      : Default
-	Flags             : 
+	Flags             :
 Crop Capability Video Capture:
 	Bounds      : Left 0, Top 0, Width 640, Height 480
 	Default     : Left 0, Top 0, Width 640, Height 480

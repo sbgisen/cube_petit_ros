@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-  <node pkg="cube_petit_text_to_speech" name="cube_petit_text_to_speech" type="jtalk.py" output="screen"/>
-  <node pkg="cube_petit_text_to_speech" name="cube_petit_text_to_emotion" type="text_to_emotion.py" output="screen"/>
+  <node pkg="cube_petit_text_to_speech" name="cube_petit_text_to_speech" type="jtalk.py"
+    output="screen"/>
+
+  <!-- For Python3.7 Only-->
+  <!-- <node pkg="cube_petit_text_to_speech" name="cube_petit_text_to_emotion"
+  type="text_to_emotion.py" output="screen"/> -->
+
 </launch>

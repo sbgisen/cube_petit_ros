@@ -11,22 +11,16 @@
 
   <arg name="camera_image" default="/rear_camera/rear_camera/image_raw"/>
   <arg name="camera_info" default="/rear_camera/rear_camera/camera_info"/>
-  
   <arg name="output_frame" default="rear_camera_optical_link"/>
   <arg name="bundle_files" default="$(find cube_petit_ar_docking)/config/ar_markers/bundles/Marker012.xml"/>
-
-
-  <node name="ar_track_alvar" pkg="ar_track_alvar" type="findMarkerBundlesNoKinect" respawn="false" output="screen" 
-  args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) 
-  $(arg camera_image) $(arg camera_info) $(arg output_frame) $(arg bundle_files)"/>
-
+  <node name="ar_track_alvar" pkg="ar_track_alvar" type="findMarkerBundlesNoKinect" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error)    $(arg camera_image) $(arg camera_info) $(arg output_frame) $(arg bundle_files)"/>
   <!-- <node pkg="rostopic" type="rostopic" name="battery_remaining" args="pub -r 20 /gazebo_battery_monitor/battery_remaining std_msgs/Float64 9.0"  output="screen" />
   <node pkg="rostopic" type="rostopic" name="battery_voltage" args="pub -r 20 /gazebo_battery_monitor/battery_voltage std_msgs/Float64 13.0"  output="screen"/>
   <node pkg="rostopic" type="rostopic" name="charge_current" args="pub -r 20 /gazebo_battery_monitor/charge_current std_msgs/Float64 1.0"  output="screen"/>
  -->
   <node name="ar_docking_server" pkg="cube_petit_ar_docking" type="cube_petit_ar_docking_node" output="screen">
     <rosparam command="load" file="$(find cube_petit_ar_docking)/config/docking/cube_petit.yaml"/>
-  </node> 
-  <include file="$(find cube_speech)/launch/speech_server.launch"/>
+  </node>
+  <!-- <include file="$(find cube_speech)/launch/speech_server.launch"/> -->
 
 </launch>

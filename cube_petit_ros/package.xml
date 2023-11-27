@@ -59,6 +59,9 @@
   <build_depend>cube_petit_description</build_depend>
   <build_depend>cube_petit_gazebo</build_depend>
   <build_depend>cube_petit_navigation</build_depend>
+  <build_depend>cube_petit_ar_docking</build_depend>
+  <build_depend>jbd_battery_monitor</build_depend>
+  <build_depend>navigation_goals</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>

@@ -94,11 +94,16 @@ source setup.bash
 ### 4-2. Other PC (Ubuntu16,18,20)
 
 ```
-cd ~/catkin_ws/src
+sudo apt install -y python3-pip python3-colcon-common-extensions python3-setuptools python3-vcstool
+pip3 install -U setuptools
+
 git clone git@github.com:sbgisen/cube_petit_ros.git
 cd cube_petit_ros/cube_petit_ros
-catkin bt
-source ~/catkin_ws/devel/setup.bash
+rosdep install -i --from-paths ./
+cd ~/ros/src/
+vcs import < cube_petit_ros/.rosinstall
+catkin build
+source ~/.bashrc
 ```
 ## 5. Quick Usage
 

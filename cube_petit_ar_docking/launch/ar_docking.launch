@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-    <include file="$(find cube_petit_ar_docking)/launch/ar_action_client.launch"/>
-    <include file="$(find cube_petit_ar_docking)/launch/ar_tracking.launch"/>
-    <include file="$(find cube_speech)/launch/speech_server.launch"/>
+  <include file="$(find cube_petit_ar_docking)/launch/ar_action_client.launch"/>
+  <include file="$(find cube_petit_ar_docking)/launch/ar_tracking.launch"/>
+  <!-- <include file="$(find cube_speech)/launch/speech_server.launch"/> -->
 </launch>

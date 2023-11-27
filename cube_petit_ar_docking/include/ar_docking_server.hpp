@@ -23,29 +23,29 @@
 #include <actionlib/server/simple_action_server.h>
 #include <linux/can.h>
 #include <linux/can/raw.h>
-#include <math.h>  /* M_PI */
-# include "cube_petit_ar_docking/ARDockingAction.h"
-# include "pregoal_broadcaster.hpp"
-# include "ar_docking_controller.hpp"
-# include "battery_current_monitor.hpp"
-# include "move_base_action_client.hpp"
-# include "speech_util.hpp"
-
+#include <math.h> /* M_PI */
+#include "cube_petit_ar_docking/ARDockingAction.h"
+#include "pregoal_broadcaster.hpp"
+#include "ar_docking_controller.hpp"
+#include "battery_current_monitor.hpp"
+#include "move_base_action_client.hpp"
+#include "speech_util.hpp"
 
 typedef actionlib::SimpleActionServer<cube_petit_ar_docking::ARDockingAction> Server;
 
-class AR_Docking_Server {
+class ArDockingServer
+{
 private:
-  Server server;
-  Pregoal_Broadcaster pregoal_broadcaster;
-  AR_Docking_Controller ar_docking_controller;
-  float current_data[10];
-  int current_data_count;
-  cube_petit_ar_docking::ARDockingResult result;
+  Server server_;
+  Pregoal_Broadcaster pregoal_broadcaster_;
+  AR_Docking_Controller ar_docking_controller_;
+  float current_data_[10];
+  int current_data_count_;
+  cube_petit_ar_docking::ARDockingResult result_;
 
 public:
-  AR_Docking_Server(ros::NodeHandle nh);
-  ~AR_Docking_Server();
+  ArDockingServer(ros::NodeHandle nh);
+  ~ArDockingServer();
   // void currentCallback(const std_msgs::Float64::ConstPtr& msg);
   // int isCharging();
   // void publish_tf_pregoal(std::vector<double>& pregoal);
@@ -55,6 +55,4 @@ public:
   void actionFinish(int result, Server* as);
 };
 
-
-
-#endif //AR_DOCKING_SERVER
+#endif  // AR_DOCKING_SERVER

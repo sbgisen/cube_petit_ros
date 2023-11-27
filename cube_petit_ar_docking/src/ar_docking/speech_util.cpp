@@ -41,7 +41,7 @@ int Speech_Util::say(std::string text, std::string type, std::string emotion, in
 /////////////////////////////
 
 Speech_Util::Speech_Util(ros::NodeHandle nh)
-  //speech_service(nh, "speech_service")//, boost::bind(&AR_Docking_Server::actionServerCallback, this, _1, &server), false),
+  //speech_service(nh, "speech_service")//, boost::bind(&ArDockingServer::actionServerCallback, this, _1, &server), false),
  {
   ROS_INFO("Speech_Util::Speech_Util");
 
@@ -58,4 +58,3 @@ Speech_Util::Speech_Util(ros::NodeHandle nh)
 Speech_Util::~Speech_Util() {
   ROS_INFO("Speech_Util::Speech_Util");
 }
-

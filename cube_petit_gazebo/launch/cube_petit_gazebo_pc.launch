@@ -1,69 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
-
-    <!-- load cube_petit urdf -->
-    <arg name="cube_petit_version1" default="true"/>
-    <arg name="cube_petit_version2" default="false"/>
-
-
-    <!-- version1 -->
-    <!-- <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" /> -->
-    <!-- <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo.yaml"/> -->
-
-    <!-- version2 -->
-    <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit_v2.xacro" />
-    <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo2.yaml"/>
-
-    <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
-
-    <env name="GAZEBO_MODEL_PATH" value="$(find cube_petit_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)" />
-
-    <!-- cut laser data of cube_petit's pole -->
-    <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="cube_petit_pacecat_filter" ns="/pacecat">
-      <remap from="scan" to="scan" />
-      <remap from="scan_filtered" to="scan_filtered" />
-      <!-- v1 -->
-      <!-- <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" /> -->
-      <!-- v2 -->
-      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml" />
-    </node>
-
-    <arg name="model2" default="$(find cube_petit_gazebo)/models/charge_doc/cube_petit_charge_doc.xacro"/>   
-    <param name="robot_description2" command="$(find xacro)/xacro $(arg model2) --inorder"/>
-
-    <!-- launch gazebo -->
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="paused" value="false"/>
-        <arg name="use_sim_time" value="true"/>
-        <arg name="gui" value="true"/>
-        <arg name="headless" value="false"/>
-        <arg name="debug" value="false"/>
-        <!-- load world file from /worlds/ -->
-        <arg name="world_name" value="$(find cube_petit_gazebo)/worlds/cube_with_house.world"/>
-    </include>
-
-    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model cube_petit -x 1 -y -2.5" />
-    <node name="spawn_urdf2" pkg="gazebo_ros" type="spawn_model" args="-param robot_description2 -urdf -model cube_petit_charge_doc -x 0 -y -2.5" />
-
-
-    <!-- load controller_manager and robot_state_publisher -->
-    <param name="/diff_drive_controller/enable_odom_tf" value="true"/>
-    <!-- for gazebo param file is /config/odom_gazebo.yaml -->
-
-
-    <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/cube_petit" args="joint_state_controller diff_drive_controller"/>
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/cube_petit"/>
-    
-    <!-- launch rviz -->
-    <node name="rviz" pkg="rviz" type="rviz" args="" required="false"/>
-    <group ns="rviz_topics_relay">
-      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /navigation/clicked_point"/>
-      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /navigation/initialpose"/>
-      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /navigation/move_base_simple/goal"/>
-    </group>
-
-    <!-- launch teleop -->
-    <!-- <group ns="joystick">
+  <!-- load cube_petit urdf -->
+  <arg name="cube_petit_version1" default="true"/>
+  <arg name="cube_petit_version2" default="false"/>
+  <!-- version1 -->
+  <!-- <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" /> -->
+  <!-- <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo.yaml"/> -->
+  <!-- version2 -->
+  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit_v2.xacro"/>
+  <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo2.yaml"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
+  <env name="GAZEBO_MODEL_PATH" value="$(find cube_petit_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)"/>
+  <!-- cut laser data of cube_petit's pole -->
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="cube_petit_pacecat_filter" ns="/pacecat">
+    <remap from="scan" to="scan"/>
+    <remap from="scan_filtered" to="scan_filtered"/>
+    <!-- v1 -->
+    <!-- <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" /> -->
+    <!-- v2 -->
+    <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml"/>
+  </node>
+  <arg name="model2" default="$(find cube_petit_gazebo)/models/charge_doc/cube_petit_charge_doc.xacro"/>
+  <param name="robot_description2" command="$(find xacro)/xacro $(arg model2) --inorder"/>
+  <!-- launch gazebo -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+    <!-- load world file from /worlds/ -->
+    <arg name="world_name" value="$(find cube_petit_gazebo)/worlds/cube_with_house.world"/>
+  </include>
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model cube_petit -x 1 -y -2.5"/>
+  <node name="spawn_urdf2" pkg="gazebo_ros" type="spawn_model" args="-param robot_description2 -urdf -model cube_petit_charge_doc -x 0 -y -2.5"/>
+  <!-- load controller_manager and robot_state_publisher -->
+  <param name="/diff_drive_controller/enable_odom_tf" value="true"/>
+  <!-- for gazebo param file is /config/odom_gazebo.yaml -->
+  <node name="controller" pkg="controller_manager" type="spawner" respawn="false" output="screen" ns="/cube_petit" args="joint_state_controller diff_drive_controller"/>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" ns="/cube_petit"/>
+  <!-- launch rviz -->
+  <node name="rviz" pkg="rviz" type="rviz" args="" required="false"/>
+  <group ns="rviz_topics_relay">
+    <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /clicked_point"/>
+    <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /initialpose"/>
+    <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /move_base_simple/goal"/>
+  </group>
+  <!-- launch teleop -->
+  <!-- <group ns="joystick">
       <arg name="teleop_config" default="$(find cube_petit_bringup)/config/ps3.config.yaml"/>
       <node name="joy_node" pkg="joy" type="joy_node"/>
       <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
@@ -74,19 +58,17 @@
      -->
   <group ns="joystick">
     <arg name="teleop_config" default="$(find cube_petit_bringup)/config/ps3.config.yaml"/>
-    <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder" />
-    <node name="joy_node" pkg="joy" type="joy_node" >
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
+    <node name="joy_node" pkg="joy" type="joy_node">
       <param name="autorepeat_rate" value="10.0"/>
     </node>
     <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
-      <rosparam command="load" file="$(arg teleop_config)" />
+      <rosparam command="load" file="$(arg teleop_config)"/>
       <remap from="cmd_vel" to="/cube_petit/diff_drive_controller/cmd_vel"/>
     </node>
-   </group>
-
-       <!-- Charging simulation -->
-    <include file="$(find cube_petit_gazebo)/launch/include/docking_station_simulation.launch">
-      <arg name="robot" value="cube-petit"/>
-    </include>
-
+  </group>
+  <!-- Charging simulation -->
+  <include file="$(find cube_petit_gazebo)/launch/include/docking_station_simulation.launch">
+    <arg name="robot" value="cube-petit"/>
+  </include>
 </launch>

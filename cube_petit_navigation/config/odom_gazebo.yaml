@@ -3,7 +3,7 @@ cube_petit/diff_drive_controller:
   left_wheel  : "left_wheel_joint"
   right_wheel : "right_wheel_joint"
 
-  publish_rate: 50.0
+  publish_rate: 100.0 #50
   cmd_vel_timeout: 30.0
   wheel_separation : 0.154
   wheel_radius : 0.033

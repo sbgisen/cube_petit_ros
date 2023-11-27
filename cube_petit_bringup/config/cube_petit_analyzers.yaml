@@ -1,0 +1,70 @@
+analyzers:
+  battery:
+    type: diagnostic_aggregator/AnalyzerGroup
+    path: battery
+    analyzers:
+      epsolar_device:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: epsolar
+        find_and_remove_prefix: diagnostic_epsolar
+      battery:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: remaining_battery
+        find_and_remove_prefix: diagnostic_battery
+  motors:
+    type: diagnostic_aggregator/AnalyzerGroup
+    path: motors
+    analyzers:
+      wheel_right:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: wheel_right
+        find_and_remove_prefix: diagnostic_wheel_right_
+        num_items: 2
+      wheel_left:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: wheel_left
+        find_and_remove_prefix: diagnostic_wheel_left_
+        num_items: 2
+  sensors:
+    type: diagnostic_aggregator/AnalyzerGroup
+    path: sensors
+    analyzers:
+      map_scan:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: map_scan
+        find_and_remove_prefix: diagnostic_map_scan_
+      depth_camera:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: depth_camera
+        find_and_remove_prefix: diagnostic_depth_camera_
+        num_items: 2
+      imu:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: imu
+        find_and_remove_prefix: diagnostic_imu_
+        num_items: 2
+      foot_scan:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: foot_scan
+        find_and_remove_prefix: diagnostic_foot_scan_
+        num_items: 2
+      body_scan:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: body_scan
+        find_and_remove_prefix: diagnostic_body_scan_
+        num_items: 2
+      head_scan:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: head_scan
+        find_and_remove_prefix: diagnostic_head_scan_
+        num_items: 2
+  move_base:
+    type: diagnostic_aggregator/AnalyzerGroup
+    path: move_base
+    analyzers:
+      movebase:
+        type: diagnostic_aggregator/GenericAnalyzer
+        path: status
+        find_and_remove_prefix: diagnostic_move_base_status
+        discard_stale: true
+        timeout: 5.0

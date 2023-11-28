@@ -15,14 +15,15 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <cmath>
 #include "serial_communication.hpp"
 
-
-enum Params {
+enum Params
+{
   BATTERY_REMAINING,
   BATTERY_VOLTAGE,
   CHARGE_CURRENT
 };
-std::vector<double> battery_status_(3,0.0);
+std::vector<double> g_BATTERY_STATUS(3, 0.0);
 
-#endif //JBD_BATTERY_MONITOR
+#endif  // JBD_BATTERY_MONITOR

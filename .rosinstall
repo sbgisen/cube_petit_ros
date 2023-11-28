@@ -1,0 +1,16 @@
+- git:
+    uri: git@github.com:sbgisen/ros_controllers.git
+    local-name: ros_controllers
+    version: feature/cube_petit
+- git:
+    uri: git@github.com:sbgisen/cube_speech.git
+    local-name: cube_speech
+    version: noetic-devel
+- git:
+    uri: git@github.com:sbgisen/lh_laser_driver.git
+    local-name: lh_laser_driver
+    version: develop
+- git:
+    uri: git@github.com:sbgisen/brass_gazebo_battery.git
+    local-name: brass_gazebo_battery
+    version: feature/export_library

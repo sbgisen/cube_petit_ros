@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <!-- <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity> -->
+
+    <!--
+    https://github.com/BruceChanJianLe/gazebo-actor/tree/650cb17121076ac5fcb3ded8a21f3fad7d2cac7c#Attach-Collision-Model-to-Actor-Plugin -->
+    <!-- how to use  -->
+
+    <model name="actor_collision_model">
+      <pose>0 0 0 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <collision name="link">
+          <pose>0 -0.18 0.00 1.57 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.3</radius>
+              <length>1.8</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <!-- <visual name="link">
+          <pose>0 -0.18 0.00 1.57 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>0.3</radius>
+              <length>1.8</length>
+            </cylinder>
+          </geometry>
+        </visual> -->
+      </link>
+    </model>
+
+    <actor name="actor">
+      <skin>
+        <filename>file://media/models/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <pose>0 0 0 0 0 0</pose>
+      <animation name="walking">
+        <filename>file://media/models/walk.dae</filename>
+        <scale>1.000000</scale>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+
+
+      <plugin name="actor_plugin" filename="libPedestrianSFMRandomPlugin.so">
+        <velocity>0.70</velocity>
+        <radius>0.4</radius>
+        <animation_factor>5.1</animation_factor>
+        <people_distance>6.0</people_distance>
+        <goal_weight>2.0</goal_weight>
+        <obstacle_weight>10.0</obstacle_weight>
+        <social_weight>15</social_weight>
+        <group_gaze_weight>3.0</group_gaze_weight>
+        <group_coh_weight>2.0</group_coh_weight>
+        <group_rep_weight>1.0</group_rep_weight>
+        <ignore_obstacles>
+          <model>ground_plane</model>
+          <model>actor_collision_model</model>
+        </ignore_obstacles>
+        <trajectory>
+          <cyclic>true</cyclic>
+          <waypoint>2 0 -1</waypoint>
+          <waypoint>2 -2 -1</waypoint>
+          <waypoint>-2 -2 -1</waypoint>
+          <waypoint>-2 0 -1</waypoint>
+        </trajectory>
+        <!-- <random_trajectory>
+          <steps>10</steps>
+          <origin>1.0 0.0 0.0</origin>
+          <rx>11.0</rx>
+          <ry>6.0</ry>
+        </random_trajectory> -->
+      </plugin>
+
+      <plugin name="attach_model" filename="libAttachModelPlugin.so">
+        <link>
+          <link_name>actor_pose</link_name>
+          <model>
+            <model_name>actor_collision_model</model_name>
+          </model>
+        </link>
+      </plugin>
+
+      <plugin name="ground_truth" filename="libgazebo_ros_p3d.so">
+        <frameName>world</frameName>
+        <bodyName>actor_pose</bodyName>
+        <topicName>/tracker</topicName>
+        <updateRate>10.0</updateRate>
+      </plugin>
+    </actor>
+
+
+  </world>
+</sdf>

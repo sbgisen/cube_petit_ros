@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <joint name="laser_joint" type="fixed">
     <parent link="body_link"/>
@@ -32,7 +32,7 @@
     <mu1 value="0.5"/>
     <kp value="50000"/>
     <kd value="0"/>
-    <sensor type="ray" name="pacecat">
+    <sensor type="gpu_ray" name="pacecat">
       <pose>0 0 0 0 0 0</pose>
       <visualize>false</visualize>
       <update_rate>10</update_rate>
@@ -56,7 +56,7 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_laser.so">
+      <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_gpu_laser.so">
         <topicName>/pacecat/scan</topicName>
         <frameName>pacecat_link</frameName>
       </plugin>

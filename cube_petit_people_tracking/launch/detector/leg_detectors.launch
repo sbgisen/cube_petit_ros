@@ -1,0 +1,22 @@
+<!-- Alternative launch file that launches two instances of the laser-based leg detector from wg-perception (needs to be installed separately) -->
+<launch>  
+    <arg name="config_file" default="$(find cube_petit_people_tracking)/config/leg_detector/default.yaml"/>
+
+    <arg name="detection_id_increment" default="20"/>
+    <arg name="detection_id_offset" default="1"/>
+
+    <!-- With default prefix, topic and node names will be similar to those from laser_detectors.launch. Override this if you want to run both at the same time! -->
+    <arg name="node_prefix" default="laser_leg"/>
+
+    <group ns="/spencer/perception_internal/people_detection">
+        <include file="$(find cube_petit_people_tracking)/launch/detector/leg_detector_wrapper/leg_detector.launch">
+            <arg name="scan" value="/pacecat/scan_filtered"/>
+            <arg name="node_prefix" value="$(arg node_prefix)"/>
+            <arg name="detected_persons" value="/spencer/perception_internal/detected_persons/$(arg node_prefix)_front"/>
+            <arg name="detection_id_increment" value="$(arg detection_id_increment)"/>
+            <arg name="detection_id_offset" value="$(arg detection_id_offset)"/>
+            <arg name="config_file" value="$(arg config_file)"/>
+        </include>
+    </group>
+
+</launch>

@@ -1,0 +1,43 @@
+<launch>
+    <arg name="rgbd" default="true"/>
+    <arg name="common_frame_id" default="base_footprint"/>
+
+    <!-- Nodelet manager for all detected person association-related nodelets -->
+    <group ns="/spencer/perception_internal/detected_person_association">
+        <node name="detected_person_association_nodelet_manager" pkg="nodelet" type="nodelet" args="manager" output="screen" required="true" launch-prefix="nice -n 20"/>
+    </group>
+
+    <!-- FIXME: First associate e.g. front HOG + laser, afterwards aggregate front & rear! (Otherwise association is more costly, and remember it is O(n²!)) -->
+    <!-- That also allows to spread the association load across two laptops -->
+
+    <!-- Aggregate laser detections -->
+    <include file="$(find spencer_detected_person_association)/launch/aggregate_lasers.launch">
+        <arg name="common_frame_id" value="$(arg common_frame_id)"/>
+    </include>
+
+    <!-- Aggregate high-recall laser detectors -->
+    <include file="$(find spencer_detected_person_association)/launch/aggregate_high_recall_lasers.launch">
+        <arg name="common_frame_id" value="$(arg common_frame_id)"/>
+    </include>
+
+    
+    <!-- Aggregate RGB-D detections (optional) -->
+    <group if="$(arg rgbd)">
+        <include file="$(find spencer_detected_person_association)/launch/aggregate_rgbd_upper_body.launch">
+            <arg name="common_frame_id" value="$(arg common_frame_id)"/>
+        </include>
+
+        <include file="$(find spencer_detected_person_association)/launch/aggregate_rgbd_ground_hog.launch">
+            <arg name="common_frame_id" value="$(arg common_frame_id)"/>
+        </include>
+    </group>
+
+    <!-- Aggregate face detections (care-o-bot) -->
+    <group if="$(arg rgbd)">
+        <include file="$(find spencer_detected_person_association)/launch/aggregate_faces.launch">
+            <arg name="common_frame_id" value="$(arg common_frame_id)"/>
+        </include>
+    </group>
+
+
+</launch>

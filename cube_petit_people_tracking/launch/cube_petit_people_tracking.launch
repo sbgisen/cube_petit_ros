@@ -1,0 +1,17 @@
+<launch>
+
+    <!-- People detector -->
+    <include file="$(find spencer_people_tracking_launch)/launch/detectors/laser_detectors.launch">
+        <arg name="low_confidence_detections" default="false"/>
+        <arg name="laser_max_distance" default="5"/>
+    </include>
+    
+    <include file="$(find cube_petit_people_tracking)/launch/detector/leg_detectors.launch"/>
+
+    <!-- People tracking -->
+    <include file="$(find cube_petit_people_tracking)/launch/tracker/freiburg_people_tracking.launch">
+        <arg name="rgbd" default="false"/>
+        <arg name="laser_low_confidence_detections" default="false"/>
+    </include>
+
+</launch>

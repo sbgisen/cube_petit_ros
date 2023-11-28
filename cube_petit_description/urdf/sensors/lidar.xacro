@@ -3,7 +3,7 @@
   <joint name="laser_joint" type="fixed">
     <parent link="body_link"/>
     <child link="pacecat_link"/>
-    <origin rpy="0 0 3.14159" xyz="0.0 0 0.23975"/>
+    <origin rpy="0 0 0" xyz="0.0 0 0.23975"/>
   </joint>
   <link name="pacecat_link">
     <inertial>
@@ -63,4 +63,3 @@
     </sensor>
   </gazebo>
 </robot>
-

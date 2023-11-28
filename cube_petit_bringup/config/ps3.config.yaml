@@ -1,12 +1,17 @@
+# Joy L Stick (0:Right)
 axis_linear: 1
-scale_linear: 0.5
-scale_linear_turbo: 1.5
 
+# ZENGO
+scale_linear: 0.3
+scale_linear_turbo: 0.7
+
+# KAITEN
 axis_angular: 0
 scale_angular: 5.0
 
-enable_button: 1  # batu button
-enable_turbo_button: 10  # L1 shoulder button
+# TURBO
+enable_button: 1 # batu button
+enable_turbo_button: 6 # L1 shoulder button
 
 # 0:select  1:leftJOY   2:rightJOY  3:start
 # 4:ue      5:migi      6:sita      7:hidari

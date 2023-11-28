@@ -130,7 +130,7 @@
       <plugin name="ground_truth" filename="libgazebo_ros_p3d.so">
         <frameName>world</frameName>
         <bodyName>actor_pose</bodyName>
-        <topicName>/tracker</topicName>
+        <topicName>/actor_tracker</topicName>
         <updateRate>10.0</updateRate>
       </plugin>
     </actor>

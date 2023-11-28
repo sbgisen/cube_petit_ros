@@ -25,8 +25,8 @@
 class Cube_Petit_Hardware_Interface : public hardware_interface::RobotHW{
 
 private:
-  //std::shared_ptr<Dji_Can_Communication> dji_can_ptr_;
-  Dji_Can_Communication dji_can_;
+  //std::shared_ptr<DjiCanCommunication> dji_can_ptr_;
+  DjiCanCommunication dji_can_;
   hardware_interface::JointStateInterface    joint_state_interface_;
   hardware_interface::VelocityJointInterface joint_velocity_interface_;
   hardware_interface::EffortJointInterface effort_joint_interface_;
@@ -58,7 +58,7 @@ public:
   Cube_Petit_Hardware_Interface();
   ~Cube_Petit_Hardware_Interface();
   void initialize(ros::NodeHandle nh);
-  std::string execCmd(std::string system_cmd);
+  std::string execCmd(const std::string &system_cmd);
   void update();
   void write();
   void read();

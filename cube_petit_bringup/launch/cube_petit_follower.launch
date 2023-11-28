@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <node pkg="nodelet" type="nodelet" name="turtlebot_follower"
+    args="load turtlebot_follower/TurtlebotFollower /camera/camera/camera_manager">
+    <remap from="turtlebot_follower/cmd_vel" to="/cube_petit/diff_drive_controller/cmd_vel"/>
+    <remap from="depth/points" to="/camera/camera/points"/>
+    <param name="enabled" value="false"/>
+
+    <param name="x_scale" value="14.0"/>
+    <param name="z_scale" value="4.0"/>
+    <param name="min_x" value="-0.35"/>
+    <param name="max_x" value="0.35"/>
+    <param name="min_y" value="0.1"/>
+    <param name="max_y" value="0.5"/>
+    <param name="max_z" value="1.2"/>
+    <param name="goal_z" value="0.6"/>
+  </node>
+</launch>

@@ -1,79 +1,69 @@
+<?xml version="1.0"?>
 <launch>
-    <!-- Set and remove parameter for web console. -->
-  <arg name="map_info_file" default="/home/gisen/map/M20210525165127330/map_info.yaml"/>
+  <!-- Set and remove parameter for web console. -->
+  <!-- <arg name="map_info_file" default="/home/gisen/map/M20210525165127330/map_info.yaml"/>
   <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/>
   <rosparam command="delete" param="map_info/building_id"/>
-  <rosparam command="delete" param="map_info/floor_id"/>
-  <group ns="navigation">
-    
-    <!--[EDIT] robot name-->
-    <arg name="robot" default="cube_petit"/>
-    <!--[EDIT] topic name of /scan-->
-    <arg name="scan" default="/pacecat/scan_filtered"/>
-    <!--[EDIT] topic name of /odom-->
-    <arg name="odom" default="/cube_petit/diff_drive_controller/odom"/>
-
-    <!-- [EDIT] map file name-->
-    <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
-
-    <!-- <arg name="map_file" default="$(find cube_petit_gazebo)/map/floor_eight/map.yaml"/> -->
-    <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/airi_v2/map.yaml"/> -->
-    <arg name="map_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml"/>
-
-    <!-- [EDIT] keepout map file name if you need -->
-    <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml" />
-    <arg name="use_keepout" default="true" />
-    <param name="map_server/map_file" value="$(arg map_file)" />
-
-
-
-
-
-    <!-- If "costmap_image = true" launch costmap_to_image node -->
-    <arg name="costmap_image" default="false" />
-
-    <!-- Navigation parameter files -->
-    <arg name="move_base_include" default="$(find cube_petit_navigation)/launch/include/move_base.launch.xml"/>
-    <arg name="amcl_include" default="$(find cube_petit_navigation)/launch/include/amcl.launch.xml"/>
-
-
-    <!-- serve up a map -->
-    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
-
-    <!-- serve up a map with keepout zones -->
-    <group if="$(arg use_keepout)" >
+  <rosparam command="delete" param="map_info/floor_id"/> -->
+  <!-- <group ns="navigation"> -->
+  <!--[EDIT] robot name-->
+  <arg name="robot" default="cube_petit"/>
+  <!--[EDIT] topic name of /scan-->
+  <arg name="scan" default="/pacecat/scan_filtered"/>
+  <!--[EDIT] topic name of /odom-->
+  <arg name="odom" default="/cube_petit/diff_drive_controller/odom"/>
+  <!-- [EDIT] map file name-->
+  <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
+  <arg name="map_info_file" default="(find cube_petit)/map/daikaigisitu/map.yaml"/>
+  <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/>
+  <!-- <arg name="map_file" default="$(find cube_petit_gazebo)/map/floor_eight/map.yaml"/> -->
+  <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/airi_v2/map.yaml"/> -->
+  <arg name="map_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml"/>
+  <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/maker_fair/map.yaml"/> -->
+  <!-- <arg name="map_file" default="/home/gisen/map_24/map2/map.yaml"/> -->
+  <!-- [EDIT] keepout map file name if you need -->
+  <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml"/>
+  <!-- <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/maker_fair/map.yaml" /> -->
+  <!-- <arg name="map_keepout_file" default="/home/gisen/map_24/map2/map.yaml"/> -->
+  <arg name="use_keepout" default="true"/>
+  <param name="map_server/map_file" value="$(arg map_file)"/>
+  <!-- <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="odom_tf" args="0 0 0 0 0 0 map odom 100" /> -->
+  <!-- If "costmap_image = true" launch costmap_to_image node -->
+  <arg name="costmap_image" default="false"/>
+  <!-- Navigation parameter files -->
+  <arg name="move_base_include" default="$(find cube_petit_navigation)/launch/include/move_base.launch.xml"/>
+  <arg name="amcl_include" default="$(find cube_petit_navigation)/launch/include/amcl.launch.xml"/>
+  <!-- serve up a map -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)"/>
+  <!-- serve up a map with keepout zones -->
+  <group if="$(arg use_keepout)">
     <node name="map_keepout_server" pkg="map_server" type="map_server" args="$(arg map_keepout_file)">
-      <remap from="map" to="map_keepout" />
-      <remap from="static_map" to="static_map_keepout" />
+      <remap from="map" to="map_keepout"/>
+      <remap from="static_map" to="static_map_keepout"/>
     </node>
-    </group>
-
-    <!-- localize the robot -->
-
-    <include file="$(arg amcl_include)">
-      <arg name="scan_topic" value="$(arg scan)"/>  
-    </include>
-
-    <group ns="rviz_topics_relay">
-      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /navigation/clicked_point"/>
-      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /navigation/initialpose"/>
-      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /navigation/move_base_simple/goal"/>
-    </group>
-
-
-    <!-- move the robot -->
-    <include file="$(arg move_base_include)">
-      <arg if="$(arg use_keepout)" name="map_topic" value="map_keepout" />
-      <arg name="robot" value="$(arg robot)"/>
-      <!-- [EDIT] topic name of /odom -->
-      <arg name="odom_topic" value="$(arg odom)" />
-      <arg name="costmap_image" value="$(arg costmap_image)" />
-      <remap from="move_base_simple/goal" to="/move_base_simple/goal"/>
-      <remap from="initial_pose" to="/initial_pose"/>
-      <remap from="clicked_point" to="/clicked_point"/>
-      
-    </include>
   </group>
+  <!-- localize the robot -->
+  <include file="$(arg amcl_include)">
+    <arg name="scan_topic" value="$(arg scan)"/>
+  </include>
+  <!-- <group ns="rviz_topics_relay">
+      <node name="clicked_point_relay" pkg="topic_tools" type="relay" args="/clicked_point /clicked_point"/>
+      <node name="initialpose_relay" pkg="topic_tools" type="relay" args="/initialpose /initialpose"/>
+      <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /move_base_simple/goal"/>
+    </group> -->
+  <!-- move the robot -->
+  <include file="$(arg move_base_include)">
+    <arg if="$(arg use_keepout)" name="map_topic" value="map_keepout"/>
+    <arg name="robot" value="$(arg robot)"/>
+    <!-- [EDIT] topic name of /odom -->
+    <arg name="odom_topic" value="$(arg odom)"/>
+    <arg name="costmap_image" value="$(arg costmap_image)"/>
+    <!-- <remap from="move_base_simple/goal" to="/move_base_simple/goal"/>
+      <remap from="initial_pose" to="/initial_pose"/>
+      <remap from="clicked_point" to="/clicked_point"/> -->
+  </include>
+  <!-- </group> -->
 
 
 </launch>

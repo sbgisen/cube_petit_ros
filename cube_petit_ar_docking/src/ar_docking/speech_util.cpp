@@ -9,7 +9,7 @@ int Speech_Util::sayText(std::string text){
   speech_service.request.emotion_level = emo_level_default_;
   speech_service.request.pitch = pitch_default_;
   speech_service.request.speed = speed_default_;
- 
+
   if (client.call(speech_service)){
     ROS_INFO("Sum: %d", (int)speech_service.response.result);
   }else{
@@ -51,7 +51,7 @@ Speech_Util::Speech_Util(ros::NodeHandle nh)
   pitch_default_  = 100;  // voicetext 50~200 , jtalk 0~300
   speed_default_ = 100;      // voicetext 50~400, jtalk 0~300
 
- client = nh.serviceClient<cube_petit_ar_docking::CubeSpeech>("/speech_server");
+ client = nh.serviceClient<cube_petit_ar_docking::CubeSpeech>("speech_service");
 
 }
 

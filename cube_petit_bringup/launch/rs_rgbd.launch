@@ -67,7 +67,7 @@ Processing enabled by this node:
 
   <arg name="color_width"         default="320"/>
   <arg name="color_height"        default="180"/>
-  <arg name="enable_color"        default="false"/>
+  <arg name="enable_color"        default="true"/>
 
   <arg name="fisheye_fps"         default="30"/>
   <arg name="depth_fps"           default="30"/>

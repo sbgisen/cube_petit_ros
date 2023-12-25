@@ -10,14 +10,14 @@ import actionlib
 
 # Brings in the messages used by the ar_docking action, including the
 # goal message and the result message.
-import ar_docking.msg
+
 from std_msgs.msg import Float32
 from std_msgs.msg import Int8
 
 # import ar_docking.msg
-from bzrlib.commands import Command
+from breezy.commands import Command
 # import ar_docking_server
-
+import ar_docking.msg
 
 def ar_docking_action_client(goal='ar_marker_0'):
     # Creates the SimpleActionClient, passing the type of the action
@@ -39,7 +39,7 @@ def ar_docking_action_client(goal='ar_marker_0'):
 #     del client
 #     del _goal
     return return_tmp
-    
+
 class doChargeSubscriber: #ドッキング動作開始コマンド(1でドッキング開始,2でアンドック)
     def __init__(self):
         self._status = 0 #0:何もなし, 1:ドッキング開始, 2:アンドック
@@ -75,11 +75,11 @@ class arDockingActionClient: #ドッキング動作開始コマンド(1でドッ
 
 if __name__ == '__main__':
     # Initializes a rospy node so that the SimpleActionClient can
-    # publish and subscribe over ROS.      
+    # publish and subscribe over ROS.
     rospy.init_node('ar_docking_action_client')
     #reference: http://wiki.ros.org/actionlib_tutorials/Tutorials/Writing%20a%20Simple%20Action%20Client%20%28Python%29
     client = arDockingActionClient()
-    
+
     do_charge_subscriber = doChargeSubscriber()
     do_training = False # True: ぶつかり稽古
     doCharge = 0 #0:何もなし, 1:ドッキング開始, 2:アンドック

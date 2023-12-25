@@ -55,10 +55,14 @@
   <include file="$(find cube_petit_bringup)/launch/talk_and_listen.launch"/>
 
 
+
   <!-- <include file="$(find cube_chat/launch/cube_chat.launch"/> -->
 
   <!-- launch FACE -->
   <include file="$(find cube_facial_animation)/launch/web.launch"/>
+
+  <!-- omron -->
+  <include file="$(find omron_env_sensor)/launch/test.launch"/>
 
   <!-- launch ARDUINO -->
   <!-- <node name="rosserial_python" pkg="rosserial_python" type="serial_node.py" launch-prefix="nice -n 19">
@@ -70,5 +74,8 @@
     <param name="port" value="/dev/ttyARDUINO_FAN"/>
     <param name="baud" value="57600"/>
   </node> -->
+
+  <!-- launch respeaker -->
+  <!-- <include file="$(find respeaker_ros)/launch/respeaker.launch"/> -->
 
 </launch>

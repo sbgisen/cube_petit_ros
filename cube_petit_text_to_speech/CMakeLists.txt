@@ -4,20 +4,22 @@ project(cube_petit_text_to_speech)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
-find_package(
-  catkin REQUIRED
-  COMPONENTS roscpp
-             rospy
-             std_msgs
-             tf
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  omron_env_sensor_msgs
 )
 
 catkin_package(
-  CATKIN_DEPENDS
-    roscpp
-    rospy
-    std_msgs
-    tf
+#  INCLUDE_DIRS include
+#  LIBRARIES cube_petit_text_to_speech
+#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  DEPENDS system_lib
+#   message_runtime
 )
 
 ###########

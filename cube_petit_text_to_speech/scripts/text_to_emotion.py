@@ -81,7 +81,7 @@ def julius_callback(phrase):
 
 # start
 rospy.Subscriber("/julius_result_text", String, julius_callback, queue_size=1)
-rospy.Subscriber("/text_to_emotion_on", Bool, text_to_emotion_callback, queue_size=1)
+rospy.Subscriber("/text_to_emotion_flag", Bool, text_to_emotion_callback, queue_size=1)
 
 # 'yorokobi' 'ikari' 'aware' 'kowagari' 'haji' 'suki' 'iya' 'takaburi' 'yasuragi' 'odoroki'
 publish_emotion = rospy.Publisher('/talk_to_emotion/emotion', String, queue_size=1)

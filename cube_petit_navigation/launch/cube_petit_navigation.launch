@@ -16,12 +16,13 @@
 
     <!-- [EDIT] map file name-->
     <!-- <arg name="map_file" default="$(find cube_petit)/map/daikaigisitu/map.yaml"/> -->
-    <arg name="map_info_file" default="(find cube_petit)/map/daikaigisitu/map.yaml"/>
+    <arg name="map_info_file" default="/home/gisen/map/M20230721123625306/map.yaml"/>
     <rosparam command="load" file="$(arg map_info_file)" ns="map_info"/>
 
     <!-- <arg name="map_file" default="$(find cube_petit_gazebo)/map/floor_eight/map.yaml"/> -->
     <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/airi_v2/map.yaml"/> -->
     <arg name="map_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml"/>
+    <!-- <arg name="map_file" default="/home/gisen/map/M20230721123625306/map.yaml"/> -->
 
 
     <!-- <arg name="map_file" default="$(find cube_petit_navigation)/map/maker_fair/map.yaml"/> -->
@@ -29,7 +30,8 @@
 
 
     <!-- [EDIT] keepout map file name if you need -->
-    <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml" />
+    <!-- <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/floor_27_2/3/map.yaml" /> -->
+    <arg name="map_keepout_file" default="/home/gisen/map/M20230721123625306/keepout.yaml"/>
     <!-- <arg name="map_keepout_file" default="$(find cube_petit_navigation)/map/maker_fair/map.yaml" /> -->
     <!-- <arg name="map_keepout_file" default="/home/gisen/map_24/map2/map.yaml"/> -->
     <arg name="use_keepout" default="true" />

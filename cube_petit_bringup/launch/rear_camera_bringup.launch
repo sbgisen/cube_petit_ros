@@ -2,7 +2,7 @@
 <launch>
 
   <group ns="/rear_camera/rear_camera">
-    <!-- launch カメラ -->>
+    <!-- launch カメラ -->
     <!-- <node pkg="uvc_camera" type="uvc_camera_node" name="usb_camera_node">
         <param name="device" type="string" value="/dev/rear_camera"/>
         <param name="pixel_format" value="YUYV"/>
@@ -16,7 +16,8 @@
         <param name="camera_frame_id" value="rear_camera"/>
         <param name="io_method" value="mmap"/>
         <param name="frame_id" value="rear_camera_optical_link"/>
-        <param name="camera_info_url" type="string" value="file://$(find cube_petit_bringup)/config/sensors/rear_camera/camera.yaml"/> -->
+        <param name="framerate" value="10" />
+        <param name="camera_info_url" type="string" value="file://$(find cube_petit_bringup)/config/sensors/rear_camera/camera.yaml"/>
     </node>
   </group>
 

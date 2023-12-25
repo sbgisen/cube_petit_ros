@@ -17,6 +17,14 @@
     <origin rpy="0 0 3.1415926" xyz="0 0 0"/>
   </joint>
 
+  <link name="respeaker_base"/>
+  <joint name="respeaker_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="respeaker_base"/>
+    <origin rpy="0 0 0" xyz="0 0 0.28"/>
+  </joint>
+
+
 
   <link name="body_link">
     <visual>
@@ -58,10 +66,12 @@
     <origin rpy="0 0 3.14" xyz="-0.11 0 0.025"/>
   </joint>
 
-  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/lidar.xacro"/>
+  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/lidar.xacro" />
 
   <!-- rear camera -->
-  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/camera.xacro"/>
+  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/camera.xacro" />
+
+  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/depth.xacro" />
 
   <xacro:include filename="$(find cube_petit_description)/urdf/sensors/depth.xacro"/>
 

@@ -73,8 +73,6 @@
 
   <xacro:include filename="$(find cube_petit_description)/urdf/sensors/depth.xacro" />
 
-  <xacro:include filename="$(find cube_petit_description)/urdf/sensors/depth.xacro"/>
-
   <xacro:include filename="$(find cube_petit_description)/urdf/wheels/tamiya_wheels.xacro"/>
   <!-- <xacro:include filename="$(find cube_petit_description)/urdf/wheels/turtlebot_wheels.xacro"
   /> -->

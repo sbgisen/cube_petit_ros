@@ -78,7 +78,7 @@ Processing enabled by this node:
   <arg name="enable_gyro"         default="false"/>
   <arg name="enable_accel"        default="false"/>
 
-  <arg name="enable_pointcloud"   default="false"/>
+  <arg name="enable_pointcloud"   default="true"/>
   <arg name="enable_sync"         default="true"/>
   <arg name="align_depth"         default="true"/>
   <arg name="filters"             default=""/>

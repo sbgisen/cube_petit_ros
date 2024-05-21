@@ -1,0 +1,143 @@
+<?xml version="1.0" ?>
+<robot name="cube_petit" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- camera joint -->
+  <joint name="rear_camera_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="rear_camera_link"/>
+    <origin rpy="0 0.0 3.1415926" xyz="-0.10137 0.0 0.18306"/>
+  </joint>
+  <!-- camera link -->
+  <link name="rear_camera_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
+      <mass value="0.11166745"/>
+      <inertia
+        ixx="0.004391"
+        ixy="0.000000" iyy="0.004391"
+        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- camera optical joint -->
+  <joint name="rear_camera_optical_joint" type="fixed">
+    <parent link="rear_camera_link"/>
+    <child link="rear_camera_optical_link"/>
+    <origin rpy="-1.57 0 -1.57" xyz="0.0 0.0 0.0"/>
+  </joint>
+  <!-- camera optical link -->
+  <link name="rear_camera_optical_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
+      <mass value="0.11166745"/>
+      <inertia
+        ixx="0.004391"
+        ixy="0.000000" iyy="0.004391"
+        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+    </collision>
+  </link>  
+
+
+  <gazebo reference="rear_camera_link">
+    <sensor type="camera" name="rear_camera">
+      <update_rate>30.0</update_rate>
+      <camera name="head">
+        <horizontal_fov>0.8243246</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>10</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>rear_camera/rear_camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>rear_camera_optical_link</frameName>
+        <hackBaseline>0.0</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- <gazebo reference="rear_camera_link">
+    <mu1 value="0.5"/>
+    <kp value="50000"/>
+    <kd value="0"/>
+    <sensor type="camera" name="camera">
+      <always_on>true</always_on>
+      <update_rate>4.0</update_rate>
+      <camera>
+        <horizontal_fov>${60.0*3.1415926/180.0}</horizontal_fov>
+        <image>
+          <format>R8G8B8</format>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.2</near>
+          <far>1.5</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera</frameName>
+        <hackBaseline>0.0</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo> -->
+
+   
+</robot>

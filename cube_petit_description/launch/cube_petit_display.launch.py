@@ -35,7 +35,7 @@ def generate_launch_description() -> LaunchDescription:
         Launch descriptions
     """
     pkg_share = FindPackageShare('cube_petit_description').find('cube_petit_description')
-    xacro_file = pathlib.Path(pkg_share) / 'xacro/cube_petit_v2.xacro'
+    xacro_file = pathlib.Path(pkg_share) / 'xacro/cube_petit.xacro'
     doc = xacro.process_file(xacro_file)
     robot_description = doc.toprettyxml(indent='  ')
     params = {'robot_description': robot_description}

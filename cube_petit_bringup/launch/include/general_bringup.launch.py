@@ -70,10 +70,10 @@ def generate_launch_description() -> LaunchDescription:
         'disable_ros_controller',
         description='Disable basic ros controller to use customize ros controller.',
         default_value='false'))
-    description_pkg = FindPackageShare('cube_description').find('cube_description')
+    description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     args.append(DeclareLaunchArgument(
         'hardware_config',
-        default_value=str(pathlib.Path(description_pkg) / 'xacro/cuboid_robot.xacro')))
+        default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
     bringup_pkg = pathlib.Path(FindPackageShare('cube_bringup').find('cube_bringup'))
     args.append(DeclareLaunchArgument(
         'ekf_config',

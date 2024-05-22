@@ -23,8 +23,10 @@ import xacro
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import GroupAction
+from launch.actions import IncludeLaunchDescription
 from launch.actions import OpaqueFunction
 from launch.launch_context import LaunchContext
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -87,21 +89,28 @@ def generate_launch_description() -> LaunchDescription:
         'hardware_config',
         default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
 
-    socketcan_bridge = GroupAction(actions=[
-        Node(
-            package='ros2_socketcan',
-            executable='socket_can_receiver.launch.py',
-            name='ros2_socketcan',
-            namespace='cube_petit',
-            output='screen',
-            parameters=[{
-                'interface': 'can0',  # 必要に応じてCANインターフェースを指定
-                'baudrate': 500000    # 必要に応じてCANのボーレートを指定
-            }]
-        )
-    ])
+
+    socketcan_bridge_pkg = pathlib.Path(FindPackageShare('ros2_socketcan').find('ros2_socketcan'))
+    socketcan_bridge = IncludeLaunchDescription(
+        XMLLaunchDescriptionSource(str(socketcan_bridge_pkg / 'launch/socket_can_bridge.launch.xml')),
+        launch_arguments={
+            'interface': 'can0',
+            'receiver_interval_sec': '0.01',
+            'sender_timeout_sec': '0.01',
+            'enable_can_fd': 'false',
+            'from_can_bus_topic': 'from_can_bus',
+            'to_can_bus_topic': 'to_can_bus'}.items()
+    )
+
+    hardware_interface = Node(
+        package="dji_ros_controller",
+        executable="dji_ros_controller_node",
+        parameters=[]
+    )
+
 
     return LaunchDescription(args + [
         OpaqueFunction(function=launch_setup),
         socketcan_bridge,
+        hardware_interface,
     ])

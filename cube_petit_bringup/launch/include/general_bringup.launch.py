@@ -35,7 +35,7 @@ from launch_ros.substitutions import FindPackageShare
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
-    launch_robot_path = PathJoinSubstitution([str(bringup_pkg), 'launch/include', LaunchConfiguration('robot')])
+    launch_robot_path = PathJoinSubstitution([str(bringup_pkg), 'launch/include', 'cube_petit_v3'])
 
     teleop = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([str(bringup_pkg),
@@ -88,6 +88,11 @@ def generate_launch_description() -> LaunchDescription:
                                                                       / 'launch/cube_expression.launch.py')),
                                     launch_arguments={'gazebo': LaunchConfiguration('gazebo')}.items())
 
+    hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface'))
+    motor_bringup = IncludeLaunchDescription(PythonLaunchDescriptionSource(str(hardware_pkg
+                                                                      / 'launch/cube_petit_control.launch.py')),
+                                    launch_arguments={}.items())
+
     robot_localization = Node(
         package='robot_localization',
         executable='ekf_node',
@@ -97,7 +102,7 @@ def generate_launch_description() -> LaunchDescription:
         remappings=[('odometry/filtered', 'odom')])
 
     return LaunchDescription(args + [
-        face,
+        motor_bringup,
         robot_localization,
         OpaqueFunction(function=launch_setup)
     ])

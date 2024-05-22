@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
-<robot name="cube_petit_v3" xmlns:xacro="http://www.ros.org/wiki/xacro">
-
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="cube_petit_v3">
   <!-- General -->
   <!-- <xacro:include filename="color_property.xacro"/> -->
 
@@ -34,8 +33,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh
-          filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
+        <mesh filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -49,10 +47,7 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00440023 0.00053314 0.15283194"/>
       <mass value="1.98239086"/>
-      <inertia
-        ixx="0.02351680"
-        ixy="0.00001868" iyy="0.02505713"
-        ixz="-0.00012952" iyz="-0.00004728" izz="0.02060399"/>
+      <inertia ixx="0.02351680" ixy="0.00001868" iyy="0.02505713" ixz="-0.00012952" iyz="-0.00004728" izz="0.02060399"/>
     </inertial>
   </link>
   <gazebo reference="body_link">
@@ -69,9 +64,7 @@
     <child link="connector_link"/>
     <origin rpy="0 0 3.14" xyz="-0.11 0 0.025"/>
   </joint>
-
-  <xacro:include filename="$(find cube_petit_description)/xacro/sensors/lidar.xacro" />
-
+  <xacro:include filename="$(find cube_petit_description)/xacro/sensors/lidar.xacro"/>
   <!-- rear camera -->
   <!-- <xacro:include filename="$(find cube_petit_description)/xacro/sensors/camera.xacro" /> -->
 
@@ -124,15 +117,12 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
       <mass value="0.2986774"/>
-      <inertia
-        ixx="0.0001147"
-        ixy="0.00000000" iyy="0.0002130"
-        ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
     </inertial>
     <visual>
-    <origin rpy="-1.57079632679 0 3.1415926" xyz="0 0 0"/>
+      <origin rpy="-1.57079632679 0 3.1415926" xyz="0 0 0"/>
       <geometry>
-	      <mesh filename="$(find cube_petit_description)/meshes/cube_petit/wheels/tamiya_wheel.obj"/>
+        <mesh filename="$(find cube_petit_description)/meshes/cube_petit/wheels/tamiya_wheel.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -173,10 +163,7 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
       <mass value="0.2986774"/>
-      <inertia
-        ixx="0.0001147"
-        ixy="0.00000000" iyy="0.0002130"
-        ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
     </inertial>
     <visual>
       <origin rpy="1.57079632679 0 3.1415926" xyz="0 0 0"/>
@@ -201,7 +188,7 @@
     <kd value="0"/>
   </gazebo>
 
-  <ros2_control name="GazeboSystem" type="system">
+  <!-- <ros2_control name="GazeboSystem" type="system">
     <hardware>
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
     </hardware>
@@ -221,16 +208,43 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
+  </ros2_control> -->
+
+  <ros2_control name="left_wheel_motor" type="actuator">
+    <hardware>
+      <plugin>hardware_interface/VelocityJointInterface</plugin>
+    </hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+  <ros2_control name="right_wheel_motor" type="actuator">
+    <hardware>
+      <plugin>hardware_interface/VelocityJointInterface</plugin>
+    </hardware>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
   </ros2_control>
 
 
-  <gazebo>
+  <!-- <gazebo>
     <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
       <robotNamespace>/cube_petit</robotNamespace>
       <robot_param>robot_description</robot_param>
       <robot_param_node>robot_state_publisher</robot_param_node>
       <parameters>$(find cube_petit_gazebo)/config/base_control_gazebo.yaml</parameters>
     </plugin>
-  </gazebo>
+  </gazebo> -->
 
 </robot>

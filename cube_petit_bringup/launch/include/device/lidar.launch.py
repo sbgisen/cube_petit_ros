@@ -28,16 +28,16 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
-def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
-    bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
-    laser_filter = bringup_pkg / 'config' / LaunchConfiguration('yaml_file').perform(context)
-    topic = LaunchConfiguration('scan_topic').perform(context)
-    with open(laser_filter) as f:
-        laser_filter_params = yaml.safe_load(f)
-    return [Node(package='laser_filters', executable='scan_to_scan_filter_chain',
-                 name=['lh_laser_node_', LaunchConfiguration('name'), '_filter'],
-                 remappings=[('scan', f'{topic}_raw'), ('scan_filtered', topic)],
-                 parameters=[laser_filter_params])]
+# def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
+#     bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
+#     laser_filter = bringup_pkg / 'config/sensors' / LaunchConfiguration('yaml_file').perform(context)
+#     topic = LaunchConfiguration('scan_topic').perform(context)
+#     with open(laser_filter) as f:
+#         laser_filter_params = yaml.safe_load(f)
+#     return [Node(package='laser_filters', executable='scan_to_scan_filter_chain',
+#                  name=['lh_laser_node_', LaunchConfiguration('name'), '_filter'],
+#                  remappings=[('scan', f'{topic}_raw'), ('scan_filtered', topic)],
+#                  parameters=[laser_filter_params])]
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -73,5 +73,5 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription(args + [
         laser,
-        OpaqueFunction(function=launch_setup),
+        # OpaqueFunction(function=launch_setup),
     ])

@@ -87,6 +87,21 @@ def generate_launch_description() -> LaunchDescription:
         'hardware_config',
         default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
 
+    socketcan_bridge = GroupAction(actions=[
+        Node(
+            package='ros2_socketcan',
+            executable='socket_can_receiver.launch.py',
+            name='ros2_socketcan',
+            namespace='cube_petit',
+            output='screen',
+            parameters=[{
+                'interface': 'can0',  # 必要に応じてCANインターフェースを指定
+                'baudrate': 500000    # 必要に応じてCANのボーレートを指定
+            }]
+        )
+    ])
+
     return LaunchDescription(args + [
-        OpaqueFunction(function=launch_setup)
+        OpaqueFunction(function=launch_setup),
+        socketcan_bridge,
     ])

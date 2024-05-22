@@ -1,0 +1,4 @@
+- git:
+    uri: https://github.com/autowarefoundation/ros2_socketcan.git
+    local-name: ros2_socketcan
+    version: main

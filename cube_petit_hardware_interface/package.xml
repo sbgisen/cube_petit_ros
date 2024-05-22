@@ -13,6 +13,7 @@
   <exec_depend>cube_description</exec_depend>
   <exec_depend>diff_drive_controller</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
+  <depend>ros2-socketcan</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

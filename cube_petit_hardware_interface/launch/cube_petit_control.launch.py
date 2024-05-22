@@ -26,20 +26,23 @@ from launch.actions import GroupAction
 from launch.actions import IncludeLaunchDescription
 from launch.actions import OpaqueFunction
 from launch.launch_context import LaunchContext
-from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
 
-    doc = xacro.process_file(LaunchConfiguration('hardware_config').perform(context), mappings={'use_sim': 'false'})
-    robot_description = {"robot_description": doc.toprettyxml(indent='  ')}
+    description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
+    xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
+    doc = xacro.process_file(xacro_file, mappings={'use_sim': 'true'})
+    robot_description = doc.toprettyxml(indent='  ')
+    print(robot_description)
 
     my_pkg = FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface')
     robot_controllers = [my_pkg, '/config/cube_petit_hw_interface.yaml']
-
+    print(robot_controllers)
     control_node = GroupAction(actions=[
         # PushRosNamespace(LaunchConfiguration('robot_namespace')),
         Node(package="controller_manager",
@@ -89,7 +92,6 @@ def generate_launch_description() -> LaunchDescription:
         'hardware_config',
         default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
 
-
     socketcan_bridge_pkg = pathlib.Path(FindPackageShare('ros2_socketcan').find('ros2_socketcan'))
     socketcan_bridge = IncludeLaunchDescription(
         XMLLaunchDescriptionSource(str(socketcan_bridge_pkg / 'launch/socket_can_bridge.launch.xml')),
@@ -107,7 +109,6 @@ def generate_launch_description() -> LaunchDescription:
         executable="dji_ros_controller_node",
         parameters=[]
     )
-
 
     return LaunchDescription(args + [
         OpaqueFunction(function=launch_setup),

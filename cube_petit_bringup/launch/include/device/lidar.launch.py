@@ -16,17 +16,9 @@
 # limitations under the License.
 #
 
-import pathlib
-
-import yaml
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.actions import OpaqueFunction
-from launch.launch_context import LaunchContext
-from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
-
 
 # def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
 #     bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
@@ -63,15 +55,35 @@ def generate_launch_description() -> LaunchDescription:
         'yaml_file',
         default_value='lidar_scan_filter.yaml'))
 
-    laser = Node(package='lh_laser_driver',
-                 executable='lh_laser_publisher',
-                 name=['lh_laser_node_', LaunchConfiguration('name')],
-                 parameters=[{'port': LaunchConfiguration('port'),
-                              'frame_id': LaunchConfiguration('frame')}],
-                 remappings=[('scan', [LaunchConfiguration('scan_topic'), '_raw'])],
-                 output='screen')
+    ldlidar_node = Node(
+        package='ldlidar_stl_ros2',
+        executable='ldlidar_stl_ros2_node',
+        name='LD06',
+        output='screen',
+        parameters=[
+            {'product_name': 'LDLiDAR_LD06'},
+            {'topic_name': 'scan'},
+            {'frame_id': 'base_laser'},
+            {'port_name': '/dev/ttyLD06-19'},
+            {'port_baudrate': 230400},
+            {'laser_scan_dir': True},
+            {'enable_angle_crop_func': False},
+            # {'angle_crop_min': 135.0},
+            # {'angle_crop_max': 225.0}
+        ]
+    )
+
+    # base_link to base_laser tf node
+    base_link_to_laser_tf_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_to_base_laser_ld19',
+        arguments=['0', '0', '0.18', '0', '0', '0', 'base_link', 'ld19_link']
+    )
 
     return LaunchDescription(args + [
-        laser,
+        # laser,
         # OpaqueFunction(function=launch_setup),
+        ldlidar_node,
+        base_link_to_laser_tf_node,
     ])

@@ -18,6 +18,16 @@ velocity_controller:
 joint_state_broadcaster:
   ros__parameters:
     publish_rate: 50
+    joints:
+      - left_wheel_joint
+      - right_wheel_joint
+    interfaces:
+      position:
+        - left_wheel_joint
+        - right_wheel_joint
+      velocity:
+        - left_wheel_joint
+        - right_wheel_joint
 
 # Diff drive controller --------------------------------------
 diff_drive_controller:
@@ -27,8 +37,8 @@ diff_drive_controller:
     right_wheel_names:
       - right_wheel_joint
 
-    left_wheel: left_wheel_joint
-    right_wheel: right_wheel_joint
+    # left_wheel: left_wheel_joint
+    # right_wheel: right_wheel_joint
     publish_rate: 100.0               # default: 50
     pose_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
     twist_covariance_diagonal: [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]

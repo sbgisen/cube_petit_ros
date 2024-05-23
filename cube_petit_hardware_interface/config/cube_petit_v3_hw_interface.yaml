@@ -1,0 +1,11 @@
+robot_hardware:
+  - left_dji_hw_interface
+  - right_dji_hw_interface
+
+left_dji_hw_interface:
+  type: vesc_hw_interface/VescHwInterface
+  joint_name: left_wheel_joint
+
+right_dji_hw_interface:
+  type: vesc_hw_interface/VescHwInterface
+  joint_name: right_wheel_joint

@@ -210,10 +210,18 @@
     </joint>
   </ros2_control> -->
 
-  <ros2_control name="left_wheel_motor" type="actuator">
+  <ros2_control name="CubepetitSystem" type="system">
     <hardware>
-      <plugin>hardware_interface/VelocityJointInterface</plugin>
+      <plugin>m2006_ros2_hardware/M2006Ros2</plugin>
     </hardware>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
     <joint name="left_wheel_joint">
       <command_interface name="velocity">
         <param name="min">-6</param>
@@ -223,7 +231,7 @@
       <state_interface name="velocity"/>
     </joint>
   </ros2_control>
-  <ros2_control name="right_wheel_motor" type="actuator">
+  <!-- <ros2_control name="right_wheel_motor" type="actuator">
     <hardware>
       <plugin>hardware_interface/VelocityJointInterface</plugin>
     </hardware>
@@ -235,7 +243,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-  </ros2_control>
+  </ros2_control> -->
 
 
   <!-- <gazebo>

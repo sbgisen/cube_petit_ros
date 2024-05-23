@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import os
 import pathlib
 from distutils.util import strtobool
 
@@ -35,14 +36,14 @@ from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
 
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
-    xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
-    doc = xacro.process_file(xacro_file, mappings={'use_sim': 'true'})
-    robot_description = doc.toprettyxml(indent='  ')
-    print(robot_description)
+    xacro_file = os.path.join(description_pkg, 'xacro', 'cube_petit.xacro')
+    use_sim = 'false'  # or 'false', depending on your use case
+    doc = xacro.process_file(xacro_file, mappings={'use_sim': use_sim})
+    robot_description = {"robot_description": doc.toprettyxml(indent='  ')}
 
     my_pkg = FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface')
     robot_controllers = [my_pkg, '/config/cube_petit_hw_interface.yaml']
-    print(robot_controllers)
+
     control_node = GroupAction(actions=[
         # PushRosNamespace(LaunchConfiguration('robot_namespace')),
         Node(package="controller_manager",
@@ -95,6 +96,7 @@ def generate_launch_description() -> LaunchDescription:
     socketcan_bridge_pkg = pathlib.Path(FindPackageShare('ros2_socketcan').find('ros2_socketcan'))
     socketcan_bridge = IncludeLaunchDescription(
         XMLLaunchDescriptionSource(str(socketcan_bridge_pkg / 'launch/socket_can_bridge.launch.xml')),
+        # ttyCANable
         launch_arguments={
             'interface': 'can0',
             'receiver_interval_sec': '0.01',
@@ -106,7 +108,7 @@ def generate_launch_description() -> LaunchDescription:
 
     hardware_interface = Node(
         package="dji_ros_controller",
-        executable="dji_ros_controller_node",
+        executable="M2006_ros2",
         parameters=[]
     )
 

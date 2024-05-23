@@ -66,7 +66,14 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
              executable='spawner',
              output='both',
              arguments=["--controller-manager", "controller_manager",
-                        'diff_drive_controller'])])
+                        'diff_drive_controller']),
+        Node(
+            package='robot_state_publisher',
+            executable='robot_state_publisher',
+            name='robot_state_publisher',
+            parameters=[robot_description])
+    ])
+
     return [control_node, controllers]
 
 
@@ -106,14 +113,19 @@ def generate_launch_description() -> LaunchDescription:
             'to_can_bus_topic': 'to_can_bus'}.items()
     )
 
-    hardware_interface = Node(
-        package="dji_ros_controller",
-        executable="M2006_ros2",
-        parameters=[]
-    )
+    # hardware_interface = Node(
+    #     package="dji_ros_controller",
+    #     executable="M2006_ros2",
+    #     parameters=[]
+    # )
+
+    description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
+    args.append(DeclareLaunchArgument(
+        'hardware_config',
+        default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
 
     return LaunchDescription(args + [
         OpaqueFunction(function=launch_setup),
         socketcan_bridge,
-        hardware_interface,
+        # hardware_interface,
     ])

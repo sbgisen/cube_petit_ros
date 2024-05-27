@@ -17,16 +17,12 @@
 #
 
 import pathlib
-from distutils.util import strtobool
 
 import xacro
-import yaml
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import EmitEvent
-from launch.actions import GroupAction
 from launch.actions import IncludeLaunchDescription
-from launch.actions import OpaqueFunction
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
@@ -97,7 +93,7 @@ def generate_launch_description() -> LaunchDescription:
 
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     print(description_pkg)
-    xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
+    xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit_gazebo.xacro'
 
     doc = xacro.process_file(xacro_file, mappings={'use_sim': 'true'})
     robot_description = doc.toprettyxml(indent='  ')
@@ -107,7 +103,6 @@ def generate_launch_description() -> LaunchDescription:
                                  executable='robot_state_publisher',
                                  output='both',
                                  parameters=[{'robot_description': robot_description}])
-
 
     hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
     controllers = IncludeLaunchDescription(

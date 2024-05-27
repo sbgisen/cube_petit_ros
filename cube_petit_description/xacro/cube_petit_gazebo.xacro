@@ -188,7 +188,7 @@
     <kd value="0"/>
   </gazebo>
 
-  <!-- <ros2_control name="GazeboSystem" type="system">
+  <ros2_control name="GazeboSystem" type="system">
     <hardware>
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
     </hardware>
@@ -208,9 +208,9 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-  </ros2_control> -->
+  </ros2_control>
 
-  <ros2_control name="left_wheel_motor" type="actuator">
+  <!-- <ros2_control name="left_wheel_motor" type="actuator">
     <hardware>
       <plugin>hardware_interface/VelocityJointInterface</plugin>
     </hardware>
@@ -235,7 +235,7 @@
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
-  </ros2_control>
+  </ros2_control> -->
 
 
   <gazebo>

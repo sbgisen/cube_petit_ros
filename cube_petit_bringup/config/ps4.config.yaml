@@ -1,17 +1,20 @@
 # Joy L Stick (0:Right)
-axis_linear: 1
+teleop_twist_joy_node:
+  ros__parameters:
 
-# ZENGO
-scale_linear: 0.3
-scale_linear_turbo: 0.7
+    axis_linear: 1
 
-# KAITEN
-axis_angular: 0
-scale_angular: 5.0
+    # ZENGO
+    scale_linear: 0.3
+    scale_linear_turbo: 0.7
 
-# TURBO
-enable_button: 1 # batu button
-enable_turbo_button: 6 # L1 shoulder button
+    # KAITEN
+    axis_angular: 0
+    scale_angular: 5.0
+
+    # TURBO
+    enable_button: 0 # batu button
+    enable_turbo_button: 4 # L1 shoulder button
 
 # 0:select  1:leftJOY   2:rightJOY  3:start
 # 4:ue      5:migi      6:sita      7:hidari

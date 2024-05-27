@@ -29,7 +29,7 @@ class TwistToTwistStamped(Node):
         super().__init__('twist_to_twist_stamped')
         self.subscription = self.create_subscription(
             Twist,
-            '/cmd_vel',
+            '/cmd_vel_raw',
             self.listener_callback,
             10)
         self.publisher_ = self.create_publisher(TwistStamped, '/diff_drive_controller/cmd_vel', 10)

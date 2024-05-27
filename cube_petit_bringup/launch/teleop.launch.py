@@ -16,8 +16,16 @@
 # limitations under the License.
 #
 
+import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import GroupAction
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
+from launch_ros.actions import PushRosNamespace
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -26,25 +34,58 @@ def generate_launch_description() -> LaunchDescription:
     Returns:
         Launch descriptions
     """
-    use_sim_time_arg = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='false',
-        description='Use simulation (Gazebo) clock if true')
-    robot_namespace_arg = DeclareLaunchArgument(
-        'robot_namespace',
-        default_value='cube_petit')
-    cmd_vel_out_arg = DeclareLaunchArgument(
-        'cmd_vel_out',
-        default_value='/diff_drive_controller/cmd_vel_raw')
-    # default_value=[LaunchConfiguration('robot_namespace'), '/diff_drive_controller/cmd_vel_raw'])
+    teleop_twist_joy_dir = get_package_share_directory('teleop_twist_joy')
+    cube_teleop_dir = get_package_share_directory('cube_petit_bringup')
 
-    container_name_arg = DeclareLaunchArgument(
-        'container_name', default_value='teleop_container',
-        description='the name of container that nodes will load in if use composition')
+    robot_arg = DeclareLaunchArgument(
+        'robot',
+        default_value='cube_petit',
+        description='Name of the robot'
+    )
+
+    controller_arg = DeclareLaunchArgument(
+        'controller',
+        default_value='ps4',
+        description='Type of controller'
+    )
+
+    joy_dev = '/dev/input/js0'
+    config_filepath = os.path.join(
+        cube_teleop_dir, 'config', 'ps4.config.yaml'
+    )
+
+    teleop_include = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(teleop_twist_joy_dir, 'launch', 'teleop-launch.py')),
+        launch_arguments={
+            'joy_dev': joy_dev,
+            'config_filepath': config_filepath
+        }.items(),
+    )
+    teleop_joy = GroupAction([
+        PushRosNamespace('/diff_drive_controller2'),
+        teleop_include,
+    ])
+
+    teleop_joy_remap = Node(
+        package='teleop_twist_joy',
+        executable='teleop_node',
+        name='teleop_twist_joy_node',
+        output='screen',
+        parameters=[config_filepath],
+        remappings=[
+            ('/cmd_vel', '/cmd_vel_raw'),
+        ],
+    )
 
     return LaunchDescription([
-        use_sim_time_arg,
-        robot_namespace_arg,
-        cmd_vel_out_arg,
-        container_name_arg,
+        robot_arg,
+        controller_arg,
+        teleop_joy,
+        teleop_joy_remap,
+        Node(
+            package='cube_petit_bringup',
+            executable='twist_to_twist_stamped.py',
+            name='twist_to_twist_stamped',
+            output='screen',
+        ),
     ])

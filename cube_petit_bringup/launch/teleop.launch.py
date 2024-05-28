@@ -20,12 +20,13 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+# from launch.actions import GroupAction
 from launch.actions import DeclareLaunchArgument
-from launch.actions import GroupAction
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch_ros.actions import PushRosNamespace
+
+# from launch_ros.actions import PushRosNamespace
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -61,10 +62,10 @@ def generate_launch_description() -> LaunchDescription:
             'config_filepath': config_filepath
         }.items(),
     )
-    teleop_joy = GroupAction([
-        PushRosNamespace('/diff_drive_controller2'),
-        teleop_include,
-    ])
+    # teleop_joy = GroupAction([
+    #     PushRosNamespace('/diff_drive_controller2'),
+    #     teleop_include,
+    # ])
 
     teleop_joy_remap = Node(
         package='teleop_twist_joy',
@@ -80,7 +81,7 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription([
         robot_arg,
         controller_arg,
-        teleop_joy,
+        teleop_include,
         teleop_joy_remap,
         Node(
             package='cube_petit_bringup',

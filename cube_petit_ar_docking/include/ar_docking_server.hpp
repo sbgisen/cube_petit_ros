@@ -46,12 +46,8 @@ private:
 public:
   ArDockingServer(ros::NodeHandle nh);
   ~ArDockingServer();
-  // void currentCallback(const std_msgs::Float64::ConstPtr& msg);
-  // int isCharging();
-  // void publish_tf_pregoal(std::vector<double>& pregoal);
   void initialize(ros::NodeHandle nh);
   void actionServerCallback(const cube_petit_ar_docking::ARDockingGoalConstPtr& goal, Server* as);
-  // void actionServerCallback1(const cube_petit_ar_docking::ARDockingGoalConstPtr& goal, Server* as);
   void actionFinish(int result, Server* as);
 };
 

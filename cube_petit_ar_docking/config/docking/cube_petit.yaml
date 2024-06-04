@@ -1,12 +1,7 @@
 /map_info:
   test_int: 1
-  #  charging_station_pose: [-0.290, -0.029, 0.000, 0.000, 0.000, -0.040, 0.999]
-#  charging_station_pose: [-1.683, -0.028, 0.000, 0.000, 0.000, 0.692, 0.722]
   charging_station_pose: [-1.987, -0.543, 0.000, 0.000, 0.000, 0.714, 0.700]
-  # charging_station_pose: [-1.995, -0.318, 0.000, 0.000, 0.000, 0.705, 0.709]
-
-  # maker_fair_practice
-  charging_station_pose: [0.291, 0.071, 0.000, 0.000, 0.000, -0.014, 1.000]
+  
 undock_distance: 0.4 # 終わったあと離れる距離
 undock_velocity: 0.1 # 終わったあと離れる速さ
 

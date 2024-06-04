@@ -118,8 +118,6 @@ void ArDockingServer::actionFinish(int result_int, Server* as){
 
 void ArDockingServer::initialize(ros::NodeHandle nh){
   ROS_INFO("ArDockingServer::initialize");
-  // Pregoal_Broadcaster pregoal_broadcaster_(nh);
-
 }
 
 // https://www.gocca.work/cpp-initialize-list/ 参考
@@ -131,7 +129,6 @@ ArDockingServer::ArDockingServer(ros::NodeHandle nh):
  {
   server_.start();
   ROS_INFO("ar_docking_server_start");
-  // std::memset(current_data_, 0.0, sizeof(current_data_));
   initialize(nh);
 }
 

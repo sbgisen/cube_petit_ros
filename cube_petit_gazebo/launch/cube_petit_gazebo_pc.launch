@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <!-- load cube_petit urdf -->
-  <arg name="cube_petit_version1" default="true"/>
-  <arg name="cube_petit_version2" default="false"/>
+  <arg name="cube_petit_version" default="v2"/>
   <!-- version1 -->
-  <!-- <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" /> -->
-  <!-- <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo.yaml"/> -->
+  <group if="$(arg cube_petit_version) == 'v1'">
+    <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit.xacro" />
+    <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo.yaml"/>
+  </group>
   <!-- version2 -->
-  <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit_v2.xacro"/>
-  <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo2.yaml"/>
+  <group if="$(arg cube_petit_version) == 'v2'">
+    <arg name="model" default="$(find cube_petit_description)/urdf/cube_petit_v2.xacro"/>
+    <rosparam command="load" file="$(find cube_petit_navigation)/config/odom_gazebo2.yaml"/>
+  </group>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>
   <env name="GAZEBO_MODEL_PATH" value="$(find cube_petit_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)"/>
   <!-- cut laser data of cube_petit's pole -->
@@ -16,9 +19,13 @@
     <remap from="scan" to="scan"/>
     <remap from="scan_filtered" to="scan_filtered"/>
     <!-- v1 -->
-    <!-- <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" /> -->
+    <group if="$(arg cube_petit_version) == 'v1'">
+      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" />
+    </group>
     <!-- v2 -->
-    <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml"/>
+    <group if="$(arg cube_petit_version) == 'v2'">
+      <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter2.yaml"/>
+    </group>
   </node>
   <arg name="model2" default="$(find cube_petit_gazebo)/models/charge_doc/cube_petit_charge_doc.xacro"/>
   <param name="robot_description2" command="$(find xacro)/xacro $(arg model2) --inorder"/>
@@ -47,15 +54,6 @@
     <node name="simple_goal_relay" pkg="topic_tools" type="relay" args="/move_base_simple/goal /move_base_simple/goal"/>
   </group>
   <!-- launch teleop -->
-  <!-- <group ns="joystick">
-      <arg name="teleop_config" default="$(find cube_petit_bringup)/config/ps3.config.yaml"/>
-      <node name="joy_node" pkg="joy" type="joy_node"/>
-      <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
-        <rosparam command="load" file="$(arg teleop_config)" />
-        <remap from="cmd_vel" to="/cube_petit/diff_drive_controller/cmd_vel"/>
-      </node>
-    </group>
-     -->
   <group ns="joystick">
     <arg name="teleop_config" default="$(find cube_petit_bringup)/config/ps3.config.yaml"/>
     <param name="robot_description" command="$(find xacro)/xacro $(arg model) --inorder"/>

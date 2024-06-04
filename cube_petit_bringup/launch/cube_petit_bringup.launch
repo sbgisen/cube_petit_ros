@@ -21,14 +21,6 @@
     </node>
   </group>
 
-  <!-- launch IMU -->
-  <!-- <include file="$(find wt901B_ros)/launch/wt901B_ros.launch"/> -->
-  <!-- <remap from="scan" to="scan" /> -->
-  <!-- <remap from="scan_filtered" to="scan_filtered"/> -->
-  <!-- v1 -->
-  <!-- <rosparam command="load" file="$(find cube_petit_bringup)/config/sensors/cube_petit_pacecat_filter.yaml" /> -->
-  <!-- v2 -->
-  <!-- imaha iranai -->
   <include file="$(find cube_petit_bringup)/launch/realsense_rgbd.launch"/>
 
   <!-- launch CAMERA -->

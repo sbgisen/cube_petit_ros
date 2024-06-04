@@ -16,7 +16,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
 install(
-  DIRECTORY launch
+  DIRECTORY launch config resources
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -30,6 +30,6 @@ endif()
 ament_package()
 
 install(
-  PROGRAMS scripts/cube_petit_speech_to_text.py
+  PROGRAMS scripts/cube_petit_speech_to_text.py scripts/cube_petit_hotword.py
   DESTINATION lib/${PROJECT_NAME}
 )

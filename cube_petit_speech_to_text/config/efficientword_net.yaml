@@ -1,0 +1,5 @@
+hotword_detector:
+  ros__parameters:
+    keywords: ["Cube-petit"]
+    thresholds: [0.65]
+# json files path: resources/efficient_word_net/<keywords>_ref.json

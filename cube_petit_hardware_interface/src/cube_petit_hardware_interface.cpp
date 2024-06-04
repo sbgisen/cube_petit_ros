@@ -46,9 +46,8 @@ int main(int argc, char** argv)
 
 // シェル実行
 std::string Cube_Petit_Hardware_Interface::execCmd(const std::string &system_cmd)
-{  // static
+{
   FILE* fp;
-  // ROS_INFO("[%s]" system_cmd);
   std::string result = "";
   char buf[256];
   if ((fp = popen(system_cmd.c_str(), "r")) != nullptr)
@@ -65,14 +64,9 @@ std::string Cube_Petit_Hardware_Interface::execCmd(const std::string &system_cmd
 ////////////////////////////////////////////
 void Cube_Petit_Hardware_Interface::read()
 {
-  // std::lock_guard<std::mutex> lock(mutex);  //ロックする
-  //  ROS_INFO("Cube_Petit_Hardware_Interface::read -> START");
   std::vector<double> status;
   status.resize(dji_can_.status_size_ + 2, 0);
-
-  //
   dji_can_.updateMotorStatus(status);
-
   // copies and updates the status
   position_.at(LEFT) = status.at(POSITION_LEFT);
   velocity_.at(LEFT) = status.at(VELOCITY_LEFT);
@@ -95,11 +89,6 @@ void Cube_Petit_Hardware_Interface::read()
     effort_.at(RIGHT) *= -1.0;
     velocity_.at(RIGHT) *= -1.0;
   }
-
-  // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> position %f, %f", position_.at(LEFT), position_.at(RIGHT));
-  // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> velocity %f, %f", velocity_.at(LEFT), velocity_.at(RIGHT));
-  // ROS_INFO("Cube_Petit_Hardware_Interface::read   -> effort %f, %f", effort_.at(LEFT), effort_.at(RIGHT));
-  // ROS_INFO("Cube_Petit_Hardware_Interface::read -> FINISH");
 }
 
 ////////////////////////////////////////////////////
@@ -107,9 +96,6 @@ void Cube_Petit_Hardware_Interface::read()
 ////////////////////////////////////////////////////
 void Cube_Petit_Hardware_Interface::write()
 {
-  // std::lock_guard<std::mutex> lock(mutex);  //ロックする
-  //  ROS_INFO("Cube_Petit_Hardware_Interface::write -> START");
-
   // sets commands depending on its direction
   if (direction_.at(LEFT))
   {
@@ -141,7 +127,6 @@ void Cube_Petit_Hardware_Interface::write()
 /////////////////////////
 void Cube_Petit_Hardware_Interface::update()
 {
-  // std::lock_guard<std::mutex> lock(mutex);  //ロックする
   read();
   write();
 }
@@ -169,8 +154,6 @@ Cube_Petit_Hardware_Interface::Cube_Petit_Hardware_Interface()
                                                          &effort_[LEFT]);
   hardware_interface::JointStateHandle state_handle_right("right_wheel_joint", &position_[RIGHT], &velocity_[RIGHT],
                                                           &effort_[RIGHT]);
-
-  // あ
   joint_state_interface_.registerHandle(state_handle_left);
   joint_state_interface_.registerHandle(state_handle_right);
   registerInterface(&joint_state_interface_);
@@ -180,7 +163,6 @@ Cube_Petit_Hardware_Interface::Cube_Petit_Hardware_Interface()
   hardware_interface::JointHandle velocity_handle_right(joint_state_interface_.getHandle("right_wheel_joint"),
                                                         &velocity_command_[RIGHT]);
 
-  //
   joint_velocity_interface_.registerHandle(velocity_handle_left);
   joint_velocity_interface_.registerHandle(velocity_handle_right);
 

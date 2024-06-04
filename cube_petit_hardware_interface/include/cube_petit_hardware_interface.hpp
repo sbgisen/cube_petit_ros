@@ -25,7 +25,6 @@
 class Cube_Petit_Hardware_Interface : public hardware_interface::RobotHW{
 
 private:
-  //std::shared_ptr<DjiCanCommunication> dji_can_ptr_;
   DjiCanCommunication dji_can_;
   hardware_interface::JointStateInterface    joint_state_interface_;
   hardware_interface::VelocityJointInterface joint_velocity_interface_;

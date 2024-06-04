@@ -18,24 +18,16 @@ import sys
 import time
 
 import rclpy
-# from rclpy.node import Node
 import rclpy.node
 from rclpy.action import ActionClient
-# from rclpy.task import Future
 from rclpy.executors import ExternalShutdownException
 
 from sensor_msgs.msg import Joy
 from sbgisen_msgs.action import Speech
 
-
 class TextToJtalk(rclpy.node.Node):
     def __init__(self):
         super().__init__('cube_petit_text_to_jtalk')
-
-        self.declare_parameter('my_parameter', 'world')
-
-        self.timer = self.create_timer(3, self.timer_callback)
-
         self.__action_client = ActionClient(self, Speech, '/speech_action_server')
         self._joy_subscription = self.create_subscription(Joy,'joy', self.joystick_callback, 1)
         self.send_talk("起動しました！")
@@ -81,19 +73,6 @@ class TextToJtalk(rclpy.node.Node):
         self.__action_client.wait_for_server()
         self.get_logger().info("Robot say: [%s]" % (talk_text))
         return self.__action_client.send_goal_async(talk_msg)
-
-    def timer_callback(self):
-        my_param = self.get_parameter('my_parameter').get_parameter_value().string_value
-
-        self.get_logger().info('Hello %s!' % my_param)
-
-        my_new_param = rclpy.parameter.Parameter(
-            'my_parameter',
-            rclpy.Parameter.Type.STRING,
-            'world'
-        )
-        all_new_parameters = [my_new_param]
-        self.set_parameters(all_new_parameters)
 
     def joystick_callback(self, Joy):
         if Joy.buttons[0] == 1:

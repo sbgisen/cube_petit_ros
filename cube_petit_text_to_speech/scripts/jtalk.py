@@ -36,13 +36,12 @@ except rospy.ServiceException:
 # 1Hz
 rate = rospy.Rate(10)
 
-# instance_var_name [TODO] param or smtng easy
+# instance_var_name [TODO] param
 emotion = 'happiness'
 pitch = 130
 speed = 100
 volume = 100
 speech_method = 'jtalk'
-
 
 # Class method1: text_to_jtalk
 def text_to_jtalk(phrase):
@@ -54,8 +53,6 @@ def text_to_jtalk(phrase):
         rospy.loginfo('Speech failed for some unknown reason')
     else:
         rospy.loginfo('Robot speech: {}'.format(phrase))
-    # rospy.sleep(2.0)
-
 
 def text_to_jtalk_sadness(phrase):
     emotion = 'sadness'
@@ -66,7 +63,6 @@ def text_to_jtalk_sadness(phrase):
         rospy.loginfo('Speech failed for some unknown reason')
     else:
         rospy.loginfo('Robot speech: {}'.format(phrase))
-    # rospy.sleep(2.0)
 
 def text_to_jtalk_shout(phrase):
     emotion = 'shout'
@@ -77,7 +73,6 @@ def text_to_jtalk_shout(phrase):
         rospy.loginfo('Speech failed for some unknown reason')
     else:
         rospy.loginfo('Robot speech: {}'.format(phrase))
-    # rospy.sleep(2.0)
 
 
 julius_text = ''

@@ -5,3 +5,6 @@
     uri: https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git
     local-name: ldlidar_stl_ros2
     version: main
+    uri: https://github.com/sbgisen/depthai_hand_tracker.git
+    local-name: depthai_hand_tracker
+    version: humnle

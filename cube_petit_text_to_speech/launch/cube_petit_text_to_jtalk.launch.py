@@ -55,5 +55,11 @@ def generate_launch_description() -> LaunchDescription:
             executable='speech_action_server',
             name='speech_action_server'
         ),
+        Node(
+            package='depthai_hand_tracker',
+            executable='depthai_hand_tracker_ros.py',
+            name='depthai_hand_tracker',
+            output='screen'
+        ),
         teleop_include
     ])

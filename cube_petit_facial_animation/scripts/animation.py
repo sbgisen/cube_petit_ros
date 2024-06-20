@@ -33,6 +33,7 @@ class Chrome():
         u"""Chromeを起動"""
         self._p = subprocess.Popen([
             "google-chrome", "--new-window", "--start-fullscreen",
+            "--disable-features=Translate", "--guest", "--kiosk", "--start-maximized",
             "--no-default-browser-check", "--hide-crash-restore-bubble", html_path])
 
     def kill_started(self):

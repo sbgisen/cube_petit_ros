@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
+import random
 # Copyright (c) 2024 SoftBank Corp.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +17,23 @@
 # limitations under the License.
 import sys
 import time
-import random
 
 import rclpy
 import rclpy.node
 from rclpy.action import ActionClient
 from rclpy.executors import ExternalShutdownException
-
-from sensor_msgs.msg import Joy
 from sbgisen_msgs.action import Speech
+from sensor_msgs.msg import Joy
 from std_msgs.msg import String
+
 
 class TextToJtalk(rclpy.node.Node):
     def __init__(self):
         super().__init__('cube_petit_text_to_jtalk')
         self.__action_client = ActionClient(self, Speech, '/speech_action_server')
-        self._hand_gesture_subscription = self.create_subscription(String, '/hand_gesture', self.handgesture_callback, 1)
+        self._hand_gesture_subscription = self.create_subscription(
+            String, '/hand_gesture', self.handgesture_callback, 1)
+        self._hotword_subscription = self.create_subscription(String, '/detect_word', self.hotword_callback, 1)
         self._joy_subscription = self.create_subscription(Joy, 'joy', self.joystick_callback, 1)
         self.hand_gesture = None
         self.hand_gesture_received = False
@@ -75,6 +77,10 @@ class TextToJtalk(rclpy.node.Node):
             self.send_talk("僕の勝ちです")
         else:
             self.send_talk("あなたの勝ちです")
+
+    def hotword_callback(self, Hotword):
+        if Hotword.data == "Cube-petit":
+            self.send_talk("はーい")
 
     def handgesture_callback(self, HandGesture):
         if self.janken_flag:
@@ -156,6 +162,7 @@ class TextToJtalk(rclpy.node.Node):
             self.get_logger().info('shita')
         time.sleep(1.0)
 
+
 def main():
     rclpy.init()
     node = TextToJtalk()
@@ -169,6 +176,7 @@ def main():
     finally:
         rclpy.try_shutdown()
         node.destroy_node()
+
 
 if __name__ == '__main__':
     main()

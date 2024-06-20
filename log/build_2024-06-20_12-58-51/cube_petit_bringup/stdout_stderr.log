@@ -1,0 +1,53 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 1.3.8 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+-- Found ament_lint_auto: 0.12.10 (/opt/ros/humble/share/ament_lint_auto/cmake)
+-- Added test 'flake8' to check Python code syntax and style conventions
+-- Added test 'lint_cmake' to check CMake code style
+-- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+-- Added test 'xmllint' to check XML markup files
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/cube-petit/ros/src/cube_petit_ros/build/cube_petit_bringup
+-- Install configuration: ""
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/cube_petit_bringup.launch.py
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/include
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/include/cube_petit_v3
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/include/cube_petit_v3/sensors.launch.py
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/include/device
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/include/device/lidar.launch.py
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/include/general_bringup.launch.py
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/teleop_key.launch.py
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/launch/teleop.launch.py
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/config
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/config/ps4.config.yaml
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/config/sensors
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/config/sensors/lidar_scan_filter.yaml
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/ament_index/resource_index/package_run_dependencies/cube_petit_bringup
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/ament_index/resource_index/parent_prefix_path/cube_petit_bringup
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/environment/ament_prefix_path.sh
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/environment/ament_prefix_path.dsv
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/environment/path.sh
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/environment/path.dsv
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/local_setup.bash
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/local_setup.sh
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/local_setup.zsh
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/local_setup.dsv
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/package.dsv
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/ament_index/resource_index/packages/cube_petit_bringup
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/cmake/cube_petit_bringupConfig.cmake
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/cmake/cube_petit_bringupConfig-version.cmake
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/share/cube_petit_bringup/package.xml
+-- Installing: /home/cube-petit/ros/src/cube_petit_ros/install/cube_petit_bringup/lib/cube_petit_bringup/twist_to_twist_stamped.py

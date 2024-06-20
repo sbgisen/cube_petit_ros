@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cube_petit_python_api</name>
+  <version>2.0.0</version>
+  <description>python api for cube_petit</description>
+  <maintainer email="SBGRP-git@g.softbank.co.jp">SoftBank corp.</maintainer>
+  <license>Apache 2.0</license>
+
+  <depend>action_msgs</depend>
+  <depend>actionlib_msgs</depend>
+  <test_depend>actionlib_tutorials</test_depend>
+  <!-- <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
+  <depend>geometry_msgs</depend>
+  <depend>move_base_msgs</depend>
+  <depend>python3-numpy</depend>
+  <depend>python-transforms3d-pip</depend> -->
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <!-- <depend>tf</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf_transformations</depend> -->
+
+  <!-- <exec_depend>cube_diagnostic</exec_depend>
+  <exec_depend>cube_expression</exec_depend>
+  <exec_depend>cube_navigation</exec_depend> -->
+  <exec_depend>cube_speech</exec_depend>
+
+  <!-- <test_depend>actionlib_tutorials</test_depend>
+  <test_depend>cube_gazebo</test_depend>
+  <test_depend>cube_navigation</test_depend> -->
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

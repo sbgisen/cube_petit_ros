@@ -63,8 +63,6 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments={
             'robot': LaunchConfiguration('robot')}.items())
 
-<<<<<<< Updated upstream
-=======
     teleop = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py')))
 
@@ -86,8 +84,6 @@ def generate_launch_description() -> LaunchDescription:
         RegisterEventHandler(event_handler=OnProcessExit(target_action=robot_state,
                                                          on_exit=[EmitEvent(event=Shutdown())])),
         general,
-<<<<<<< Updated upstream
-=======
         teleop,
         text_to_speech,
         face_animation,

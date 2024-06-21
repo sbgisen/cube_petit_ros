@@ -22,8 +22,8 @@ ros2 launch cube_speech cube_speech.launch.py
 [Terminal2]
 ```.py
 from rclpy.node import Node
-import rcypy
-from cube_petit_python_api.commanders.speech import SpeechCommander
+import rclpy
+from commanders.speech import SpeechCommander
 rclpy.init()
 node = Node('test')
 speech_node = SpeechCommander(node)

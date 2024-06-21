@@ -35,6 +35,10 @@ setup(
     name=package_name,
     version='0.0.0',
     packages=find_packages(),
+    packages=find_packages('src', exclude=['test']),
+    package_dir={'': 'src'},
+    py_modules=[],
+    install_requires=['setuptools'],
     data_files=[
         ('share/ament_index/resource_index/packages',
          ['resource/' + package_name]),

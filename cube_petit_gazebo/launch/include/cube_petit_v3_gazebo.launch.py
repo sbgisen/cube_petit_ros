@@ -123,46 +123,28 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[{'robot_description': robot_description}, controller_config_path],
         output='screen'
     )
-    joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster'],
-        output='screen'
-    )
-    diff_drive_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['diff_drive_controller'],
-        output='screen'
-    )
+    load_joint_state_controller = Node(package='controller_manager',
+                                       executable='spawner',
+                                       output='both',
+                                       arguments=['-c', '/controller_manager',
+                                                  'joint_state_broadcaster'])
+
+    load_diff_drive_controller = Node(package='controller_manager',
+                                      executable='spawner',
+                                      output='both',
+                                      arguments=['-c', '/controller_manager',
+                                                 'diff_drive_controller'])
 
     return LaunchDescription(args + [
         SetParameter(name='use_sim_time', value=True),
         robot_state_publisher,
-        RegisterEventHandler(event_handler=OnProcessExit(
-            target_action=robot_state_publisher,
-            on_exit=[EmitEvent(event=Shutdown())]
-        )),
+        # RegisterEventHandler(event_handler=OnProcessExit(
+        #     target_action=robot_state_publisher,
+        #     on_exit=[EmitEvent(event=Shutdown())]
+        # )),
         spawn_entity,
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=spawn_entity,
-                on_exit=[controllers],
-            )
-        ),
-        ros2_control_node,
-        RegisterEventHandler(
-            OnProcessExit(
-                target_action=ros2_control_node,
-                on_exit=[joint_state_broadcaster_spawner]
-            )
-        ),
-        RegisterEventHandler(
-            OnProcessExit(
-                target_action=joint_state_broadcaster_spawner,
-                on_exit=[diff_drive_controller_spawner]
-            )
-        )
-
+        # load_joint_state_controller,
+        # load_diff_drive_controller,
+        controllers,
 
     ])

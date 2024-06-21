@@ -95,18 +95,6 @@ def generate_launch_description() -> LaunchDescription:
         'robot_init_yaw',
         default_value='0.0',
         description='Yaw of the robot in the Gazebo world'))
-    args.append(DeclareLaunchArgument(
-        'station_x',
-        default_value='-2.393',
-        description='X position of the robot in the Gazebo world'))
-    args.append(DeclareLaunchArgument(
-        'station_y',
-        default_value='8.494',
-        description='Y position of the robot in the Gazebo world'))
-    args.append(DeclareLaunchArgument(
-        'station_yaw',
-        default_value='-1.5708',
-        description='Yaw of the robot in the Gazebo world'))
 
     gzserver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -126,10 +114,26 @@ def generate_launch_description() -> LaunchDescription:
         )
     )
 
+    bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
+    teleop = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py')))
+
+    text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
+    text_to_speech = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py')))
+
+    speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
+    hotword = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword.launch.py')))
+
+
     return LaunchDescription(args + [
         SetParameter(name='use_sim_time', value=True),
         gazebo_model_path,
         gzserver,
         gzclient,
         OpaqueFunction(function=launch_setup),
+        teleop,
+        text_to_speech,
+        hotword,
     ])

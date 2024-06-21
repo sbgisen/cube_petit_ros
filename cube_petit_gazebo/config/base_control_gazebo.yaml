@@ -7,6 +7,13 @@ controller_manager:
     diff_drive_controller:
       type: diff_drive_controller/DiffDriveController
 
+velocity_controller:
+  ros__parameters:
+    joints:
+      - left_wheel_joint
+      - right_wheel_joint
+
+
 # Publish all joint states -----------------------------------
 joint_state_broadcaster:
   ros__parameters:

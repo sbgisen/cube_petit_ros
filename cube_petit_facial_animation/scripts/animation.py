@@ -34,6 +34,7 @@ class Chrome():
         self._p = subprocess.Popen([
             "google-chrome", "--new-window", "--start-fullscreen",
             "--disable-features=Translate", "--guest", "--kiosk", "--start-maximized",
+            "--password-store=basic",
             "--no-default-browser-check", "--hide-crash-restore-bubble", html_path])
 
     def kill_started(self):

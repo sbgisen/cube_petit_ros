@@ -15,8 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from . import gpt_chat
 from . import speech
 
 __all__ = [
-    'speech'
+    'speech',
+    'gpt_chat'
 ]

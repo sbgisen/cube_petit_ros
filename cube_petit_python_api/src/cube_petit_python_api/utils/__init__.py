@@ -15,8 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cube_petit_python_api.utils import gpt_client
 from cube_petit_python_api.utils import proxies
 
 __all__ = [
-    'proxies'
+    'proxies',
+    'gpt_client'
 ]

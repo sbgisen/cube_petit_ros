@@ -17,11 +17,13 @@
 """Cube petit's speech."""
 
 import typing
+
 import rclpy
-from rclpy.node import Node
-from rclpy.action import ActionClient
-from sbgisen_msgs.action import Speech
 from action_msgs.msg import GoalStatus
+from rclpy.action import ActionClient
+from rclpy.node import Node
+from sbgisen_msgs.action import Speech
+
 
 class SpeechCommander:
     """Commander for handling speech."""
@@ -37,6 +39,7 @@ class SpeechCommander:
         if not self.speaker.wait_for_server(timeout_sec=5.0):
             self.node.get_logger().error('Unable to find /speech_action_server.')
             raise Exception('Unable to find /speech_action_server.')
+        self.node.get_logger().info("Speech Commander init")
 
     def say(self,
             phrase_id: str,
@@ -116,6 +119,7 @@ class SpeechCommander:
         else:
             self.node.get_logger().info('Speech failed.')
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = Node('speech_commander_node')
@@ -129,6 +133,7 @@ def main(args=None):
     finally:
         node.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

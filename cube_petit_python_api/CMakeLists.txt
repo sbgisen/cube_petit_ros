@@ -33,5 +33,12 @@ install(
   FILES_MATCHING PATTERN "*.py"
 )
 
+install(DIRECTORY resource/
+  DESTINATION share/${PROJECT_NAME}/resource
+)
+
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
 
 ament_package()

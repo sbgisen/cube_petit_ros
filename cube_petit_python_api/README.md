@@ -32,13 +32,14 @@ speech_node.say("test")
 
 ### Usage:Use Cupe-petit Chat via GPT-4
 Need speech_to_text  `/julius_talk_result`
-Need param `api_key`
+Topic can publish like `ros2 topic pub --once /julius_talk_result std_msgs/msg/String "data: 'こんにちは'"`
+Need env `OPENAI_API_KEY`
 Add param `setting_file`: path to setting file
 
 ```.py
 from rclpy.node import Node
 import rclpy
-from commanders.gpt_chat import GPTChatCommander
+from cube_petit_python_api.commanders.gpt_chat import GPTChatCommander
 rclpy.init()
 node = Node('test')
 gpt_chat_node = GPTChatCommander(node)
@@ -46,10 +47,13 @@ gpt_chat_node.chat("こんにちは")
 ```
 
 ### Usage:Use just GPT-4
+Need env `OPENAI_API_KEY`
+Add param `setting_file`: path to setting file
+
 ```.py
 from rclpy.node import Node
 import rclpy
-from utils.gpt_client import GPTClient
+from cube_petit_python_api.utils.gpt_client import GPTClient
 rclpy.init()
 node = Node('test')
 gpt_node = GPTClient(self, api_key=`api_key`)

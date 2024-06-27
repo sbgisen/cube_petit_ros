@@ -50,8 +50,9 @@ class GPTChatCommander:
         package_path = get_package_share_directory('cube_petit_python_api')
         default_setting_file_path = f"{package_path}/config/cube_petit_gpt_setting.txt"
 
-        self.__setting_file = self.node.declare_parameter('setting_file',
-                                                          default_setting_file_path).get_parameter_value().string_value
+        # self.__setting_file = self.node.declare_parameter('setting_file', default_setting_file_path).get_parameter_value().string_value
+        self.__setting_file = default_setting_file_path
+
         try:
             with open(self.__setting_file, 'r') as file:
                 self.__setting_file__text = file.read()
@@ -158,7 +159,7 @@ class GPTChatCommander:
                 break
 
     def clear_chat_history(self) -> None:
-        self.__chat_history = [{"role": "system", "content": self.__setting_file}]
+        self.__chat_history = [{"role": "system", "content": self.__setting_file__text}]
 
     def get_chat_history(self) -> dict:
         return self.__chat_history

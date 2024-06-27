@@ -95,7 +95,6 @@ class GPTClient(object):
             ]
         response = self.__client.chat.completions.create(
             model="gpt-4-vision-preview",
-            response_format={'type': 'json_object'},
             messages=contexts,
             max_tokens=300,
         )

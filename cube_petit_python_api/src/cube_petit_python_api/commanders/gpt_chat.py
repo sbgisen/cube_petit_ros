@@ -50,7 +50,8 @@ class GPTChatCommander:
         package_path = get_package_share_directory('cube_petit_python_api')
         default_setting_file_path = f"{package_path}/config/cube_petit_gpt_setting.txt"
 
-        # self.__setting_file = self.node.declare_parameter('setting_file', default_setting_file_path).get_parameter_value().string_value
+        # self.__setting_file = self.node.declare_parameter('setting_file', default_setting_file_path).
+        # get_parameter_value().string_value
         self.__setting_file = default_setting_file_path
 
         try:
@@ -85,7 +86,8 @@ class GPTChatCommander:
             timeout: int = 30,
             image: np.ndarray = None,
             add_setting_text: str = None,
-            context: dict = None) -> str:
+            context: dict = None,
+            input_user_text: str = None) -> str:
         """Chat."""
         self.node.get_logger().info('Waiting for chat')
         speech_commander = SpeechCommander(self.node)
@@ -96,8 +98,9 @@ class GPTChatCommander:
             self.__chat_history = [{"role": "system", "content": self.__setting_file__text}]
         if timeout is not None:
             self.timeout_duration = Duration(seconds=timeout)
-        self.__chat_history.append({"role": "assistant", "content": input_robot_text})
-        speech_commander.say(input_robot_text)
+        if input_robot_text != "":
+            self.__chat_history.append({"role": "assistant", "content": input_robot_text})
+            speech_commander.say(input_robot_text)
 
         while rclpy.ok():
             try:
@@ -106,38 +109,41 @@ class GPTChatCommander:
                 jtalk_retry_time = 0
                 self.node.get_logger().info("Wait for Julius text")
 
-                while jtalk_retry_time < self.__max_jtalk_retry_time:
-                    start_time = self.node.get_clock().now()
-                    while self.__julius_text == "":
-                        rclpy.spin_once(self.node, timeout_sec=0.1)
-                        if (self.node.get_clock().now() - start_time) > self.timeout_duration:
-                            self.node.get_logger().warn("Juliusからの応答がありませんでした。")
-                            jtalk_retry_time += 1
+                if input_user_text is None:
+                    while jtalk_retry_time < self.__max_jtalk_retry_time:
+                        start_time = self.node.get_clock().now()
+                        while self.__julius_text == "":
+                            rclpy.spin_once(self.node, timeout_sec=0.1)
+                            if (self.node.get_clock().now() - start_time) > self.timeout_duration:
+                                self.node.get_logger().warn("Juliusからの応答がありませんでした。")
+                                jtalk_retry_time += 1
+                                break
+                        if self.__julius_text != "":
                             break
-                    if self.__julius_text != "":
-                        break
-                if self.__julius_text == "":
-                    self.node.get_logger().error("Juliusからの返答がないため終了します")
+                    if self.__julius_text == "":
+                        self.node.get_logger().error("Juliusからの返答がないため終了します")
+                    self.input_user_text = self.__julius_text
+                else:
+                    self.input_user_text = input_user_text
 
-                input_user_text = self.__julius_text
-                self.node.get_logger().info(input_user_text)
+                self.node.get_logger().info(self.input_user_text)
 
                 if add_setting_text is not None:
                     self.__chat_history.append({"role": "system", "content": add_setting_text})
 
                 if image is None:
-                    self.__chat_history.append({"role": "user", "content": input_user_text})
+                    self.__chat_history.append({"role": "user", "content": self.input_user_text})
                     result_json = self.__speaker.get_response(self, contexts=self.__chat_history)
                 else:
                     _, bin_image = cv2.imencode('.png', image)
                     base64_image = base64.b64encode(bin_image).decode('utf-8')
                     content = [
-                        {"type": "text", "text": input_user_text},
+                        {"type": "text", "text": self.input_user_text},
                         {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"},
                     ]
                     self.__chat_history.append({"role": "user", "content": content})
                     result_json = self.__speaker.get_response_use_image(
-                        self, image=image, contents=self.__chat_history)
+                        self, image=image, contexts=self.__chat_history)
 
                 response_data = json.loads(result_json)
                 if 'end_conversation' not in response_data:
@@ -151,6 +157,8 @@ class GPTChatCommander:
                 if 'speech_phrase' in response_data:
                     speech_commander.say(response_data['speech_phrase'])
                     self.__chat_history.append({"role": "assistant", "content": response_data['speech_phrase']})
+                if input_user_text is not None:
+                    return result_json
             except json.JSONDecodeError:
                 self.node.get_logger().error("JSON解析エラーが発生しました。")
                 break

@@ -78,7 +78,12 @@ class GPTChatCommander:
         self.node.get_logger().debug(self.__julius_text)
         self.node.get_logger().debug("-----------------")
 
-    def chat(self, input_robot_text: str, timeout: int = 30, image: np.darray = None) -> str:
+    def chat(
+            self,
+            input_robot_text: str,
+            timeout: int = 30,
+            image: np.darray = None,
+            add_setting_text: str = None) -> str:
         """Chat."""
         self.node.get_logger().info('Waiting for chat')
         speech_commander = SpeechCommander(self.node)
@@ -109,8 +114,13 @@ class GPTChatCommander:
 
                 input_user_text = self.__julius_text
                 self.node.get_logger().info(input_user_text)
+
+                if add_setting_text is not None:
+                    self.__chat_history.append({"role": "system", "content": add_setting_text})
+
                 if image is None:
                     self.__chat_history.append({"role": "user", "content": input_user_text})
+                    result_json = self.__speaker.get_response(self, image=image, contexts=self.__chat_history)
                 else:
                     _, bin_image = cv2.imencode('.png', image)
                     base64_image = base64.b64encode(bin_image).decode('utf-8')
@@ -119,11 +129,8 @@ class GPTChatCommander:
                         {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"},
                     ]
                     self.__chat_history.append({"role": "user", "content": content})
-
-                if image is None:
-                    result_json = self.__speaker.get_response(self, image=image, contexts=self.__chat_history)
-                else:
                     result_json = self.__speaker.get_response_use_image(self, contents=self.__chat_history)
+
                 response_data = json.loads(result_json)
                 if 'end_conversation' not in response_data:
                     if 'speech_phrase' in response_data:

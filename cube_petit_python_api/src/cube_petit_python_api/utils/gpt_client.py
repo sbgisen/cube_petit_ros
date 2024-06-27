@@ -68,7 +68,7 @@ class GPTClient(object):
         else:
             self.__client = openai.OpenAI(api_key=api_key)
 
-    def get_response_use_image(self, input_text: str, image: np.ndarray = None, contexts: dict = None) -> str:
+    def get_response_use_image(self, input_text: str = None, image: np.ndarray = None, contexts: dict = None) -> str:
         if image is None:
             self.node.get_logger().warn("use test image...")
             package_path = get_package_share_directory('cube_petit_python_api')

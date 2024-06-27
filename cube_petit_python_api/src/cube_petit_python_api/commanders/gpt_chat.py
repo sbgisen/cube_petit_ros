@@ -119,7 +119,11 @@ class GPTChatCommander:
                         {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"},
                     ]
                     self.__chat_history.append({"role": "user", "content": content})
-                result_json = self.__speaker.get_response(self, contexts=self.__chat_history)
+
+                if image is None:
+                    result_json = self.__speaker.get_response(self, image=image, contexts=self.__chat_history)
+                else:
+                    result_json = self.__speaker.get_response_use_image(self, contents=self.__chat_history)
                 response_data = json.loads(result_json)
                 if 'end_conversation' not in response_data:
                     if 'speech_phrase' in response_data:

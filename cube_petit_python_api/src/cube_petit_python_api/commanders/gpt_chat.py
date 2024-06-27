@@ -64,7 +64,7 @@ class GPTChatCommander:
 
         self.node.get_logger().info(self.__setting_file)
         self.__julius_text = None
-        self.node.create_subscription(String, '/julius_talk_result', self.__julius_callback, 1)
+        self.node.create_subscription(String, '/julius_result_text', self.__julius_callback, 1)
         self.__speaker = GPTClient(self.node,
                                    api_key=self.api_key,
                                    setting_file=self.__setting_file)
@@ -82,11 +82,17 @@ class GPTChatCommander:
             self,
             input_robot_text: str,
             timeout: int = 30,
-            image: np.darray = None,
-            add_setting_text: str = None) -> str:
+            image: np.ndarray = None,
+            add_setting_text: str = None,
+            context: dict = None) -> str:
         """Chat."""
         self.node.get_logger().info('Waiting for chat')
         speech_commander = SpeechCommander(self.node)
+
+        if context is not None:
+            self.__chat_history.append(context)
+        else:
+            self.__chat_history = [{"role": "system", "content": self.__setting_file__text}]
         if timeout is not None:
             self.timeout_duration = Duration(seconds=timeout)
         self.__chat_history.append({"role": "assistant", "content": input_robot_text})
@@ -120,7 +126,7 @@ class GPTChatCommander:
 
                 if image is None:
                     self.__chat_history.append({"role": "user", "content": input_user_text})
-                    result_json = self.__speaker.get_response(self, image=image, contexts=self.__chat_history)
+                    result_json = self.__speaker.get_response(self, contexts=self.__chat_history)
                 else:
                     _, bin_image = cv2.imencode('.png', image)
                     base64_image = base64.b64encode(bin_image).decode('utf-8')
@@ -129,7 +135,8 @@ class GPTChatCommander:
                         {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"},
                     ]
                     self.__chat_history.append({"role": "user", "content": content})
-                    result_json = self.__speaker.get_response_use_image(self, contents=self.__chat_history)
+                    result_json = self.__speaker.get_response_use_image(
+                        self, image=image, contents=self.__chat_history)
 
                 response_data = json.loads(result_json)
                 if 'end_conversation' not in response_data:
@@ -149,4 +156,9 @@ class GPTChatCommander:
             except Exception as e:
                 self.node.get_logger().error(f"予期せぬエラーが発生しました: {str(e)}")
                 break
+
+    def clear_chat_history(self) -> None:
         self.__chat_history = [{"role": "system", "content": self.__setting_file}]
+
+    def get_chat_history(self) -> dict:
+        return self.__chat_history

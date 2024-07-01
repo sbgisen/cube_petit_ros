@@ -22,8 +22,7 @@ import json
 import os
 
 import cv2
-import np
-import openai
+import numpy as np
 import rclpy
 from ament_index_python.packages import get_package_share_directory
 from rclpy.duration import Duration

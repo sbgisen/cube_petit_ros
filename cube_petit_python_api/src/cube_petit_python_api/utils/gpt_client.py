@@ -23,7 +23,7 @@ import pathlib
 import typing
 
 import cv2
-import np
+import numpy as np
 import openai
 from ament_index_python.packages import get_package_share_directory
 from rclpy.node import Node
@@ -51,7 +51,7 @@ class GPTClient(object):
         if api_key is None or api_key == "":
             if os.getenv('OPENAI_API_KEY', '') == "":
                 self.node.get_logger().error("No api_key...")
-                return False
+                # return False
             else:
                 self.node.get_logger().warn("Use env OPENAI_API_KEY")
 

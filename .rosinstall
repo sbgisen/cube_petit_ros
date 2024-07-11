@@ -1,10 +1,20 @@
 - git:
-    uri: https://github.com/autowarefoundation/ros2_socketcan.git
-    local-name: ros2_socketcan
-    version: main
     uri: https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git
     local-name: ldlidar_stl_ros2
-    version: main
+    version: master
+- git:
     uri: https://github.com/sbgisen/depthai_hand_tracker.git
     local-name: depthai_hand_tracker
     version: humnle
+- git:
+    uri: git@github.com:sbgisen/cube_speech.git
+    local-name: cube_speech
+    version: feature/cube_petit_ros2
+- git:
+    uri: git@github.com:sbgisen/sbgisen_msgs.git
+    local-name: sbgisen_msgs
+    version: main
+- git:
+    uri: git@github.com:sbgisen/dji_ros_controller.git
+    local-name: dji_ros_controller
+    version: feature/humble-m2006

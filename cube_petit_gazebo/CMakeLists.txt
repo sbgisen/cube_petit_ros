@@ -23,7 +23,6 @@ find_package(ament_cmake_python REQUIRED)
 install(
   DIRECTORY config
             launch
-            models
             worlds
   DESTINATION share/${PROJECT_NAME}
 )

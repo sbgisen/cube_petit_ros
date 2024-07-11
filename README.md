@@ -105,6 +105,7 @@ If you connect a microphone and say "Cube Petit", it will respond with "Yes"
     ```
     cd ~/ros/src
     git clone -b feature/add_state_machine git@github.com:sbgisen/cube_petit_smach_ros.git
+    cd ~/ros/
     rosdep install --from-paths src --ignore-src -r -y
     cd ~/ros && colcon build --symlink-install --packages-up-to cube_petit_smach_ros
     source install/setup.bash

@@ -1,5 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
-#include "/home/cube-petit/ros/src/dji_ros_controller/include/M2006Ros2.hpp"  // M2006Ros2 のヘッダファイルをインクルード
+#include "M2006Ros2.hpp"  // M2006Ros2 のヘッダファイルをインクルード
 
 int main(int argc, char** argv)
 {

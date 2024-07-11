@@ -9,6 +9,8 @@
   <url type="repository">https://github.com/sbgisen/cube_petit_ros</url>
   <url type="bugtracker">https://github.com/sbgisen/cube_petit_ros/issues</url>
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>dji_ros_controller</build_depend>
+  <exec_depend>dji_ros_controller</exec_depend>
   <exec_depend>controller_manager</exec_depend>
   <exec_depend>cube_description</exec_depend>
   <exec_depend>diff_drive_controller</exec_depend>

@@ -32,11 +32,12 @@ find_package(can_msgs REQUIRED)
 find_package(controller_manager REQUIRED)
 find_package(class_loader REQUIRED)
 find_package(control_toolbox REQUIRED)
+find_package(dji_ros_controller REQUIRED)
 
 # Include directories
 include_directories(
   include
-  ${CMAKE_CURRENT_SOURCE_DIR}/../dji_ros_controller/include
+  # ${CMAKE_CURRENT_SOURCE_DIR}/../dji_ros_controller/include
   ${rclcpp_INCLUDE_DIRS}
   ${rclcpp_lifecycle_INCLUDE_DIRS}
   ${hardware_interface_INCLUDE_DIRS}
@@ -49,6 +50,7 @@ include_directories(
   ${controller_manager_INCLUDE_DIRS}
   ${class_loader_INCLUDE_DIRS}
   ${controll_toolbox_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/../dji_ros_controller/include
 )
 
 # uncomment the following section in order to fill in

@@ -27,9 +27,15 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
 
 install(
   PROGRAMS scripts/cube_petit_speech_to_text.py scripts/cube_petit_hotword.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+install(CODE "
+  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/requirements.txt)
+  execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/setup/install-julius.sh)
+  ")
+
+ament_package()

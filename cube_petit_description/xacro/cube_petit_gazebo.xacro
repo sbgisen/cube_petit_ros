@@ -34,8 +34,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh
-          filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
+        <mesh filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -49,8 +48,7 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00440023 0.00053314 0.15283194"/>
       <mass value="1.98239086"/>
-      <inertia ixx="0.02351680" ixy="0.00001868" iyy="0.02505713" ixz="-0.00012952"
-        iyz="-0.00004728" izz="0.02060399"/>
+      <inertia ixx="0.02351680" ixy="0.00001868" iyy="0.02505713" ixz="-0.00012952" iyz="-0.00004728" izz="0.02060399"/>
     </inertial>
   </link>
   <gazebo reference="body_link">
@@ -78,10 +76,7 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.00208424"/>
       <mass value="0.11166745"/>
-      <inertia
-        ixx="0.004391"
-        ixy="0.000000" iyy="0.004391"
-        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+      <inertia ixx="0.004391" ixy="0.000000" iyy="0.004391" ixz="0.000000" iyz="0.000000" izz="0.004277"/>
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -192,8 +187,7 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
       <mass value="0.2986774"/>
-      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001"
-        izz="0.0001148"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
     </inertial>
     <visual>
       <origin rpy="-1.57079632679 0 3.1415926" xyz="0 0 0"/>
@@ -240,8 +234,7 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
       <mass value="0.2986774"/>
-      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001"
-        izz="0.0001148"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
     </inertial>
     <visual>
       <origin rpy="1.57079632679 0 3.1415926" xyz="0 0 0"/>

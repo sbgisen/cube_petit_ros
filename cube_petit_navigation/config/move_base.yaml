@@ -11,7 +11,7 @@ oscillation_timeout: 10.0
 oscillation_distance: 0.5
 
 # Local planner
-controller_frequency: 10.0 #10.0
+controller_frequency: 10.0 # 10.0
 controller_patience: 3.0
 max_planning_retries: 5
 
@@ -56,15 +56,15 @@ TrajectoryPlannerROS:
   angular_sim_granularity: 0.015
 
   pdist_scale: 1.45
-  gdist_scale: 1.9 #1.2 #0.4 #6.0
+  gdist_scale: 1.9 # 1.2 #0.4 #6.0
   occdist_scale: 0.1 # 0.06 #0.6
   oscillation_reset_dist: 0.15 # 0.15
   escape_reset_dist: 0.05
   escape_reset_theta: 0.025
 
   vx_samples: 11
-  vtheta_samples: 10 # scoring (defaults) meter_scoring: false #true 
-  heading_lookahead: 0.2 #0.35
+  vtheta_samples: 10 # scoring (defaults) meter_scoring: false #true
+  heading_lookahead: 0.2 # 0.35
 
   heading_scoring_timestep: 0.8
   heading_scoring: false
@@ -82,11 +82,11 @@ TrajectoryPlannerROS:
 # Recovery behaviors
 recovery_behavior_enabled: true
 recovery_behaviors:
-        #- name: 'car_maneuver_recovery'
+# - name: 'car_maneuver_recovery'
         #  type: 'car_maneuver_recovery/CarManeuverRecovery'
   - name: 'conservative_reset'
     type: 'clear_costmap_recovery/ClearCostmapRecovery'
-  # - name: 'clear_and_rotate_recovery'
+    # - name: 'clear_and_rotate_recovery'
   #   type: 'clear_and_rotate_recovery/ClearAndRotateRecovery'
 
 
@@ -98,7 +98,7 @@ rotate_recovery:
 clear_and_rotate_recovery:
   frequency: 10.0
   sim_granularity: 0.02
-aggressive_reset: 
+aggressive_reset:
   reset_distance: 0.5
 car_maneuver_recovery:
   four_wheel_steering: True
@@ -113,7 +113,7 @@ car_maneuver_recovery:
 
 
 TebLocalPlannerROS:
- odom_topic: /cube_petit/diff_drive_controller/odom
+  odom_topic: /cube_petit/diff_drive_controller/odom
  map_frame: /odom
 
  # Trajectory
@@ -121,7 +121,7 @@ TebLocalPlannerROS:
  dt_ref: 0.45 # 0.1 # 2021/07/16 #0.3        # zikan bunkai nou
  dt_hysteresis: 0.1 # 0.01  # 2021/07/16 # suidyou ha dt_ref no 10%
  global_plan_overwrite_orientation: False # True  # 2021/07/16
- max_global_plan_lookahead_dist: 3.0    #global_plan subset max length
+ max_global_plan_lookahead_dist: 3.0    # global_plan subset max length
  feasibility_check_no_poses: 5 # 0  # 2021/07/16
  allow_init_with_backwards_motion: True
 
@@ -142,19 +142,19 @@ TebLocalPlannerROS:
  yaw_goal_tolerance: 0.2
  free_goal_vel: False       # If True, set max speed to reach goal
  complete_global_plan: True # nazo  #(2021/07/16)  add
-    
- # Obstacles   
+
+ # Obstacles
  min_obstacle_dist: 0.2
  inflation_dist: 0.2
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 1.0
- obstacle_poses_affected: 15  #30  # 2021/07/16  # CPU up
+ obstacle_poses_affected: 15  # 30  # 2021/07/16  # CPU up
  costmap_converter_plugin: ""
  costmap_converter_spin_thread: True
  costmap_converter_rate: 5
-#  include_dynamic_obstacles: True # 2021/07/16 add
+ #  include_dynamic_obstacles: True # 2021/07/16 add
 #  dynamic_obstacle_inflation_dist: 0.4 # 2021/07/16 add
- 
+
 # Optimization
  no_inner_iterations: 5
  no_outer_iterations: 4
@@ -178,7 +178,7 @@ TebLocalPlannerROS:
  weight_viapoint: 1
  weight_adapt_factor: 2
 
-#  no_inner_iterations: 3
+ #  no_inner_iterations: 3
 #  no_outer_iterations: 3
 #  optimization_activate: True
 #  optimization_verbose: False
@@ -217,7 +217,7 @@ TebLocalPlannerROS:
  visualize_hc_graph: False
  visualize_with_time_as_z_axis_scale: False
 
-#  enable_homotopy_class_planning: True # heiretu syori increase cpu
+ #  enable_homotopy_class_planning: True # heiretu syori increase cpu
 #  enable_multithreading: True  # multi thread
 #  simple_exploration: False
 #  max_number_classes: 4

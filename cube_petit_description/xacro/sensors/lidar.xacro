@@ -33,8 +33,9 @@
     <kp value="50000"/>
     <kd value="0"/>
     <sensor type="gpu_ray" name="pacecat">
+      <alwaysOn>true</alwaysOn>
       <pose>0 0 0 0 0 0</pose>
-      <visualize>false</visualize>
+      <visualize>true</visualize>
       <update_rate>10</update_rate>
       <ray>
         <scan>
@@ -56,9 +57,13 @@
           <stddev>0.01</stddev>
         </noise>
       </ray>
-      <plugin name="gazebo_ros_lidar_controller" filename="libgazebo_ros_gpu_laser.so">
-        <topicName>/pacecat/scan</topicName>
-        <frameName>pacecat_link</frameName>
+      <plugin name="gazebo_ros_laser" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <namespace>/pacecat</namespace>
+          <remapping>~/out:=/pacecat/scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>pacecat_link</frame_name>
       </plugin>
     </sensor>
   </gazebo>

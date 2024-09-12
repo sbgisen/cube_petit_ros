@@ -3,8 +3,10 @@
   <!-- General -->
   <!-- <xacro:include filename="color_property.xacro"/> -->
 
-  <!-- <xacro:include filename="$(find cube_petit_description)/xacro/publish_pose/publish_pose.xacro"/>
-  <xacro:include filename="$(find cube_petit_description)/xacro/brass_gazebo_battery/brass_gazebo_battery.xacro"/> -->
+  <!-- <xacro:include filename="$(find
+  cube_petit_description)/xacro/publish_pose/publish_pose.xacro"/>
+  <xacro:include filename="$(find
+  cube_petit_description)/xacro/brass_gazebo_battery/brass_gazebo_battery.xacro"/> -->
 
   <link name="base_link"/>
   <joint name="body_joint" type="fixed">
@@ -28,12 +30,12 @@
   </joint>
 
 
-
   <link name="body_link">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
+        <mesh
+          filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
       </geometry>
     </visual>
     <collision>
@@ -47,7 +49,8 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00440023 0.00053314 0.15283194"/>
       <mass value="1.98239086"/>
-      <inertia ixx="0.02351680" ixy="0.00001868" iyy="0.02505713" ixz="-0.00012952" iyz="-0.00004728" izz="0.02060399"/>
+      <inertia ixx="0.02351680" ixy="0.00001868" iyy="0.02505713" ixz="-0.00012952"
+        iyz="-0.00004728" izz="0.02060399"/>
     </inertial>
   </link>
   <gazebo reference="body_link">
@@ -64,7 +67,78 @@
     <child link="connector_link"/>
     <origin rpy="0 0 3.14" xyz="-0.11 0 0.025"/>
   </joint>
-  <xacro:include filename="$(find cube_petit_description)/xacro/sensors/lidar.xacro"/>
+
+  <!-- lidar -->
+  <joint name="laser_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="pacecat_link"/>
+    <origin rpy="0 0 0" xyz="0.0 0 0.23975"/>
+  </joint>
+  <link name="pacecat_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.00208424"/>
+      <mass value="0.11166745"/>
+      <inertia
+        ixx="0.004391"
+        ixy="0.000000" iyy="0.004391"
+        ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.025"/>
+      </geometry>
+      <!-- <material name="red"/> -->
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.0315" radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="pacecat_link">
+    <material>red</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <self_collide>false</self_collide>
+    <sensor type="ray" name="pacecat_ray">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>400</samples>
+            <resolution>1</resolution>
+            <min_angle>${radians(-180)}</min_angle>
+            <max_angle>${radians( 180)}</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.16</min>
+          <max>20.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="scan" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <!-- <namespace>/cube_petit</namespace> -->
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>pacecat_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- <xacro:include filename="$(find cube_petit_description)/xacro/sensors/lidar.xacro"/> -->
   <!-- rear camera -->
   <!-- <xacro:include filename="$(find cube_petit_description)/xacro/sensors/camera.xacro" /> -->
 
@@ -118,7 +192,8 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
       <mass value="0.2986774"/>
-      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001"
+        izz="0.0001148"/>
     </inertial>
     <visual>
       <origin rpy="-1.57079632679 0 3.1415926" xyz="0 0 0"/>
@@ -165,7 +240,8 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
       <mass value="0.2986774"/>
-      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001"
+        izz="0.0001148"/>
     </inertial>
     <visual>
       <origin rpy="1.57079632679 0 3.1415926" xyz="0 0 0"/>

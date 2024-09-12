@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 
 # Copyright (c) 2024 SoftBank Corp.
@@ -70,7 +70,7 @@ def generate_launch_description() -> LaunchDescription:
         default_value='false'))
     args.append(DeclareLaunchArgument(
         'verbose',
-        default_value='false'))
+        default_value='true'))
     args.append(DeclareLaunchArgument(
         'gui',
         default_value='true'))
@@ -125,7 +125,6 @@ def generate_launch_description() -> LaunchDescription:
     speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
     hotword = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword.launch.py')))
-
 
     return LaunchDescription(args + [
         SetParameter(name='use_sim_time', value=True),

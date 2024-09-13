@@ -33,9 +33,9 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
-install(CODE "
-  execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/requirements.txt)
-  execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/setup/install-julius.sh)
-  ")
+# install(CODE "
+#   execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install -r ${CMAKE_CURRENT_SOURCE_DIR}/requirements.txt)
+#   execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/setup/install-julius.sh)
+#   ")
 
 ament_package()

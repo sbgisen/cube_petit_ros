@@ -85,11 +85,11 @@ def generate_launch_description() -> LaunchDescription:
         default_value='false'))
     args.append(DeclareLaunchArgument(
         'robot_init_x',
-        default_value='-2.5',
+        default_value='0.5',
         description='X position of the robot in the Gazebo world'))
     args.append(DeclareLaunchArgument(
         'robot_init_y',
-        default_value='0.0',
+        default_value='-2.0',
         description='Y position of the robot in the Gazebo world'))
     args.append(DeclareLaunchArgument(
         'robot_init_yaw',
@@ -133,6 +133,6 @@ def generate_launch_description() -> LaunchDescription:
         gzclient,
         OpaqueFunction(function=launch_setup),
         teleop,
-        text_to_speech,
-        hotword,
+        # text_to_speech,
+        # hotword,
     ])

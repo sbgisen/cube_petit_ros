@@ -38,7 +38,7 @@ amcl:
     z_max: 0.05
     z_rand: 0.05
     z_short: 0.05
-    scan_topic: /scan
+    scan_topic: /scan_filtered
     set_initial_pose: True
     initial_pose: { x: 0.0, y: 0.0, yaw: 0.0 }
 
@@ -194,7 +194,7 @@ local_costmap:
         max_obstacle_height: 1.0
         combination_method: 1
         pacecat_scan:
-          topic: /scan
+          topic: /scan_filtered
           max_obstacle_height: 1.0
           clearing: true
           marking: true
@@ -229,7 +229,7 @@ local_costmap:
         observation_sources: pacecat_scan
         pacecat_scan:
           data_type: LaserScan
-          topic: /scan
+          topic: /scan_filtered
           marking: true
           clearing: true
           obstacle_range: 3.0
@@ -273,7 +273,7 @@ global_costmap:
         enabled: true
         observation_sources: pacecat_scan
         pacecat_scan:
-          topic: /scan
+          topic: /scan_filtered
           max_obstacle_height: 1.0
           clearing: true
           marking: true
@@ -301,7 +301,7 @@ global_costmap:
         observation_sources: pacecat_scan
         pacecat_scan:
           data_type: LaserScan
-          topic: /scan
+          topic: /scan_filtered
           marking: true
           clearing: true
           obstacle_range: 3.0
@@ -452,7 +452,7 @@ slam_toolbox:
     odom_frame: odom
     map_frame: map
     base_frame: base_link
-    scan_topic: /scan
+    scan_topic: /scan_filtered
     mode: mapping # localization
 
     # if you'd like to immediately start continuing a map at a given pose

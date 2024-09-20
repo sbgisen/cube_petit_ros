@@ -78,6 +78,23 @@ def generate_launch_description() -> LaunchDescription:
     speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
     hotword = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword.launch.py')))
+    speech_to_text = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py')))
+
+    demo_pkg = pathlib.Path(FindPackageShare('cube_petit_smach_ros').find('cube_petit_smach_ros'))
+    demo_statemachine = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(demo_pkg / 'launch/demo.launch.py')))
+
+    demo_sm = Node(
+        package='cube_petit_smach_ros',
+        executable='demo_sm.py',
+        output='screen'
+    )
+    talk_sm = Node(
+        package='cube_petit_smach_ros',
+        executable='talk_sm.py',
+        output='screen'
+    )
 
     return LaunchDescription(args + [
         robot_state,
@@ -87,5 +104,9 @@ def generate_launch_description() -> LaunchDescription:
         teleop,
         text_to_speech,
         face_animation,
-        hotword
+        hotword,
+        speech_to_text,
+        # demo_statemachine,
+        demo_sm,
+        talk_sm,
     ])

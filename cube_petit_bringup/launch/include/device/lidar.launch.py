@@ -16,8 +16,10 @@
 # limitations under the License.
 #
 
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 
 # def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
@@ -58,36 +60,18 @@ def generate_launch_description() -> LaunchDescription:
     ldlidar_node = Node(
         package='ldlidar_stl_ros2',
         executable='ldlidar_stl_ros2_node',
-        name='LD06',
+        name='LD19',
         output='screen',
         parameters=[
-            {'product_name': 'LDLiDAR_LD06'},
+            {'product_name': 'LDLiDAR_LD19'},
             {'topic_name': 'scan'},
-            {'frame_id': 'base_laser'},
+            {'frame_id': 'pacecat_link'},
             {'port_name': '/dev/ttyLD06-19'},
             {'port_baudrate': 230400},
             {'laser_scan_dir': True},
-            {'enable_angle_crop_func': True},
+            {'enable_angle_crop_func': False},
             {'angle_crop_min': 35.0},
             {'angle_crop_max': 55.0}
-        ]
-    )
-
-    ldlidar_node2 = Node(
-        package='ldlidar_stl_ros2',
-        executable='ldlidar_stl_ros2_node',
-        name='LD06',
-        output='screen',
-        parameters=[
-            {'product_name': 'LDLiDAR_LD06'},
-            {'topic_name': 'scan'},
-            {'frame_id': 'base_laser'},
-            {'port_name': '/dev/ttyLD06-19'},
-            {'port_baudrate': 230400},
-            {'laser_scan_dir': True},
-            {'enable_angle_crop_func': True},
-            {'angle_crop_min': 190.0},
-            {'angle_crop_max': 225.0}
         ]
     )
 
@@ -96,13 +80,21 @@ def generate_launch_description() -> LaunchDescription:
         package='tf2_ros',
         executable='static_transform_publisher',
         name='base_link_to_base_laser_ld19',
-        arguments=['0', '0', '0.18', '0', '0', '0', 'base_link', 'ld19_link']
+        arguments=['0', '0', '0.18', '0', '0', '0', 'base_link', 'pacecat_link']
     )
 
     return LaunchDescription(args + [
         # laser,
         # OpaqueFunction(function=launch_setup),
         ldlidar_node,
-        ldlidar_node2,
         base_link_to_laser_tf_node,
+        Node(
+            package="laser_filters",
+            executable="scan_to_scan_filter_chain",
+            parameters=[
+                PathJoinSubstitution([
+                    get_package_share_directory("cube_petit_bringup"),
+                    "config/sensors", "lidar_filter.yaml",
+                ])],
+        ),
     ])

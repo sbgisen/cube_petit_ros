@@ -63,7 +63,7 @@ def generate_launch_description() -> LaunchDescription:
     nav2_bringup = pathlib.Path(FindPackageShare('nav2_bringup').find('nav2_bringup'))
 
     lifecycle_nodes = ['controller_server',
-                       'smoother_server',
+                       #    'smoother_server',
                        'planner_server',
                        'behavior_server',
                        'bt_navigator',
@@ -107,13 +107,13 @@ def generate_launch_description() -> LaunchDescription:
                         plugin='nav2_controller::ControllerServer',
                         name='controller_server',
                         parameters=[configured_params],
-                        remappings=remappings + [('cmd_vel', 'nav_vel')]),
-                    ComposableNode(
-                        package='nav2_smoother',
-                        plugin='nav2_smoother::SmootherServer',
-                        name='smoother_server',
-                        parameters=[configured_params],
-                        remappings=remappings),
+                        remappings=remappings + [('cmd_vel', 'cmd_vel_raw')]),
+                    # ComposableNode(
+                    #     package='nav2_smoother',
+                    #     plugin='nav2_smoother::SmootherServer',
+                    #     name='smoother_server',
+                    #     parameters=[configured_params],
+                    #     remappings=remappings),
                     ComposableNode(
                         package='nav2_planner',
                         plugin='nav2_planner::PlannerServer',

@@ -1,0 +1,100 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100 # Hz
+    use_sim_time: true
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+velocity_controller:
+  ros__parameters:
+    joints:
+      - left_wheel_joint
+      - right_wheel_joint
+
+# Publish all joint states -----------------------------------
+joint_state_broadcaster:
+  ros__parameters:
+    publish_rate: 50
+    joints:
+      - left_wheel_joint
+      - right_wheel_joint
+    interfaces:
+      position:
+        - left_wheel_joint
+        - right_wheel_joint
+      velocity:
+        - left_wheel_joint
+        - right_wheel_joint
+
+# Diff drive controller --------------------------------------
+diff_drive_controller:
+  ros__parameters:
+    use_sim_time: true
+    left_wheel_names:
+      - left_wheel_joint
+    right_wheel_names:
+      - right_wheel_joint
+    publish_rate: 100.0 # default: 50
+    pose_covariance_diagonal:
+      [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+    twist_covariance_diagonal:
+      [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
+
+    # Velocity and acceleration limits
+    linear:
+      x:
+        has_velocity_limits: false
+        has_acceleration_limits: false
+        has_jerk_limits: false
+        max_velocity: 3.0
+        min_velocity: -3.0
+        max_acceleration: 0.02
+        min_acceleration: -0.02
+        max_jerk: 1.0
+        min_jerk: 1.0
+    angular:
+      z:
+        has_velocity_limits: false
+        has_acceleration_limits: false
+        has_jerk_limits: false
+        max_velocity: 3.0
+        min_velocity: -3.0
+        max_acceleration: 0.02
+        min_acceleration: -0.02
+        max_jerk: 1.0
+        min_jerk: 1.0
+
+    # Wheel separation and diameter. These are both optional.
+    # diff_drive_controller will attempt to read either one or both from the
+    # URDF if not specified as a parameter
+    wheel_separation: 0.1403
+    wheel_radius: 0.0325
+    # Wheel separation and radius multipliers
+    wheel_separation_multiplier: 1.0 # default: 1.0
+    wheel_radius_multiplier: 1.0 # default: 1.0
+    # Velocity commands timeout [s], default 0.5
+    cmd_vel_timeout: 0.25
+    # Base frame_id
+    base_frame_id: base_link
+    odom_frame_id: /odom
+    # enable_odom_tf: false
+
+gazebo_ros2_control:
+  ros__parameters:
+    pid_gains:
+      left_wheel_joint:
+        p: 100.0
+        i: 0.01
+        d: 10.0
+        i_clamp_max: 100000.0
+        i_clamp_min: -100000.0
+        antiwindup: false
+      right_wheel_joint:
+        p: 100.0
+        i: 0.01
+        d: 10.0
+        i_clamp_max: 100000.0
+        i_clamp_min: -100000.0
+        antiwindup: false

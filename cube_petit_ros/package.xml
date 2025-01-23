@@ -11,6 +11,7 @@
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
   <exec_depend>cube_petit_description</exec_depend>
   <exec_depend>cube_petit_gazebo</exec_depend>
+  <exec_depend>cube_petit_bringup</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

@@ -20,6 +20,7 @@ import pathlib
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import GroupAction
 from launch.actions import IncludeLaunchDescription
 from launch.actions import OpaqueFunction
 from launch.actions import SetEnvironmentVariable
@@ -27,7 +28,10 @@ from launch.launch_context import LaunchContext
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import EnvironmentVariable
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import ComposableNodeContainer
+from launch_ros.actions import PushROSNamespace
 from launch_ros.actions import SetParameter
+from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -62,8 +66,8 @@ def generate_launch_description() -> LaunchDescription:
     print('gazebo generate launch dessciprtion')
     pkg_path = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
     gazebo_model_path = SetEnvironmentVariable(
-        name='GAZEBO_MODEL_PATH',
-        value=[EnvironmentVariable('GAZEBO_MODEL_PATH', default_value=''), f':{pkg_path}/models'])
+        name='GZ_SIM_RESOURCE_PATH',
+        value=[EnvironmentVariable('GZ_SIM_RESOURCE_PATH', default_value=''), f':{pkg_path}/models'])
 
     args = []
     args.append(DeclareLaunchArgument('robot', default_value='cube_petit_v3'))
@@ -73,11 +77,12 @@ def generate_launch_description() -> LaunchDescription:
     args.append(DeclareLaunchArgument('robot_init_y', default_value='-2.0'))
     args.append(DeclareLaunchArgument('robot_init_yaw', default_value='0.0'))
 
-    gz_server = IncludeLaunchDescription([FindPackageShare('ros_gz_sim'), '/launch/gz_sim.launch.py'],
-                                         launch_arguments={
-                                             'gz_args': ['empty.sdf -r -s -v4'],
-                                             'on_exit_shutdown': 'true'
-                                         }.items())
+    gz_server = IncludeLaunchDescription(
+        [FindPackageShare('ros_gz_sim'), '/launch/gz_sim.launch.py'],
+        launch_arguments={
+            'gz_args': ['world /home/gisen/ros/src/cube_petit_ros/cube_petit_gazebo/worlds/sample.sdf -r -s -v4'],
+            'on_exit_shutdown': 'true'
+        }.items())
 
     gz_client = IncludeLaunchDescription([FindPackageShare('ros_gz_sim'), '/launch/gz_sim.launch.py'],
                                          launch_arguments={'gz_args': '-g -v4 '}.items())
@@ -94,6 +99,62 @@ def generate_launch_description() -> LaunchDescription:
     # hotword = IncludeLaunchDescription(
     #     PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword.launch.py')))
 
+    depth_camera = GroupAction(actions=[
+        ComposableNodeContainer(
+            name='camera_container',
+            namespace='',
+            package='rclcpp_components',
+            executable='component_container',
+            composable_node_descriptions=[
+                ComposableNode(
+                    package='image_proc',
+                    plugin='image_proc::RectifyNode',
+                    name='rgb_rectify',
+                    remappings=[
+                        ('image', '/camera/rgb/image_raw'),
+                        ('camera_info', '/camera/rgb/camera_info'),
+                        ('image_rect', '/camera/rgb/image_rect'),
+                    ],
+                ),
+                ComposableNode(
+                    package='image_proc',
+                    plugin='image_proc::RectifyNode',
+                    name='depth_rectify',
+                    remappings=[
+                        ('image', '/camera/depth/image_raw'),
+                        ('camera_info', '/camera/depth/camera_info'),
+                        ('image_rect', '/camera/depth/image_rect'),
+                    ],
+                ),
+                ComposableNode(
+                    package='depth_image_proc',
+                    plugin='depth_image_proc::RegisterNode',
+                    name='register',
+                    remappings=[
+                        ('depth/image_rect', '/camera/depth/image_rect'),
+                        ('rgb/camera_info', '/camera/rgb/camera_info'),
+                        ('depth/camera_info', '/camera/depth/camera_info'),
+                        # ('depth_registered/image_rect',
+                        #  '/camera/depth_registered/image_rect'),
+                        # ('depth_registered/camera_info',
+                        #  '/camera/depth_registered/camera_info'),
+                    ],
+                ),
+                ComposableNode(
+                    package='depth_image_proc',
+                    plugin='depth_image_proc::PointCloudXyzrgbNode',
+                    name='points_xyzrgb',
+                    remappings=[
+                        ('depth_registered/image_rect', '/camera/depth_registered/image_rect'),
+                        ('rgb/image_rect_color', '/camera/rgb/image_rect'),
+                        ('rgb/camera_info', '/camera/rgb/camera_info'),
+                        ('points', '/camera/depth/points'),
+                    ],
+                ),
+            ],
+        )
+    ])
+
     return LaunchDescription(args + [
         SetParameter(name='use_sim_time', value=True),
         gazebo_model_path,
@@ -101,6 +162,7 @@ def generate_launch_description() -> LaunchDescription:
         gz_client,
         OpaqueFunction(function=launch_setup),
         teleop,
+        depth_camera,
         # text_to_speech,
         # hotword,
     ])

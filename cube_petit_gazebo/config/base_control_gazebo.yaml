@@ -53,7 +53,7 @@ diff_drive_controller:
         max_acceleration: 0.02
         min_acceleration: -0.02
         max_jerk: 1.0
-        min_jerk: 1.0
+        min_jerk: 0.0
     angular:
       z:
         has_velocity_limits: false
@@ -64,7 +64,7 @@ diff_drive_controller:
         max_acceleration: 0.02
         min_acceleration: -0.02
         max_jerk: 1.0
-        min_jerk: 1.0
+        min_jerk: 0.0
 
     # Wheel separation and diameter. These are both optional.
     # diff_drive_controller will attempt to read either one or both from the

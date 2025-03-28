@@ -98,19 +98,19 @@ def generate_launch_description() -> LaunchDescription:
                                      'robot_description': robot_description
                                  }])
 
-    hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
-    controllers = IncludeLaunchDescription(PythonLaunchDescriptionSource(
-        [str(hardware_pkg / 'launch/include/base_control_gazebo.launch.py')]),
-                                           launch_arguments={
-                                               'robot': LaunchConfiguration('robot'),
-                                               'x': LaunchConfiguration('x'),
-                                               'y': LaunchConfiguration('y'),
-                                               'z': LaunchConfiguration('z'),
-                                               'roll': LaunchConfiguration('roll'),
-                                               'pitch': LaunchConfiguration('pitch'),
-                                               'yaw': LaunchConfiguration('yaw'),
-                                               'minimum': LaunchConfiguration('minimum')
-                                           }.items())
+    # hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
+    # controllers = IncludeLaunchDescription(PythonLaunchDescriptionSource(
+    #     [str(hardware_pkg / 'launch/include/base_control_gazebo.launch.py')]),
+    #                                        launch_arguments={
+    #                                            'robot': LaunchConfiguration('robot'),
+    #                                            'x': LaunchConfiguration('x'),
+    #                                            'y': LaunchConfiguration('y'),
+    #                                            'z': LaunchConfiguration('z'),
+    #                                            'roll': LaunchConfiguration('roll'),
+    #                                            'pitch': LaunchConfiguration('pitch'),
+    #                                            'yaw': LaunchConfiguration('yaw'),
+    #                                            'minimum': LaunchConfiguration('minimum')
+    #                                        }.items())
 
     load_joint_state_controller = Node(package='controller_manager',
                                        executable='spawner',
@@ -138,7 +138,7 @@ def generate_launch_description() -> LaunchDescription:
         spawn_entity,
         load_joint_state_controller,
         load_diff_drive_controller,
-        controllers,
+        # controllers,
         param_bridge,
         image_bridge,
     ])

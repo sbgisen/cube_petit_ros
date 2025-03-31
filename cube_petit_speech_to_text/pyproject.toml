@@ -1,0 +1,29 @@
+[project]
+name = "cube_petit_speech_to_text"
+version = "0.1.0"
+description = "EfficientWord-Net"
+license = { text = "Apache-2.0" }
+maintainers = [
+    { name = "SoftBank corp.", email = "SBGRP-git@g.softbank.co.jp" },
+]
+dependencies = [
+    "pyyaml",
+    "setuptools",
+    "numpy<2",
+    "librosa",
+    "efficientword-net @ git+https://github.com/kiri-i/EfficientWord-Net@fix/45-update",
+]
+
+[project.scripts]
+hotword_detector = "cube_petit_speech_to_text.cube_petit_hotword_detector:main"
+cube_petit_speech_to_text = "cube_petit_speech_to_text.cube_petit_speech_to_text:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["cube_petit_speech_to_text"]

@@ -58,8 +58,8 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[robot_description]
     )
 
-    # teleop = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py')))
+    teleop = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py')))
 
     text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
     text_to_speech = IncludeLaunchDescription(
@@ -85,4 +85,5 @@ def generate_launch_description() -> LaunchDescription:
         face_animation,
         hotword,
         speech_to_text,
+        teleop,
     ])

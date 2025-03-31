@@ -35,7 +35,7 @@ class TextToJtalk(rclpy.node.Node):
         self._hand_gesture_subscription = self.create_subscription(
             String, '/hand_gesture', self.handgesture_callback, 1)
         self._hotword_subscription = self.create_subscription(String, '/detect_word', self.hotword_callback, 1)
-        self._joy_subscription = self.create_subscription(Joy, 'joy', self.joystick_callback, 1)
+        self._joy_subscription = self.create_subscription(Joy, '/diff_drive_controller/joy', self.joystick_callback, 1)
         self.hand_gesture = None
         self.hand_gesture_received = False
         self.janken_flag = False

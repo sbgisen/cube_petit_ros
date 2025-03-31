@@ -15,15 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Launch file."""
-# import os
+import os
 
 # from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-# from launch.actions import GroupAction
-# from launch.actions import DeclareLaunchArgument
-# from launch.actions import IncludeLaunchDescription
-# from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import GroupAction
+from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -42,6 +44,10 @@ def generate_launch_description() -> LaunchDescription:
     #         'config_filepath': config_filepath
     #     }.items()
     # )
+    depthai_hand_tracker_dir = get_package_share_directory('depthai_hand_tracker')
+    depthai_include = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(depthai_hand_tracker_dir, 'launch', 'depthai_hand_tracker.launch.py')),
+    )
 
     return LaunchDescription([
         Node(
@@ -54,11 +60,7 @@ def generate_launch_description() -> LaunchDescription:
             executable='speech_action_server',
             name='speech_action_server'
         ),
-        # Node(
-        #     package='depthai_hand_tracker',
-        #     executable='depthai_hand_tracker_ros.py',
-        #     name='depthai_hand_tracker',
-        #     output='screen'
-        # ),
+
         # teleop_include
+        depthai_include,
     ])

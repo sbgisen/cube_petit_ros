@@ -32,6 +32,7 @@ find_package(can_msgs REQUIRED)
 find_package(controller_manager REQUIRED)
 find_package(class_loader REQUIRED)
 find_package(control_toolbox REQUIRED)
+find_package(dji_ros_controller REQUIRED)
 
 # Include directories
 include_directories(

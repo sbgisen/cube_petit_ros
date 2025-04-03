@@ -76,6 +76,11 @@ def generate_launch_description() -> LaunchDescription:
     speech_to_text = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py')))
 
+    hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface'))
+    motor_bringup = IncludeLaunchDescription(PythonLaunchDescriptionSource(str(hardware_pkg
+                                                                      / 'launch/cube_petit_control.launch.py')),
+                                    launch_arguments={}.items())
+
 
     return LaunchDescription(args + [
         robot_state,
@@ -86,4 +91,5 @@ def generate_launch_description() -> LaunchDescription:
         hotword,
         speech_to_text,
         teleop,
+        motor_bringup,
     ])

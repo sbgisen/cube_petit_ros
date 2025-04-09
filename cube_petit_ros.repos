@@ -10,4 +10,4 @@ repositories:
   dji_ros_controller:
     type: git
     url: git@github.com:sbgisen/dji_ros_controller.git
-    version: jazzy-m2006
+    version: feature/jazzy-m2006

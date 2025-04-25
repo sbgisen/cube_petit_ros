@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-u"""Chrome表示用rosnode"""
 
 import os
 import subprocess
@@ -22,49 +21,81 @@ import subprocess
 import rclpy
 from rclpy.node import Node
 
+COLOR_MAP = {
+    'blue': '#42AFE3',
+    'pink': '#ff7da8',
+    'orange': '#ffa500',
+    'green': '#6ac259',
+    'yellow': '#fff176',
+    'purple': '#ba68c8',
+    'red': '#ef5350',
+}
 script_dir = os.path.dirname(os.path.abspath(__file__))
 html_path = os.path.join(script_dir, '../../share/cube_petit_facial_animation/frontend/index.html')
 
 
 class Chrome():
-    u"""Chromeのプロセス管理クラス"""
+    """Chrome process."""
 
-    def start(self):
-        u"""Chromeを起動"""
+    def start(self) -> None:
+        """Start Chrome."""
         self._p = subprocess.Popen([
-            "google-chrome", "--new-window", "--start-fullscreen",
-            "--disable-features=Translate", "--guest", "--kiosk", "--start-maximized",
-            "--password-store=basic",
-            "--no-default-browser-check", "--hide-crash-restore-bubble", html_path])
+            'google-chrome', '--new-window', '--start-fullscreen', '--disable-features=Translate', '--guest',
+            '--kiosk', '--start-maximized', '--password-store=basic', '--no-default-browser-check',
+            '--hide-crash-restore-bubble', html_path
+        ])
 
-    def kill_started(self):
-        u"""起動したChromeを停止"""
+    def kill_started(self) -> None:
+        """Stop Chrome."""
         # rosnode開始時にすでにChromeが起動していた場合は何も起きない
         self._p.terminate()
 
-    def kill_all(self):
-        u"""Chromeのプロセスを全て終了"""
+    def kill_all(self) -> None:
+        """Kill all chrome process."""
         # 現在は未使用
         # rosnode開始時、起動済みのChromeを終了させたい場合に使用
-        subprocess.call(["pkill", "-f", "/opt/google/chrome/chrome"])
+        subprocess.call(['pkill', '-f', '/opt/google/chrome/chrome'])
 
 
 class ChromeNode(Node):
-    def __init__(self):
+
+    def __init__(self) -> None:
+        """Init."""
         super().__init__('cube_facial_animation')
+        self.declare_parameter('color', 'blue')
+        color_name = self.get_parameter('color').get_parameter_value().string_value
+        color_code = COLOR_MAP.get(color_name, '#42AFE3')
+        self.apply_color_to_css(color_code)
+
         self.chrome = Chrome()
         self.chrome.start()
         self.create_timer(0.1, self.timer_callback)
 
-    def timer_callback(self):
+    def apply_color_to_css(self, color_code: str) -> None:
+        """Apply color to css."""
+        style_template_path = os.path.join(script_dir,
+                                           '../../share/cube_petit_facial_animation/frontend/style.css.template')
+        style_output_path = os.path.join(script_dir, '../../share/cube_petit_facial_animation/frontend/style.css')
+
+        with open(style_template_path, 'r', encoding='utf-8') as f:
+            css_data = f.read()
+
+        css_data = css_data.replace('{{COLOR}}', color_code)
+
+        with open(style_output_path, 'w', encoding='utf-8') as f:
+            f.write(css_data)
+
+    def timer_callback(self) -> None:
+        """Check timer."""
         pass  # このタイマーコールバックは何もしませんが、10Hzのループを維持します
 
-    def shutdown(self):
+    def shutdown(self) -> None:
+        """Shutdown."""
         self.chrome.kill_started()
 
 
-def main(args=None):
-    rclpy.init(args=args)
+def main() -> None:
+    rclpy.init()
     node = ChromeNode()
     rclpy.spin(node)
     node.shutdown()

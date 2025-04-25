@@ -19,8 +19,8 @@ g, path {
   position: absolute;
   display: none;
   z-index: 0;
-  stroke: #ba68c8;
-  fill: #ba68c8;
+  stroke: {{COLOR}};
+  fill: {{COLOR}};
 }
 
 .emoji {

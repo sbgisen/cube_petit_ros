@@ -16,19 +16,29 @@
 # limitations under the License.
 """Launch file."""
 
-# from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-def generate_launch_description():
+
+def generate_launch_description() -> LaunchDescription:
+    """Face animation."""
     return LaunchDescription([
+        DeclareLaunchArgument('color',
+                              default_value='blue',
+                              description='Color for the faceBox (pink, orange, blue, green, yellow, purple)'),
         Node(
             package='cube_petit_facial_animation',
             executable='animation.py',
             name='facial_animation',
             output='screen',
+            parameters=[{
+                'color': LaunchConfiguration('color')
+            }],
         )
     ])
+
 
 if __name__ == '__main__':
     generate_launch_description()

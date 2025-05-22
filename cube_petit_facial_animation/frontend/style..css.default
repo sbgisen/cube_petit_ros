@@ -1,45 +1,48 @@
-html,
-body {
+html, body, .outer{
   width: 100%;
   height: 100%;
   margin: 0;
   cursor: none;
-  background-color: #ecf8fd;
 }
-
-html,
-body {
+html, body{
   overflow: hidden;
 }
-
-g,
-path {
+g{
   transform-box: fill-box;
   transform-origin: center;
 }
 
-.faceBox {
-  width: 768px;
-  height: 432px;
+.outer{
   position: absolute;
   display: none;
   z-index: 0;
+}
+.normal, .happy, .sad, .puzzled{
+  background-color: #ecf8fd;
   stroke: #42AFE3;
   fill: #42AFE3;
 }
 
-.emoji {
+.container{
+  width: 768px;
+  height: 432px;
   position: absolute;
-  bottom: 0;
-  right: 0;
-  transform-origin: bottom right;
-  width: 280px;
-  height: 280px;
-  z-index: 1;
 }
 
-.emoji svg {
-  width: 100%;
-  fill: #1d2a45;
-  display: none;
+.tear{
+  transform-origin: center 0%;
+}
+
+.speak {
+  transform-origin: center 20%;
+  animation: speak 0.2s infinite;
+}
+
+@keyframes speak {
+  0%, 100% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(0.95, .6);
+  }
 }

@@ -22,7 +22,7 @@ async function lookAt (r, euler) {
   return Promise.all([
     // 顔の移動
     anime({
-      targets: '.faceBox svg',
+      targets: 'svg',
       translateX: x * faceRangeX,
       translateY: y * faceRangeY,
       ...options,
@@ -77,7 +77,7 @@ const blink = {
 
 /** 顔パーツのアニメおよびcssをリセット */
 function resetFace () {
-  const targets = '.faceBox svg, .faceBox svg *'
+  const targets = 'svg, svg *'
   anime.remove(targets)
   $(targets).css({ transform: '' })
 }
@@ -99,19 +99,4 @@ function emoteFadeOut (selector) {
 /** スリープ */
 function sleep (timeout) {
   return new Promise((resolve) => setTimeout(() => resolve(), timeout))
-}
-
-/** direction: alternateのループ終了を待つ */
-function waitAlternateLoopComplete(anim){
-  return new Promise(async (resolve) => {
-    let stopped = false
-    anim.loopComplete = () => {
-      // 2回目のループ終了を待つ
-      if (anim.reversed) stopped = true
-    }
-    while(!stopped){
-      await sleep(100)
-    }
-    resolve()
-  })
 }

@@ -16,6 +16,6 @@ install(
 )
 
 install(
-  PROGRAMS cube_petit_facial_animation/animation.py
+  PROGRAMS cube_petit_facial_animation/animation.py cube_petit_facial_animation/expression_operator.py
   DESTINATION lib/${PROJECT_NAME}
 )

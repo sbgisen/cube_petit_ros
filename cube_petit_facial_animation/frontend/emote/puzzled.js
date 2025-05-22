@@ -19,7 +19,7 @@ const puzzled = {
     anime: null,
     defaultPath: null,
     targets: '.puzzled .mouth path',
-    init(){
+    start () {
       this.defaultPath = $(this.targets).attr('d')
       this.anime = anime({
         targets: this.targets,
@@ -32,22 +32,14 @@ const puzzled = {
         duration: 200,
         loop: true
       })
-    },
-    start () {
-      if (!this.anime){
-        this.init()
-        console.log('speech animation started')
-      } else {
-        this.anime.restart()
-        console.log('speech animation restarted')
-      }
+      console.log('speech animation started')
     },
     async stop () {
-      if (!this.anime) {
-        console.log('speech animation not initialized')
-      } else {
-        await waitAlternateLoopComplete(this.anime)
-        this.anime.pause()
+      if (!this.anime) return
+      this.anime.loopComplete = async (anim) => {
+        // direction: alterlateのため、2回目のループまで待つ
+        if (!anim.reversed) return
+        anim.pause()
         await sleep(100)
         $(this.targets).attr('d', this.defaultPath)
         console.log('speech animation stopped')

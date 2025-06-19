@@ -52,7 +52,7 @@ class CubeGaze {
   connect(ros) {
     this.lookSub = new ROSLIB.Topic({
       ros,
-      name: '/facial_expression/look_at',
+      name: 'facial_expression/look_at',
       messageType: 'std_msgs/Float64MultiArray'
     })
 

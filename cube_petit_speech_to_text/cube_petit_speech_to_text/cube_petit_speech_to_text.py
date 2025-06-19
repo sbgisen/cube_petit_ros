@@ -19,19 +19,17 @@ import os
 import signal
 import subprocess
 import sys
-from datetime import datetime
 
 import rclpy
 import rclpy.node
 from rclpy.executors import ExternalShutdownException
 from std_msgs.msg import String
-from xml.dom.expatbuilder import TEXT_NODE
 
 
 class JuliusSpeechToText(rclpy.node.Node):
     def __init__(self):
         super().__init__('cube_petit_speech_to_text')
-        self.publisher_ = self.create_publisher(String, '/julius_result_text', 1)
+        self.publisher_ = self.create_publisher(String, 'julius_result_text', 1)
         self.rate = self.create_rate(1)  # 1hz
         self.pkill_julius()
         self.start_listening()

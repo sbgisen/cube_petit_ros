@@ -65,7 +65,7 @@ class GPTChatCommander:
 
         self.node.get_logger().info(self.__setting_file)
         self.__julius_text = None
-        self.node.create_subscription(String, '/julius_result_text', self.__julius_callback, 1)
+        self.node.create_subscription(String, 'julius_result_text', self.__julius_callback, 1)
         self.__speaker = GPTClient(self.node,
                                    api_key=self.api_key,
                                    setting_file=self.__setting_file)

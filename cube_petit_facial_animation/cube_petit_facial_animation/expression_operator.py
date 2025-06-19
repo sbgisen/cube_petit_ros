@@ -28,7 +28,7 @@ from rclpy.time_source import ClockType
 from cube_petit_facial_animation_msgs.msg import FaceExpression
 
 TOPIC_FACE = 'current_expression'
-TOPIC_FACE_COMMAND = '/facial_expression/expression_command'
+TOPIC_FACE_COMMAND = 'facial_expression/expression_command'
 PARAM_OPERATION_BUFFER = 'param_operation_buffer_time'
 PARAM_OPERATION_HZ = 'param_operation_hz'
 

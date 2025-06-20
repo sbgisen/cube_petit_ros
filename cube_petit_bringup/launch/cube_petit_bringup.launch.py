@@ -29,7 +29,8 @@ from launch_ros.substitutions import FindPackageShare
 from launch.actions import GroupAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import PushRosNamespace
-
+from launch.actions import RegisterEventHandler
+from launch.event_handlers import OnProcessStart
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -59,14 +60,13 @@ def generate_launch_description() -> LaunchDescription:
     speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
     text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
 
-
-    bringup = GroupAction([
-        PushRosNamespace(LaunchConfiguration('cube_petit_host_name')),
-        Node(
+    robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         parameters=[robot_description]
-        ),
+    )
+    bringups = GroupAction([
+        PushRosNamespace(LaunchConfiguration('cube_petit_host_name')),
         IncludeLaunchDescription(
         PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
         IncludeLaunchDescription(
@@ -82,6 +82,18 @@ def generate_launch_description() -> LaunchDescription:
                                                                       launch_arguments={}.items())
     ])
 
+    bringup = GroupAction([
+        PushRosNamespace(LaunchConfiguration('cube_petit_host_name')),
+        robot_state_publisher,
+        RegisterEventHandler(
+            OnProcessStart(
+                target_action=robot_state_publisher,
+                on_start=[bringups]
+            )
+    ),
+
+
+    ])
 
     return LaunchDescription(args + [
         bringup

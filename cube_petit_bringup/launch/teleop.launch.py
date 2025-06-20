@@ -45,17 +45,15 @@ def generate_launch_description() -> LaunchDescription:
     joy_dev = '0'
     config_filepath = os.path.join(cube_teleop_dir, 'config', 'ps4.config.yaml')
 
-    teleop_include = IncludeLaunchDescription(
+    teleop_joy = GroupAction([
+        PushRosNamespace('diff_drive_controller'),
+        IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(teleop_twist_joy_dir, 'launch', 'teleop-launch.py')),
         launch_arguments={
             'joy_dev': joy_dev,
             'publish_stamped_twist': 'true',
             'config_filepath': config_filepath,
-        }.items(),
-    )
-    teleop_joy = GroupAction([
-        PushRosNamespace('diff_drive_controller'),
-        teleop_include,
+        }.items())
     ])
 
     return LaunchDescription([

@@ -31,10 +31,12 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
+import socket
 
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
-
+    hostname = socket.gethostname()
+    namespace = hostname.replace('-', '_')
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     xacro_file = os.path.join(description_pkg, 'xacro', 'cube_petit.xacro')
     use_sim = 'false'  # or 'false', depending on your use case
@@ -44,29 +46,27 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     my_pkg = FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface')
     robot_controllers = [os.path.join(my_pkg, 'config', 'cube_petit_hw_interface.yaml')]
 
-    control_node = GroupAction(actions=[
-        # PushRosNamespace(LaunchConfiguration('robot_namespace')),
-        Node(package="controller_manager",
+    control_node =Node(package="controller_manager",
              executable="ros2_control_node",
-             parameters=[robot_description, robot_controllers],
+             parameters=[robot_description, os.path.join(my_pkg, 'config', 'cube_petit_hw_interface.yaml')],
              output="both",
-             )])
+             )
+        
 
     if strtobool(LaunchConfiguration('disable_ros_controller').perform(context)):
         return [control_node]
 
     controllers = GroupAction(actions=[
-        # PushRosNamespace(LaunchConfiguration('robot_namespace')),
         Node(package='controller_manager',
              executable='spawner',
              output='both',
-             arguments=["--controller-manager", "controller_manager",
-                        'joint_state_broadcaster']),
+             arguments=['joint_state_broadcaster', "--controller-manager", '/'+namespace+"/controller_manager",
+                        ]),
         Node(package='controller_manager',
              executable='spawner',
              output='both',
-             arguments=["--controller-manager", "controller_manager",
-                        'diff_drive_controller']),
+             arguments=['diff_drive_controller', "--controller-manager", '/'+namespace+"/controller_manager",
+                        ]),
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',

@@ -29,9 +29,55 @@ from launch_ros.substitutions import FindPackageShare
 from launch.actions import GroupAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import PushRosNamespace
-from launch.actions import RegisterEventHandler
-from launch.event_handlers import OnProcessStart
+from launch.actions import OpaqueFunction
+# from launch.actions import RegisterEventHandler
+# from launch.event_handlers import OnProcessStart
 
+def launch_in_order(context, *args, **kwargs):
+    ns = LaunchConfiguration('cube_petit_host_name').perform(context)
+
+    hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface'))
+    bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
+    speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
+    text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
+
+    description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
+    xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
+    doc = xacro.process_file(xacro_file, mappings={'use_sim': 'false'})
+    robot_description = {"robot_description": doc.toprettyxml(indent='  ')}
+
+
+    robot_state_publisher = GroupAction([
+        PushRosNamespace(ns),
+        Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            parameters=[robot_description]
+        )
+    ])
+
+    control_node = GroupAction([
+        PushRosNamespace(ns),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(str(hardware_pkg
+                                                                      / 'launch/cube_petit_control.launch.py')),
+                                                                      launch_arguments={}.items())
+    ])
+
+    bringups = GroupAction([
+        PushRosNamespace(ns),
+        # IncludeLaunchDescription(
+        # PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py'))),
+        # IncludeLaunchDescription(
+        # PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword_detector.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py'))),
+    ])
+
+    return [robot_state_publisher, control_node, bringups]
 
 def generate_launch_description() -> LaunchDescription:
     """Generate launch descriptions.
@@ -47,54 +93,10 @@ def generate_launch_description() -> LaunchDescription:
     namespace = hostname.replace('-', '_')
     args.append(DeclareLaunchArgument('cube_petit_host_name', default_value=namespace))
 
-    description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
-    xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
-    doc = xacro.process_file(xacro_file, mappings={'use_sim': 'false'})
-    robot_description = {"robot_description": doc.toprettyxml(indent='  ')}
+    
+    ordered_sequence = OpaqueFunction(function=launch_in_order)
 
-    bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
-    face_animation_pkg = pathlib.Path(FindPackageShare(
-            'cube_petit_facial_animation').find('cube_petit_facial_animation'))
-    # TODO: joint_state_publisher?
-    hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface'))
-    speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
-    text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
-
-    robot_state_publisher = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        parameters=[robot_description]
-    )
-    bringups = GroupAction([
-        PushRosNamespace(LaunchConfiguration('cube_petit_host_name')),
-        IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
-        IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
-        IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py'))),
-        IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword_detector.launch.py'))),
-        IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py'))),
-        IncludeLaunchDescription(PythonLaunchDescriptionSource(str(hardware_pkg
-                                                                      / 'launch/cube_petit_control.launch.py')),
-                                                                      launch_arguments={}.items())
-    ])
-
-    bringup = GroupAction([
-        PushRosNamespace(LaunchConfiguration('cube_petit_host_name')),
-        robot_state_publisher,
-        RegisterEventHandler(
-            OnProcessStart(
-                target_action=robot_state_publisher,
-                on_start=[bringups]
-            )
-    ),
-
-
-    ])
 
     return LaunchDescription(args + [
-        bringup
+        ordered_sequence
     ])

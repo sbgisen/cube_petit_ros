@@ -1,0 +1,250 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="cube_petit_v3">
+  <!-- General -->
+  <!-- <xacro:include filename="color_property.xacro"/> -->
+
+  <!-- <xacro:include filename="$(find cube_petit_description)/xacro/publish_pose/publish_pose.xacro"/>
+  <xacro:include filename="$(find cube_petit_description)/xacro/brass_gazebo_battery/brass_gazebo_battery.xacro"/> -->
+
+  <link name="base_link"/>
+  <joint name="body_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="body_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <link name="base_link_reverse"/>
+  <joint name="base_link_reverse_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_link_reverse"/>
+    <origin rpy="0 0 3.1415926" xyz="0 0 0"/>
+  </joint>
+
+  <link name="respeaker_base"/>
+  <joint name="respeaker_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="respeaker_base"/>
+    <origin rpy="0 0 0" xyz="0 0 0.28"/>
+  </joint>
+
+
+
+  <link name="body_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="file://$(find cube_petit_description)/meshes/cube_petit/body/2/cube_petit_v2_body.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.13725"/>
+      <!-- <origin rpy="0 0 0" xyz="0 0 0.11475"/> -->
+      <geometry>
+        <box size="0.221 0.2225 0.2705"/>
+        <!-- <box size="0.221 0.2225 0.2225"/> -->
+      </geometry>
+    </collision>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00440023 0.00053314 0.15283194"/>
+      <mass value="1.98239086"/>
+      <inertia ixx="0.02351680" ixy="0.00001868" iyy="0.02505713" ixz="-0.00012952" iyz="-0.00004728" izz="0.02060399"/>
+    </inertial>
+  </link>
+  <gazebo reference="body_link">
+    <selfCollide>false</selfCollide>
+    <maxContacts>4</maxContacts>
+    <mu1 value="0.0"/>
+    <kp value="150000"/>
+    <kd value="0"/>
+  </gazebo>
+
+  <link name="connector_link"/>
+  <joint name="connector_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="connector_link"/>
+    <origin rpy="0 0 3.14" xyz="-0.11 0 0.025"/>
+  </joint>
+  <xacro:include filename="$(find cube_petit_description)/xacro/sensors/lidar.xacro"/>
+  <!-- rear camera -->
+  <!-- <xacro:include filename="$(find cube_petit_description)/xacro/sensors/camera.xacro" /> -->
+
+  <!-- <xacro:include filename="$(find cube_petit_description)/xacro/sensors/depth.xacro" /> -->
+
+  <!-- <xacro:include filename="$(find cube_petit_description)/xacro/wheels/tamiya_wheels.xacro"/> -->
+
+  <!-- <xacro:brass_gazebo_battery_plugin parent_link="base_link" voltage="25.12" capacity_ah="2.0"
+  charge_current="100.0" discharge_current="20.0" /> -->
+
+  <!-- <xacro:brass_gazebo_battery_plugin parent_link="base_link" voltage="15.12" capacity_ah="2.0"
+    charge_current="100.0" discharge_current="20.0"/>
+
+
+  <xacro:publish_pose_plugin link_name="base_link"
+    topic_out="/gazebo/docking_station_simulation/robot_pose" update_rate="30"/> -->
+
+  <!-- <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/cube_petit</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo> -->
+
+  <!-- <gazebo>
+    <plugin name="base_link_pose_publisher_plugin" filename="libgazebo_ros_p3d.so">
+      <frameName>world</frameName>
+      <bodyName>base_link</bodyName>
+      <topicName>gazebo/robot_pose</topicName>
+      <updateRate>10</updateRate>
+    </plugin>
+  </gazebo> -->
+  <joint name="left_wheel_joint" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.000985 0.070150 0.0325"/>
+    <parent link="body_link"/>
+    <child link="left_wheel_link"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="1000"/> -->
+  </joint>
+  <transmission name="left_wheel_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="left_wheel_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="left_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <link name="left_wheel_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
+      <mass value="0.2986774"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
+    </inertial>
+    <visual>
+      <origin rpy="-1.57079632679 0 3.1415926" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="$(find cube_petit_description)/meshes/cube_petit/wheels/tamiya_wheel.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57079632679 0 3.1415926" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.002" radius="0.0325"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="left_wheel_link">
+    <selfCollide>false</selfCollide>
+    <maxContacts>2</maxContacts>
+    <minDepth>0</minDepth>
+    <!-- <dampingFactor>0</dampingFactor> -->
+    <mu1 value="2.5"/>
+    <kp value="50000"/>
+    <kd value="0"/>
+  </gazebo>
+
+
+  <joint name="right_wheel_joint" type="continuous">
+    <origin rpy="0 0 0" xyz="-0.000985 -0.070150 0.0325"/>
+    <parent link="body_link"/>
+    <child link="right_wheel_link"/>
+    <axis xyz="0 1 0"/>
+    <!-- <limit effort="1000" velocity=""/> -->
+  </joint>
+  <transmission name="right_wheel_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="right_wheel_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="right_wheel_joint">
+      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+  <link name="right_wheel_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.00000147 0.00093592 -0.00000239"/>
+      <mass value="0.2986774"/>
+      <inertia ixx="0.0001147" ixy="0.00000000" iyy="0.0002130" ixz="0.00000000" iyz="0.0000001" izz="0.0001148"/>
+    </inertial>
+    <visual>
+      <origin rpy="1.57079632679 0 3.1415926" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="$(find cube_petit_description)/meshes/cube_petit/wheels/tamiya_wheel.obj"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="1.57079632679 0 3.1415926" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.002" radius="0.0325"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="right_wheel_link">
+    <selfCollide>false</selfCollide>
+    <maxContacts>2</maxContacts>
+    <minDepth>0</minDepth>
+    <!-- <dampingFactor>0</dampingFactor> -->
+    <mu1 value="2.5"/>
+    <kp value="50000"/>
+    <kd value="0"/>
+  </gazebo>
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- <ros2_control name="left_wheel_motor" type="actuator">
+    <hardware>
+      <plugin>hardware_interface/VelocityJointInterface</plugin>
+    </hardware>
+    <joint name="left_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+  <ros2_control name="right_wheel_motor" type="actuator">
+    <hardware>
+      <plugin>hardware_interface/VelocityJointInterface</plugin>
+    </hardware>
+    <joint name="right_wheel_joint">
+      <command_interface name="velocity">
+        <param name="min">-6</param>
+        <param name="max">6</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control> -->
+
+
+  <gazebo>
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+      <robotNamespace>/cube_petit</robotNamespace>
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find cube_petit_gazebo)/config/base_control_gazebo.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

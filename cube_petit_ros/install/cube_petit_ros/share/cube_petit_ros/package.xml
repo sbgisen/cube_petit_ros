@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cube_petit_ros</name>
+  <version>2.2.0</version>
+  <description>This is the meta package of the cube_petit robot.</description>
+  <maintainer email="SBGRP-git@g.softbank.co.jp">SoftBank corp.</maintainer>
+  <license>Apache 2.0</license>
+  <url type="repository">https://github.com/sbgisen/cube_petit_ros</url>
+  <url type="bugtracker">https://github.com/sbgisen/cube_perit_ros/issues</url>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>cube_petit_description</exec_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,7 @@
+- git:
+    uri: https://github.com/autowarefoundation/ros2_socketcan.git
+    local-name: ros2_socketcan
+    version: main
+    uri: https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git
+    local-name: ldlidar_stl_ros2
+    version: main

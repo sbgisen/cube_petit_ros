@@ -1,0 +1,15 @@
+robot_hardware:
+  - left_dji_hw_interface
+  - right_dji_hw_interface
+
+left_dji_hw_interface:
+  type: dji_ros_controller/M2006Ros2
+  joint_name: left_wheel_joint
+  can_interface: can0
+  can_id: 2
+
+right_dji_hw_interface:
+  type: dji_ros_controller/M2006Ros2
+  joint_name: right_wheel_joint
+  can_interface: can0
+  can_id: 1

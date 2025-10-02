@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cube_petit_text_to_speech</name>
+  <version>0.0.0</version>
+  <description>The cube_petit_text_to_speech package</description>
+  <maintainer email="SBGRP-git@g.softbank.co.jp">SoftBank corp.</maintainer>
+  <license>Apache 2.0</license>
+  <url type="repository">https://github.com/sbgisen/cube_petit_ros</url>
+  <url type="bugtracker">https://github.com/sbgisen/cube_petit_ros/issues</url>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <exec_depend>sbgisen_msgs</exec_depend>
+  <exec_depend>python3-psutil</exec_depend>
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

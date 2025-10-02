@@ -1,12 +1,12 @@
 class Ros {
-  constructor () {
+  constructor() {
     this.ros = null
     this.expression = new CubeExpression()
     this.speech = new CubeSpeech()
-    this.emoji = new CubeEmoji()
+    this.gaze = new CubeGaze()
   }
 
-  connect () {
+  connect() {
     const ws = 'ws://localhost:9090/'
     this.ros = new ROSLIB.Ros({ url: ws })
     this.ros.on('close', () => {
@@ -15,27 +15,27 @@ class Ros {
     })
     this.expression.connect(this.ros)
     this.speech.connect(this.ros)
-    this.emoji.connect(this.ros)
+    this.gaze.connect(this.ros)
     console.log('connected.')
   }
 }
 
 class CubeExpression {
-  constructor () {
+  constructor() {
     this.currentStatus = null // 表示中のステータス
     this.nextStatus = 'normal' // 表示待ちのステータス
   }
 
-  connect (ros) {
+  connect(ros) {
     const orderSub = new ROSLIB.Topic({
       ros,
-      name: '/face_node/set_expression',
-      messageType: 'cube_expression/FaceExpression'
+      name: '/facial_expression/expression_command',
+      messageType: 'sbgisen_msgs/FaceExpression'
     })
     orderSub.subscribe(message => {
       const data = message.expression
       if (emotes[data] === undefined) {
-        console.error('emote:' + data + ' is undefined.')
+        console.log('emote:' + data + ' is undefined.')
         return
       }
       console.log('emote:' + data)
@@ -44,17 +44,61 @@ class CubeExpression {
   }
 }
 
+class CubeGaze {
+  constructor() {
+    this.lookResetTimer = null // タイマーを保持
+  }
+
+  connect(ros) {
+    this.lookSub = new ROSLIB.Topic({
+      ros,
+      name: 'facial_expression/look_at',
+      messageType: 'std_msgs/Float64MultiArray'
+    })
+
+    this.lookSub.subscribe(message => {
+      const arr = message.data
+      if (!Array.isArray(arr) || arr.length < 3) {
+        console.warn('look_at: invalid format. Expected [radius, angle(deg), duration(sec)]')
+        return
+      }
+
+      const [radius, angleDeg, durationSec] = arr
+      const angleRad = angleDeg * Math.PI / 180
+
+      console.log(`CubeGaze: lookAt(radius=${radius}, angle=${angleDeg}°, duration=${durationSec}s)`)
+
+      // 視線を向ける
+      lookAt(radius, angleRad)
+
+      // 前のタイマーを解除
+      if (this.lookResetTimer) {
+        clearTimeout(this.lookResetTimer)
+        this.lookResetTimer = null
+      }
+
+      // durationが0以外なら元に戻す
+      if (durationSec > 0) {
+        this.lookResetTimer = setTimeout(() => {
+          lookAt(0, 0)
+          console.log('CubeGaze: look reset to center')
+        }, durationSec * 1000)
+      }
+    })
+  }
+}
+
 class CubeSpeech {
-  constructor () {
+  constructor() {
     this.currentStatus = false // 表示中のステータス
     this.nextStatus = false // 表示待ちのステータス
   }
 
-  connect (ros) {
+  connect(ros) {
     this.startSub = new ROSLIB.Topic({
       ros,
       name: '/speech_server/goal',
-      messageType: 'cube_speech/SpeechActionGoal'
+      messageType: 'sbgisen_msgs/SpeechActionGoal'
     })
     this.endSub = new ROSLIB.Topic({
       ros,
@@ -72,40 +116,16 @@ class CubeSpeech {
   }
 }
 
-class CubeEmoji {
-  constructor () {
-    this.currentStatus = 'none' // 表示中のステータス
-    this.nextStatus = 'none' // 表示待ちのステータス
-  }
-
-  connect (ros) {
-    const emojiSub = new ROSLIB.Topic({
-      ros,
-      name: '/face_node/set_emoji',
-      messageType: 'std_msgs/String'
-    })
-    emojiSub.subscribe(e => {
-      const data = e.data
-      if (emojis[data] === undefined) {
-        console.error('emoji:' + data + ' is undefined.')
-        return
-      }
-      console.log('emoji:' + data)
-      this.nextStatus = data
-    })
-  }
-}
-
 /**
  * main
  */
-const emotes = { normal, happy, sad, puzzled, angry }
+const emotes = { normal, happy, sad, puzzled }
 let lastConnect = 0 // 前回の接続時間
 const rosbridge = new Ros()
 rosbridge.connect()
 requestAnimationFrame(loop) // ループ処理を開始
 
-async function loop (ts) {
+async function loop(ts) {
   // console.log('loop')
   // 接続切れかつ前回の処理から1秒経過していたら再接続
   if (!rosbridge.ros && ts - lastConnect >= 1000) {
@@ -134,13 +154,6 @@ async function loop (ts) {
       if (s.nextStatus === false) await speech.stop()
     }
     s.currentStatus = s.nextStatus
-  }
-  // 絵文字を更新
-  const j = rosbridge.emoji
-  if (j.currentStatus !== j.nextStatus) {
-    emojis[j.currentStatus].stop()
-    emojis[j.nextStatus].start()
-    j.currentStatus = j.nextStatus
   }
   requestAnimationFrame(loop)
 }

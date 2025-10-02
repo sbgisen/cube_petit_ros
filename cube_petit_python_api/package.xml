@@ -28,7 +28,7 @@
   <!-- <exec_depend>cube_diagnostic</exec_depend>
   <exec_depend>cube_expression</exec_depend>
   <exec_depend>cube_navigation</exec_depend> -->
-  <exec_depend>cube_speech</exec_depend>
+  <exec_depend>sbgisen_speech</exec_depend>
 
   <!-- <test_depend>actionlib_tutorials</test_depend>
   <test_depend>cube_gazebo</test_depend>

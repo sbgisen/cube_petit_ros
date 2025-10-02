@@ -1,0 +1,5 @@
+repositories:
+  sbgisen_speech:
+    type: git
+    url: git@github.com:sbgisen/sbgisen_speech.git
+    version: jazzy-devel

@@ -63,9 +63,29 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments={
             'robot': LaunchConfiguration('robot')}.items())
 
+    teleop = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py')))
+
+    text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
+    text_to_speech = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py')))
+
+    face_animation_pkg = pathlib.Path(FindPackageShare(
+        'cube_petit_facial_animation').find('cube_petit_facial_animation'))
+    face_animation = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py')))
+
+    speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
+    hotword = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword.launch.py')))
+
     return LaunchDescription(args + [
         robot_state,
         RegisterEventHandler(event_handler=OnProcessExit(target_action=robot_state,
                                                          on_exit=[EmitEvent(event=Shutdown())])),
         general,
+        teleop,
+        text_to_speech,
+        face_animation,
+        hotword
     ])

@@ -285,7 +285,7 @@
       <always_on>true</always_on>
       <update_rate>4.0</update_rate>
       <topic>camera/depth/image_raw</topic>
-      <frame>camera_optical_link</frame>
+      <gz_frame_id>camera_depth_optical_link</gz_frame_id>
       <camera>
         <camera_info_topic>camera/depth/camera_info</camera_info_topic>
         <horizontal_fov>${60.0*3.1415926/180.0}</horizontal_fov>
@@ -300,11 +300,11 @@
         </clip>
       </camera>
     </sensor>
-    <sensor type="camera" name="camera_rgb_camera">
+    <sensor type="camera" name="camera_color_camera">
       <always_on>true</always_on>
       <update_rate>4.0</update_rate>
       <topic>camera/rgb/image_raw</topic>
-      <frame>camera_optical_link</frame>
+      <gz_frame_id>camera_rbg_optical_frame</gz_frame_id>
       <camera>
         <camera_info_topic>camera/rgb/camera_info</camera_info_topic>
         <horizontal_fov>${60.0*3.1415926/180.0}</horizontal_fov>

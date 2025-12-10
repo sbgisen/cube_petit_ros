@@ -509,7 +509,7 @@ behavior_server:
     wait:
       plugin: nav2_behaviors::Wait
     global_frame: odom
-    robot_base_frame: base_footprint
+    robot_base_frame: base_link
     transform_timeout: 0.1
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0

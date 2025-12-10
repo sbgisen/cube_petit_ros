@@ -206,11 +206,16 @@ def generate_launch_description() -> LaunchDescription:
                         ('points', 'depth_registered/points'),
                     ],
                 ),
-                ComposableNode(
-                    package='topic_tools',
-                    plugin='topic_tools::ThrottleNode',
-                    name='points_throttle',
-                ),
+                ComposableNode(package='topic_tools',
+                               plugin='topic_tools::ThrottleNode',
+                               name='points_throttle',
+                               parameters=[{
+                                   'input_topic': 'depth_registered/points',
+                                   'output_topic': 'depth_registered/points_throttled',
+                                   'lazy': True,
+                                   'throttle_type': 'messages',
+                                   'msgs_per_sec': 5.0,
+                               }]),
                 ComposableNode(
                     package='pcl_ros',
                     plugin='pcl_ros::VoxelGrid',

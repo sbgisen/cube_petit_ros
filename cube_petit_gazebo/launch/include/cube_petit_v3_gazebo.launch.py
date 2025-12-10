@@ -22,11 +22,9 @@ import pathlib
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import EmitEvent
-from launch.actions import IncludeLaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.actions import SetParameter
@@ -56,20 +54,16 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('pitch', default_value='0.0', description='Pitch of the robot in the Gazebo world'))
     args.append(DeclareLaunchArgument('yaw', default_value='0.0', description='Yaw of the robot in the Gazebo world'))
 
+    # Load Robot Model
     pkg_path = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
-
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     print(description_pkg)
     xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit_gazebo.xacro'
-
     doc = xacro.process_file(xacro_file, mappings={'use_sim': 'true'})
     robot_description = doc.toprettyxml(indent='  ')
     print(robot_description)
-    config_path = os.path.join(pkg_path, 'config', 'gz_bridge.yaml')
-    with open(config_path, 'r') as f:
-        gz_bridge_params = yaml.safe_load(f)
-        with open('/tmp/gz_bridge.yaml', 'w') as f2:
-            f2.write(yaml.safe_dump(gz_bridge_params))
+
+    # Spawn Robot
     spawn_entity = Node(package='ros_gz_sim',
                         executable='create',
                         arguments=[
@@ -84,6 +78,13 @@ def generate_launch_description() -> LaunchDescription:
                             '-Y',
                             '0.0',
                         ])
+
+    # Load GZ_SIM bridge config file
+    config_path = os.path.join(pkg_path, 'config', 'gz_bridge.yaml')
+    with open(config_path, 'r') as f:
+        gz_bridge_params = yaml.safe_load(f)
+        with open('/tmp/gz_bridge.yaml', 'w') as f2:
+            f2.write(yaml.safe_dump(gz_bridge_params))
     param_bridge = Node(package='ros_gz_bridge',
                         executable='parameter_bridge',
                         arguments=[
@@ -91,6 +92,8 @@ def generate_launch_description() -> LaunchDescription:
                             '-p',
                             'config_file:=/tmp/gz_bridge.yaml',
                         ])
+
+    # Robot State Publisher
     robot_state_publisher = Node(package='robot_state_publisher',
                                  executable='robot_state_publisher',
                                  output='both',
@@ -98,29 +101,18 @@ def generate_launch_description() -> LaunchDescription:
                                      'robot_description': robot_description
                                  }])
 
-    # hardware_pkg = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
-    # controllers = IncludeLaunchDescription(PythonLaunchDescriptionSource(
-    #     [str(hardware_pkg / 'launch/include/base_control_gazebo.launch.py')]),
-    #                                        launch_arguments={
-    #                                            'robot': LaunchConfiguration('robot'),
-    #                                            'x': LaunchConfiguration('x'),
-    #                                            'y': LaunchConfiguration('y'),
-    #                                            'z': LaunchConfiguration('z'),
-    #                                            'roll': LaunchConfiguration('roll'),
-    #                                            'pitch': LaunchConfiguration('pitch'),
-    #                                            'yaw': LaunchConfiguration('yaw'),
-    #                                            'minimum': LaunchConfiguration('minimum')
-    #                                        }.items())
-
+    # Load Controllers
     load_joint_state_controller = Node(package='controller_manager',
                                        executable='spawner',
                                        output='both',
                                        arguments=['-c', '/controller_manager', 'joint_state_broadcaster'])
-
     load_diff_drive_controller = Node(package='controller_manager',
                                       executable='spawner',
                                       output='both',
                                       arguments=['-c', '/controller_manager', 'diff_drive_controller'])
+
+    # Image bridge (ROS topic -> Gazebo topic) arguments: ROS Topic name
+    # If you want add rear_camera, add topic here.
     image_bridge = Node(
         package='ros_gz_image',
         executable='image_bridge',

@@ -1,0 +1,35 @@
+# TODO: Use wildcard namespace in composable nodes
+camera:
+  ros__parameters:
+    color:
+      frame_id: "camera_color_optical_link"
+    depth:
+      frame_id: "camera_depth_optical_link"
+    # camera_manager
+    num_worker_threads: 8
+    # rgb_resize
+    scale_width: 0.3125
+    scale_height: 0.3125
+    # depth_rectify
+    # Use nearest neighbor (0) interpolation so we don't streak across depth boundaries
+    interpolation: 0
+    # register
+    fill_upsampling_holes: true
+    use_rgb_timestamp: true
+
+    # throttle
+    input_topic: depth_registered/points
+    output_topic: depth_registered/points_throttled
+    lazy: true
+    throttle_type: messages
+    msgs_per_sec: 5.0
+    # voxel_grid
+    filter_field_name: z
+    filter_limit_min: 0.0
+    filter_limit_max: 8.0
+    filter_limit_negative: false
+    leaf_size: 0.03
+    # statistical_outlier_removal
+    mean_k: 20
+    stddev: 1.05
+    negative: false

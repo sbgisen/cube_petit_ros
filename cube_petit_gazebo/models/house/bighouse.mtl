@@ -10,7 +10,6 @@ Ke 0.360000 0.360000 0.360000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd /home/gisen/Downloads/housea.png
 
 newmtl Material.002
 Ns 96.078431
@@ -21,4 +20,3 @@ Ke 0.360000 0.360000 0.360000
 Ni 1.000000
 d 1.000000
 illum 2
-map_Kd /home/gisen/Downloads/housea.png

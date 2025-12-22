@@ -1,0 +1,434 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <world name="sample">
+    <physics type="ode">
+      <max_step_size>0.01</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>100</real_time_update_rate>
+      <gravity>0 0 -9.8</gravity>
+    </physics>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
+    </include>
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Ground Plane</uri>
+    </include>
+    <scene>
+      <shadows>false</shadows>
+    </scene>
+    <model name="house_walls">
+      <static>true</static>
+      <link name="walls">
+        <visual name="south_vis">
+          <pose>3 -6.05 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="south_col">
+          <pose>3 -6.05 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="north_vis">
+          <pose>3 0.05 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="north_col">
+          <pose>3 0.05 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>6 0.1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="west_vis">
+          <pose>-0.05 -0.325 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 0.75 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="west_col">
+          <pose>-0.05 -0.325 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 0.75 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="west_vis2">
+          <pose>-0.05 -3.75 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 4.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="west_col2">
+          <pose>-0.05 -3.75 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 4.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="east_vis">
+          <pose>6.05 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 6 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="east_col">
+          <pose>6.05 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 6 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="center_v_low_vis">
+          <pose>3 -5.25 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 1.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="center_v_low_col">
+          <pose>3 -5.25 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 1.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="center_v_mid_vis">
+          <pose>3 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 1.0 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="center_v_mid_col">
+          <pose>3 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 1.0 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="center_v_high_vis">
+          <pose>3 -0.75 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 1.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="center_v_high_col">
+          <pose>3 -0.75 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.1 1.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="center_h_left_vis">
+          <pose>0.75 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.1 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="center_h_left_col">
+          <pose>0.75 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="center_h_mid_vis">
+          <pose>3 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.0 0.1 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="center_h_mid_col">
+          <pose>3 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.0 0.1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="center_h_right_vis">
+          <pose>5.25 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.1 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="center_h_right_col">
+          <pose>5.25 -3 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.1 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="bed_rooms">
+      <static>true</static>
+      <link name="bed">
+        <visual name="bed_vis">
+          <pose>5.6 -2 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.8 1.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="bed_col">
+          <pose>5.6 -2 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.8 1.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="desk">
+        <visual name="desk_vis">
+          <pose>5.5 -0.25 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.8 0.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="desk_col">
+          <pose>5.5 -0.25 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.8 0.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="living_rooms">
+      <static>true</static>
+      <link name="tv">
+        <visual name="tv_vis">
+          <pose>5.5 -3.13 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.0 0.25 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="tv_col">
+          <pose>5.5 -3.13 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.0 0.25 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="sofa">
+        <visual name="sofa_vis">
+          <pose>5.25 -5.5 0.15 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.5 0.3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="sofa_col">
+          <pose>5.25 -5.5 0.15 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.5 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="dining_table">
+        <visual name="dining_table_vis">
+          <pose>5.25 -4.25 0.15 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.5 0.3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="dining_table_col">
+          <pose>5.25 -4.25 0.15 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.5 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="dock">
+        <visual name="dock_vis">
+          <pose>3.5 -5.6 0.005 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 0.01</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="dock_col">
+          <pose>3.5 -5.6 0.05 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 0.01</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="kitchen">
+      <static>true</static>
+      <link name="sink">
+        <visual name="sink_vis">
+          <pose>0.8 -5.7 0.25 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.5 0.5</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="sink_col">
+          <pose>0.6 -5.7 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.5 0.5 0.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="refridge">
+        <visual name="refridge_vis">
+          <pose>2.5 -5.7 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="refridge_col">
+          <pose>2.5 -5.7 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.5 1.0</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="kitchen_table">
+        <visual name="kitchen_table_vis">
+          <pose>1.5 -4.5 0.15 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 0.3</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="kitchen_table_col">
+          <pose>1.5 -4.5 0.15 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="shelf">
+        <visual name="shelf_vis">
+          <pose>0.25 -4 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.75 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="shelf_col">
+          <pose>0.25 -4 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.5 0.75 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="guest_rooms">
+      <static>true</static>
+      <link name="dock">
+        <visual name="dock_vis">
+          <pose>2.5 -0.5 0.005 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 0.01</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="dock_col">
+          <pose>2.5 -0.5 0.05 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 0.01</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="box">
+        <visual name="box_vis">
+          <pose>0.5 -2.25 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </visual>
+        <collision name="box_col">
+          <pose>0.5 -2.25 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <material>
+      <ambient>0.9 0.9 0.9 1</ambient>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+    </material>
+
+  </world>
+</sdf>

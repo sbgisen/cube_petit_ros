@@ -429,6 +429,52 @@
       <ambient>0.9 0.9 0.9 1</ambient>
       <diffuse>0.9 0.9 0.9 1</diffuse>
     </material>
-
+    <include>
+      <pose>0.5 -5.25 0 0 0 0</pose>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Standing person
+      </uri>
+    </include>
+    <include>
+      <pose>5.5 -0.9 0 0 0 -3.14</pose>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/VisitorKidSit
+      </uri>
+    </include>
+    <include>
+      <pose>5.5 -5.5 0 0 0 -3.14</pose>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/MaleVisitorSit
+      </uri>
+    </include>
+    <!-- <actor name="actor_walking">
+      <skin>
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <scale>1.0</scale>
+      </skin>
+      <animation name="walk">
+        <filename>https://fuel.gazebosim.org/1.0/Mingfei/models/actor/tip/files/meshes/walk.dae</filename>
+        <interpolate_x>true</interpolate_x>
+      </animation>
+      <script>
+        <loop>true</loop>
+        <delay_start>0.000000</delay_start>
+        <auto_start>true</auto_start>
+        <trajectory id="0" type="walk" tension="0.6">
+          <waypoint>
+            <time>0</time>
+            <pose>3 5 1.0 0 0 -1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>4</time>
+            <pose>3 1 1.0 0 0 1.57</pose>
+          </waypoint>
+          <waypoint>
+            <time>8</time>
+            <pose>3 5 1.0 0 0 -1.57</pose>
+          </waypoint>
+        </trajectory>
+      </script>
+    </actor> -->
   </world>
 </sdf>

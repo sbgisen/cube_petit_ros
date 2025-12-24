@@ -17,123 +17,223 @@
 
 from __future__ import annotations
 
-from typing import List
+import pathlib
+from typing import Dict, List, Tuple
 
+from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import PoseStamped
 import rclpy
+from rclpy.duration import Duration
 from rclpy.node import Node
-from src.cube_petit_navigation_commander import CubePetitNavigationCommander
+import rclpy.time
 from std_msgs.msg import String
+from tf2_ros import Buffer
+from tf2_ros import TransformListener
 from tf_transformations import quaternion_from_euler
+import yaml
+
+from cube_petit_navigation.cube_petit_patrol_commander import CubePetitPatrolCommander
+from cube_petit_navigation.navigation.cube_petit_navigation_commander import CubePetitNavigationCommander
+from cube_petit_navigation.patrol.patrol_controller import PatrolController
 
 
 class NavigationApiNode(Node):
-    """Navigation API node that translates semantic goals into Nav2 actions."""
+    """Navigation API node using external YAML config file."""
 
     def __init__(self) -> None:
         super().__init__('navigation_api_node')
 
-        self.declare_parameter('favorite_pose', [0.0, 0.0, 0.0])
-        self.favorite_pose: List[float] = list(self.get_parameter('favorite_pose').value)
+        # ================= config file =================
 
-        self._status_pub = self.create_publisher(
-            String,
-            'navigation/status',
-            10,
+        pkg_path = get_package_share_directory('cube_petit_navigation')
+        self.declare_parameter(
+            'places_config_file',
+            str(pathlib.Path(pkg_path) / 'config' / 'places.yaml'),
         )
-        self.create_subscription(
-            String,
-            'navigation/goal',
-            self._on_goal,
-            10,
-        )
-        self.create_subscription(
-            String,
-            'navigation/cancel',
-            self._on_cancel,
-            10,
-        )
-        self._commander = CubePetitNavigationCommander(self)
+
+        config_path = pathlib.Path(self.get_parameter('places_config_file').value)
+
+        self.get_logger().info(f'Loading places config: {config_path}')
+
+        with config_path.open() as f:
+            cfg = yaml.safe_load(f)
+
+        self._patrol_cfg: Dict = cfg.get('patrol', {})
+        self._favorite_cfg: Dict = cfg.get('favorite', {})
+        self._dock_cfg: Dict = cfg.get('dock', {})
+
+        # rooms → polygon
+        self._rooms: Dict[str, List[Tuple[float, float]]] = {}
+        for name, room in cfg.get('rooms', {}).items():
+            self._rooms[name] = [(p['x'], p['y']) for p in room.get('points', [])]
+
+        self.get_logger().info(f'Loaded rooms: {list(self._rooms.keys())}')
+
+        self._current_room: str | None = None
         self._current_status: str = 'idle'
+
+        # ================= TF =================
+
+        self._tf_buffer = Buffer()
+        self._tf_listener = TransformListener(self._tf_buffer, self)
+
+        # ================= publishers =================
+
+        self._status_pub = self.create_publisher(String, 'navigation/status', 10)
+        self._room_pub = self.create_publisher(String, 'navigation/room', 10)
+
+        # ================= subscribers =================
+
+        self.create_subscription(String, 'navigation/goal', self._on_goal, 10)
+        self.create_subscription(String, 'navigation/cancel', self._on_cancel, 10)
+
+        # ================= commanders =================
+
+        self._nav_commander = CubePetitNavigationCommander(self)
+        self._patrol_commander = CubePetitPatrolCommander(self)
+
+        self._patrol_controller = PatrolController(
+            node=self,
+            patrol_cfg=self._patrol_cfg,
+            patrol_commander=self._patrol_commander,
+        )
+
+        # ================= timer =================
+
         self.create_timer(0.2, self._on_timer)
+
         self._publish_status('idle')
         self.get_logger().info('navigation_api_node started')
 
+    # =================================================
+    # Callbacks
+    # =================================================
+
     def _on_goal(self, msg: String) -> None:
-        """Handle incoming navigation goal requests."""
-        text: str = msg.data.strip()
+        text = msg.data.strip()
         self.get_logger().info(f'Received navigation goal: {text}')
 
-        if self._commander.is_navigating():
-            self.get_logger().info('Navigation already in progress, ignoring goal')
+        if self._nav_commander.is_navigating() or self._patrol_controller.is_running():
+            self.get_logger().info('Navigation already running')
             return
 
         if text == 'favorite':
-            pose = self._pose_from_list(self.favorite_pose)
-            self._start_navigation(pose)
+            pose = self._get_favorite_pose()
+            if pose:
+                self._start_navigation(pose)
+
+        elif text == 'patrol':
+            self._patrol_controller.start()
+            self._publish_status('patrolling')
+
         elif text.startswith('pose:'):
             pose = self._parse_pose(text)
             self._start_navigation(pose)
+
         else:
-            self.get_logger().warning(f'Unknown navigation goal: {text}')
+            self.get_logger().warning(f'Unknown goal: {text}')
 
     def _on_cancel(self, _msg: String) -> None:
-        """Cancel the current navigation request."""
-        self.get_logger().info('Cancel navigation request received')
-        self._commander.cancel()
+        self._nav_commander.cancel()
+        self._patrol_controller.cancel()
         self._publish_status('idle')
 
     def _on_timer(self) -> None:
-        """Periodic check of navigation result."""
-        result = self._commander.get_result()
+        # navigation result
+        result = self._nav_commander.get_result()
         if result is True:
             self._publish_status('arrived')
         elif result is False:
             self._publish_status('failed')
 
-    def _start_navigation(self, pose: PoseStamped) -> None:
-        """Start navigation to the given pose."""
-        self._commander.go_to_pose(pose)
-        self._publish_status('navigating')
+        # patrol update
+        self._patrol_controller.update()
 
-    def _publish_status(self, status: str) -> None:
-        """Publish navigation status if it has changed."""
-        if status == self._current_status:
-            return
+        # room detection
+        pos = self._get_current_xy()
+        if pos:
+            room = self._detect_room(*pos)
+            if room != self._current_room:
+                self._current_room = room
+                self._publish_room(room)
 
-        self._current_status = status
-        msg = String()
-        msg.data = status
-        self._status_pub.publish(msg)
-        self.get_logger().info(f'Navigation status: {status}')
+    # =================================================
+    # Helpers
+    # =================================================
 
-    def _pose_from_list(self, values: List[float]) -> PoseStamped:
-        """Create a PoseStamped from [x, y, yaw]."""
-        x, y, yaw = values
+    def _get_current_xy(self) -> Tuple[float, float] | None:
+        try:
+            tf = self._tf_buffer.lookup_transform(
+                'map',
+                'base_link',
+                rclpy.time.Time(),
+                timeout=Duration(seconds=0.2),
+            )
+            return tf.transform.translation.x, tf.transform.translation.y
+        except Exception:
+            return None
+
+    def _detect_room(self, x: float, y: float) -> str | None:
+        for name, poly in self._rooms.items():
+            if self._point_in_polygon(x, y, poly):
+                return name
+        return None
+
+    @staticmethod
+    def _point_in_polygon(
+        x: float,
+        y: float,
+        polygon: List[Tuple[float, float]],
+    ) -> bool:
+        inside = False
+        n = len(polygon)
+        for i in range(n):
+            x1, y1 = polygon[i]
+            x2, y2 = polygon[(i + 1) % n]
+            if ((y1 > y) != (y2 > y)) and \
+               (x < (x2 - x1) * (y - y1) / (y2 - y1 + 1e-9) + x1):
+                inside = not inside
+        return inside
+
+    def _get_favorite_pose(self) -> PoseStamped | None:
+        order = self._favorite_cfg.get('order', [])
+        if not order:
+            return None
+        entry = self._favorite_cfg['places'].get(order[0])
+        if not entry:
+            return None
+        x, y, yaw = entry['pose']
         return self._make_pose(x, y, yaw)
 
     def _parse_pose(self, text: str) -> PoseStamped:
-        """Parse pose string formatted as 'pose:x,y,yaw'."""
         _, body = text.split(':', 1)
-        x, y, yaw = (float(v) for v in body.split(','))
+        x, y, yaw = map(float, body.split(','))
         return self._make_pose(x, y, yaw)
 
     def _make_pose(self, x: float, y: float, yaw: float) -> PoseStamped:
-        """Construct a PoseStamped in the map frame."""
         pose = PoseStamped()
         pose.header.frame_id = 'map'
         pose.header.stamp = self.get_clock().now().to_msg()
-
         pose.pose.position.x = x
         pose.pose.position.y = y
-
-        qx, qy, qz, qw = quaternion_from_euler(0.0, 0.0, yaw)
+        qx, qy, qz, qw = quaternion_from_euler(0, 0, yaw)
         pose.pose.orientation.x = qx
         pose.pose.orientation.y = qy
         pose.pose.orientation.z = qz
         pose.pose.orientation.w = qw
-
         return pose
+
+    def _start_navigation(self, pose: PoseStamped) -> None:
+        self._nav_commander.go_to_pose(pose)
+        self._publish_status('navigating')
+
+    def _publish_status(self, status: str) -> None:
+        if status != self._current_status:
+            self._current_status = status
+            self._status_pub.publish(String(data=status))
+
+    def _publish_room(self, room: str | None) -> None:
+        self._room_pub.publish(String(data=room or 'unknown'))
 
 
 def main() -> None:

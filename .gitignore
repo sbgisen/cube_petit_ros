@@ -1,0 +1,8 @@
+
+*.gv
+
+*.pdf
+
+cube_petit_navigation/cube_petit_navigation/__pycache__/__init__.cpython-312.pyc
+
+*.pyc

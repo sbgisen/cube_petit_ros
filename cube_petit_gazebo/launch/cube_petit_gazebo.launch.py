@@ -64,7 +64,7 @@ def select_world(context: LaunchContext, *args, **kwargs) -> list:
     pkg_path = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
 
     if sample_world.lower() == 'true':
-        world_path = pkg_path / 'worlds' / 'sample.sdf'
+        world_path = pkg_path / 'worlds' / 'rooms.sdf'
     else:
         world_path = 'empty.sdf'
 

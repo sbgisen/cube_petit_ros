@@ -171,11 +171,11 @@ def generate_launch_description() -> LaunchDescription:
                               description='Use simulation (Gazebo) clock if true'))
     args.append(
         DeclareLaunchArgument('map',
-                              default_value=str(pkg_share / 'map/sample/sample.yaml'),
+                              default_value=str(pkg_share / 'map/rooms/rooms.yaml'),
                               description='Full path to map yaml file to load'))
     args.append(
         DeclareLaunchArgument('keepout',
-                              default_value=str(pkg_share / 'map/sample/sample_keepout.yaml'),
+                              default_value=str(pkg_share / 'map/rooms/rooms_keepout.yaml'),
                               description='Full path to keepout yaml file to load'))
     args.append(
         DeclareLaunchArgument('params_file',

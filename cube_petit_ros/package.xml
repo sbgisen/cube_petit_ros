@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="2">
+<package format="3">
   <name>cube_petit_ros</name>
   <version>0.0.0</version>
   <description>This is the meta package of the cube_petit_ros.</description>
@@ -13,6 +13,13 @@
   <exec_depend>cube_petit_gazebo</exec_depend>
   <exec_depend>cube_petit_text_to_speech</exec_depend>
   <exec_depend>cube_petit_speech_to_text</exec_depend>
+  <exec_depend>cube_petit_facial_animation</exec_depend>
+  <exec_depend>cube_petit_facial_animation_msgs</exec_depend>
+  <exec_depend>cube_petit_bringup</exec_depend>
+  <exec_depend>cube_petit_navigation</exec_depend>
+  <exec_depend>cube_petit_navigation_msgs</exec_depend>
+  <exec_depend>cube_petit_python_api</exec_depend>
+  <exec_depend>cube_petit_speech_msgs</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

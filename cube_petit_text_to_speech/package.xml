@@ -8,18 +8,23 @@
   <license>Apache 2.0</license>
   <url type="repository">https://github.com/sbgisen/cube_petit_ros</url>
   <url type="bugtracker">https://github.com/sbgisen/cube_petit_ros/issues</url>
-
+  <exec_depend>std_msgs</exec_depend>
+  <build_depend>wget</build_depend>
+  <build_depend>libasound2-dev</build_depend>
+  <exec_depend>alsa-utils</exec_depend>
+  <exec_depend>cube_petit_speech_msgs</exec_depend>
+  <exec_depend>ffmpeg</exec_depend>
+  <exec_depend>sox</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <exec_depend>sbgisen_msgs</exec_depend>
   <exec_depend>python3-psutil</exec_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
   <test_depend>python3-pytest</test_depend>
   <export>
-    <build_type>ament_cmake</build_type>
+    <build_type>ament_python</build_type>
   </export>
 </package>

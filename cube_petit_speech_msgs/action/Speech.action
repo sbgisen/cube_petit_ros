@@ -1,0 +1,17 @@
+string EMOTION_HAPPINESS=happiness
+string EMOTION_DEFAULT=default
+string EMOTION_ANGER=anger
+string EMOTION_SHOUT=shout
+string EMOTION_SADNESS=sadness
+
+string text
+
+string emotion
+int32 emotion_level
+int32 pitch
+int32 speed
+int32 volume
+---
+bool result
+---
+builtin_interfaces/Duration elapsed_time

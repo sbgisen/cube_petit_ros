@@ -1,0 +1,184 @@
+#!/usr/bin/env python
+
+# Copyright (c) 2025 SoftBank Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import threading
+import time
+
+from action_msgs.msg import GoalStatus
+import numpy as np
+import rclpy
+from rclpy.action import ActionServer
+from rclpy.action import CancelResponse
+from rclpy.action import server
+from rclpy.callback_groups import ReentrantCallbackGroup
+import rclpy.executors
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy
+from rclpy.qos import QoSProfile
+from scipy.signal import resample_poly
+import sounddevice as sd
+import soundfile as sf
+
+from cube_petit_speech_msgs.action import Speech
+from cube_petit_speech_msgs.msg import AudioDataStamped
+from cube_petit_speech_msgs.msg import AudioInfo
+from cube_petit_text_to_speech.utils.jtalk import check_goal
+from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_file
+
+
+class SpeechActionServer(Node):
+
+    def __init__(self) -> None:
+        super().__init__('speech_action_server')
+
+        ActionServer(self,
+                     Speech,
+                     'speech_action_server',
+                     handle_accepted_callback=self.handle_accepted_callback,
+                     execute_callback=self.call_speech,
+                     cancel_callback=self.cancel_callback,
+                     callback_group=ReentrantCallbackGroup())
+
+        self.audio_stampled_publisher = self.create_publisher(AudioDataStamped, 'audio_stamped', 10)
+        info_qos = QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.audio_info_publisher = self.create_publisher(AudioInfo, 'audio_info', info_qos)
+
+        self.__sampling_rate = 16000  # [TODO] get ros param
+
+        info_msg = AudioInfo()
+        info_msg.sample_rate = self.__sampling_rate  # [TODO] get ros param
+        info_msg.channels = 1
+        info_msg.sample_format = 'S16LE'
+        info_msg.bitrate = self.__sampling_rate * 16
+        info_msg.coding_format = 'raw'
+        self.audio_info_publisher.publish(info_msg)
+
+        self.__lock = threading.Lock()
+        self.__is_running = False
+        self.get_logger().info('Speech Action Server is ready.')
+
+    def handle_accepted_callback(self, goal_handle: server.ServerGoalHandle) -> None:
+        while rclpy.ok():
+            if goal_handle.is_cancel_requested:
+                self.get_logger().info(f'Canceled phrase before execution: {goal_handle.request.text}')
+                goal_handle.canceled()
+                return
+            with self.__lock:
+                if not self.__is_running:
+                    self.__is_running = True
+                    break
+            time.sleep(0.1)
+
+        goal_handle.execute()
+
+    def cancel_callback(self, goal_handle: server.ServerGoalHandle) -> CancelResponse:
+        self.get_logger().info(f'Received cancel request for {goal_handle.request.text}')
+        return CancelResponse.ACCEPT
+
+    def call_speech(self, goal_handle: server.ServerGoalHandle) -> Speech.Result:
+
+        try:
+            res = Speech.Result()
+            if not check_goal(goal_handle.request):
+                self.get_logger().error('Invalid speech goal received.')
+                goal_handle.abort()
+                res.result = False
+                return res
+
+            feedback = Speech.Feedback()
+            goal = goal_handle.request
+            speech_file = None
+            start_t = self.get_clock().now()
+            speech_file = generate_jtalk_file(goal.text, goal.emotion, goal.pitch, goal.speed, speech_file)
+            data, sr = sf.read(speech_file, dtype='float32')
+            if data.ndim != 1:
+                data = np.mean(data, axis=1)
+            if sr != self.__sampling_rate:
+
+                def _get_up_down(orig_sr: int, target_sr: int) -> tuple[int, int]:
+                    gcd = np.gcd(orig_sr, target_sr)
+                    return target_sr // gcd, orig_sr // gcd
+
+                up, down = _get_up_down(sr, self.__sampling_rate)
+                data = resample_poly(data, up, down)
+                sr = self.__sampling_rate
+            data = data * (goal_handle.request.volume / 100.0)
+            current_index = 0
+
+            def callback(outdata: np.ndarray, frames: int, time: dict, status: sd.CallbackFlags) -> None:
+                nonlocal current_index
+                chunk = data[current_index:current_index + frames]
+                if len(chunk) < outdata.shape[0]:
+                    outdata[:len(chunk), 0] = chunk
+                    outdata[len(chunk):, 0] = 0
+                    raise sd.CallbackStop()
+                outdata[:, 0] = chunk
+
+                msg = AudioDataStamped()
+                msg.header.stamp = self.get_clock().now().to_msg()
+                msg.audio.data = (chunk * np.iinfo(np.int16).max).astype('int16').tobytes()
+                self.audio_stampled_publisher.publish(msg)
+                current_index += len(chunk)
+
+            try:
+                device = None
+                with sd.OutputStream(sr, int(sr * 0.01), device, 1, callback=callback) as stream:
+                    while rclpy.ok() and stream.active:
+                        feedback.elapsed_time = (self.get_clock().now() - start_t).to_msg()
+                        goal_handle.publish_feedback(feedback)
+                        if goal_handle.is_cancel_requested:
+                            stream.stop()
+                        time.sleep(0.2)
+            except Exception as e:
+                self.get_logger().error(f'Audio playback error: {e}')
+                goal_handle.abort()
+                res.result = False
+                return res
+
+            if goal_handle.status == GoalStatus.STATUS_CANCELING:
+                goal_handle.canceled()
+                res.result = False
+            else:
+                self.get_logger().info(f'Speech Log: {goal.text}')
+                goal_handle.succeed()
+                res.result = True
+            return res
+
+        finally:
+            with self.__lock:
+                self.__is_running = False
+
+
+def main() -> None:
+    """Entry point for the speech action server."""
+    rclpy.init()
+    executor = rclpy.executors.MultiThreadedExecutor()
+    node = SpeechActionServer()
+    executor.add_node(node)  # 必須
+    try:
+        executor.spin()
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        print(f'[ERROR in speech_action_server]: {e}')
+    finally:
+        if node is not None:
+            node.destroy_node()
+        rclpy.try_shutdown()
+
+
+if __name__ == '__main__':
+    main()

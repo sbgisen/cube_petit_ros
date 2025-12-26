@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import pathlib
 
 from launch import LaunchDescription
@@ -60,6 +59,23 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     ]
 
 
+def select_world(context: LaunchContext, *args, **kwargs) -> list:
+    sample_world = LaunchConfiguration('sample_world').perform(context)
+    pkg_path = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
+
+    if sample_world.lower() == 'true':
+        world_path = pkg_path / 'worlds' / 'rooms.sdf'
+    else:
+        world_path = 'empty.sdf'
+
+    gz_server = IncludeLaunchDescription([FindPackageShare('ros_gz_sim'), '/launch/gz_sim.launch.py'],
+                                         launch_arguments={
+                                             'gz_args': [str(world_path) + ' -v4 -s -r'],
+                                             'on_exit_shutdown': 'true'
+                                         }.items())
+    return [gz_server]
+
+
 def generate_launch_description() -> LaunchDescription:
     """Generate launch descriptions.
 
@@ -68,10 +84,14 @@ def generate_launch_description() -> LaunchDescription:
     """
     print('gazebo generate launch dessciprtion')
     pkg_path = pathlib.Path(FindPackageShare('cube_petit_gazebo').find('cube_petit_gazebo'))
-    gazebo_model_path = SetEnvironmentVariable(
-        name='GAZEBO_MODEL_PATH',
-        value=[EnvironmentVariable('GAZEBO_MODEL_PATH', default_value=''), f':{pkg_path}/models'])
-
+    share_path = pkg_path.parent
+    gazebo_model_path = SetEnvironmentVariable(name='GZ_SIM_RESOURCE_PATH',
+                                               value=[
+                                                   EnvironmentVariable('GZ_SIM_RESOURCE_PATH', default_value=''),
+                                                   f':{pkg_path}',
+                                                   f':{share_path}',
+                                                   f':{pkg_path}/models',
+                                               ])
     args = []
     args.append(DeclareLaunchArgument('robot', default_value='cube_petit_v3'))
     args.append(DeclareLaunchArgument('minimum', default_value='false'))
@@ -80,11 +100,7 @@ def generate_launch_description() -> LaunchDescription:
     args.append(DeclareLaunchArgument('robot_init_y', default_value='-2.0'))
     args.append(DeclareLaunchArgument('robot_init_yaw', default_value='0.0'))
 
-    gz_server = IncludeLaunchDescription([FindPackageShare('ros_gz_sim'), '/launch/gz_sim.launch.py'],
-                                         launch_arguments={
-                                             'gz_args': ['empty.sdf -r -s -v4'],
-                                             'on_exit_shutdown': 'true'
-                                         }.items())
+    args.append(DeclareLaunchArgument('sample_world', default_value='false'))
 
     gz_client = IncludeLaunchDescription([FindPackageShare('ros_gz_sim'), '/launch/gz_sim.launch.py'],
                                          launch_arguments={'gz_args': '-g -v4 '}.items())
@@ -190,11 +206,16 @@ def generate_launch_description() -> LaunchDescription:
                         ('points', 'depth_registered/points'),
                     ],
                 ),
-                ComposableNode(
-                    package='topic_tools',
-                    plugin='topic_tools::ThrottleNode',
-                    name='points_throttle',
-                ),
+                ComposableNode(package='topic_tools',
+                               plugin='topic_tools::ThrottleNode',
+                               name='points_throttle',
+                               parameters=[{
+                                   'input_topic': 'depth_registered/points',
+                                   'output_topic': 'depth_registered/points_throttled',
+                                   'lazy': True,
+                                   'throttle_type': 'messages',
+                                   'msgs_per_sec': 5.0,
+                               }]),
                 ComposableNode(
                     package='pcl_ros',
                     plugin='pcl_ros::VoxelGrid',
@@ -233,15 +254,15 @@ def generate_launch_description() -> LaunchDescription:
             ],
         )
     ])
-
-    return LaunchDescription(args + [
+    return LaunchDescription([
+        gazebo_model_path,
+    ] + args + [
         SetParameter(name='use_sim_time', value=True),
+        OpaqueFunction(function=select_world),
         camera_color_tf,
         camera_depth_tf,
-        gazebo_model_path,
-        gz_server,
-        gz_client,
         OpaqueFunction(function=launch_setup),
+        gz_client,
         teleop,
         realsense_group,
         # text_to_speech,

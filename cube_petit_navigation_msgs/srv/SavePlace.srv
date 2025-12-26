@@ -1,0 +1,5 @@
+string name        # place name (e.g. "sofa", "desk")
+string category    # favorite / dock / patrol
+---
+bool success
+string message

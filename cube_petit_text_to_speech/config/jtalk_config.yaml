@@ -1,0 +1,6 @@
+language: ja
+speech_emotion: happiness
+speech_emotion_level: 2
+speech_pitch: 100
+speech_speed: 100
+speech_volume: 100

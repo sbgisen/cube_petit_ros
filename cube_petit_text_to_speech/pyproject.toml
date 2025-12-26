@@ -1,0 +1,29 @@
+[project]
+name = "cube_petit_text_to_speech"
+version = "0.1.0"
+description = "cube_petit_text_to_speech package"
+license = { text = "Apache-2.0" }
+maintainers = [
+    { name = "SoftBank corp.", email = "SBGRP-git@g.softbank.co.jp" },
+]
+dependencies = [
+    "beartype>=0.21.0",
+    "pyyaml>=6.0.2",
+    "scipy>=1.16.2",
+    "sounddevice>=0.5.2",
+    "soundfile>=0.13.1",
+]
+
+[project.scripts]
+speech_action_server = "cube_petit_text_to_speech.speech_action_server:main"
+cube_petit_text_to_jtalk = "cube_petit_text_to_speech.cube_petit_text_to_jtalk:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["cube_petit_text_to_speech"]

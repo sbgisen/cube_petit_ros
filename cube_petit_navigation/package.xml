@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cube_petit_navigation</name>
+  <version>0.0.0</version>
+  <description>The cube_petit_navigation package</description>
+  <maintainer email="SBGRP-git@g.softbank.co.jp">SoftBank corp.</maintainer>
+  <license>Apache 2.0</license>
+  <url type="repository">https://github.com/sbgisen/cube_petit_ros</url>
+  <url type="bugtracker">https://github.com/sbgisen/cube_petit_ros/issues</url>
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <!-- TODO delete unneed -->
+  <exec_depend>emcl2</exec_depend>
+  <exec_depend>nav2_behaviors</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_costmap_2d</exec_depend>
+  <exec_depend>nav2_constrained_smoother</exec_depend>
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_dwb_controller</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+  <exec_depend>nav2_map_server</exec_depend>
+  <exec_depend>nav2_navfn_planner</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_smoother</exec_depend>
+  <exec_depend>nav2_waypoint_follower</exec_depend>
+  <exec_depend>opennav_docking</exec_depend>
+  <exec_depend>rclcpp_components</exec_depend>
+  <exec_depend>robot_pose_publisher_ros2</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>spatio_temporal_voxel_layer</exec_depend>
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

@@ -1,0 +1,4 @@
+string category   # "" = all
+---
+string[] categories
+string[] names

@@ -35,6 +35,9 @@ import yaml
 from cube_petit_navigation.cube_petit_patrol_commander import CubePetitPatrolCommander
 from cube_petit_navigation.navigation.cube_petit_navigation_commander import CubePetitNavigationCommander
 from cube_petit_navigation.patrol.patrol_controller import PatrolController
+from cube_petit_navigation.places.places_store import PlacesStore
+from cube_petit_navigation_msgs.msg import NavigationState
+from cube_petit_navigation_msgs.srv import SavePlace
 
 
 class NavigationApiNode(Node):
@@ -50,9 +53,9 @@ class NavigationApiNode(Node):
             'places_config_file',
             str(pathlib.Path(pkg_path) / 'config' / 'places.yaml'),
         )
-
+        places_path = pkg_path / 'config' / 'places.yaml'
         config_path = pathlib.Path(self.get_parameter('places_config_file').value)
-
+        self._places_store = PlacesStore(places_path)
         self.get_logger().info(f'Loading places config: {config_path}')
 
         with config_path.open() as f:
@@ -62,7 +65,6 @@ class NavigationApiNode(Node):
         self._favorite_cfg: Dict = cfg.get('favorite', {})
         self._dock_cfg: Dict = cfg.get('dock', {})
 
-        # rooms → polygon
         self._rooms: Dict[str, List[Tuple[float, float]]] = {}
         for name, room in cfg.get('rooms', {}).items():
             self._rooms[name] = [(p['x'], p['y']) for p in room.get('points', [])]
@@ -71,6 +73,17 @@ class NavigationApiNode(Node):
 
         self._current_room: str | None = None
         self._current_status: str = 'idle'
+
+        self.create_service(
+            SavePlace,
+            'navigation/save_place',
+            self._on_save_place,
+        )
+        self.create_service(
+            NavigationState,
+            'navigation/get_state',
+            self._on_get_state,
+        )
 
         # ================= TF =================
 
@@ -108,6 +121,38 @@ class NavigationApiNode(Node):
     # =================================================
     # Callbacks
     # =================================================
+    def _on_get_state(self, _, res: NavigationState) -> NavigationState:
+        res.status = self._current_status
+        res.room = self._current_room or 'unknown'
+        return res
+
+    def _on_save_place(
+        self,
+        request: SavePlace.Request,
+        response: SavePlace.Response,
+    ) -> SavePlace.Response:
+        pos = self._get_current_xy()
+        if pos is None:
+            response.success = False
+            response.message = 'Current position unavailable'
+            return response
+
+        x, y = pos
+        yaw = 0.0  # [TODO]
+
+        room = self._detect_room(x, y)
+
+        self._places_store.save_place(
+            category=request.category,
+            name=request.name,
+            pose=[x, y, yaw],
+            room=room,
+        )
+
+        response.success = True
+        response.message = f'Saved place "{request.name}"'
+        self.get_logger().info(response.message)
+        return response
 
     def _on_goal(self, msg: String) -> None:
         text = msg.data.strip()

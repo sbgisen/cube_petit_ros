@@ -50,16 +50,16 @@ def generate_launch_description() -> LaunchDescription:
     )
 
     return LaunchDescription([
-        Node(
-            package='cube_petit_text_to_speech',
-            executable='cube_petit_text_to_jtalk.py',
-            name='text_to_jtalk'
-        ),
-        Node(
-            package='sbgisen_speech',
-            executable='speech_action_server',
-            name='speech_action_server'
-        ),
+        # Node(
+        #     package='cube_petit_text_to_speech',
+        #     executable='cube_petit_text_to_jtalk',
+        #     name='text_to_jtalk'
+        # ),
+        # Node(
+        #     package='sbgisen_speech',
+        #     executable='speech_action_server',
+        #     name='speech_action_server'
+        # ),
 
         # teleop_include
         # depthai_include,

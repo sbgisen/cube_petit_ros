@@ -1,13 +1,9 @@
 repositories:
-  sbgisen_speech:
-    type: git
-    url: git@github.com:sbgisen/sbgisen_speech.git
-    version: jazzy-devel
   depthai_hand_tracker:
     type: git
-    url: git@github.com:sbgisen/depthai_hand_tracker.git
+    url: https://github.com/sbgisen/depthai_hand_tracker.git
     version: jazzy
   dji_ros_controller:
     type: git
-    url: git@github.com:sbgisen/dji_ros_controller.git
+    url: https://github.com/sbgisen/dji_ros_controller.git
     version: feature/jazzy-m2006

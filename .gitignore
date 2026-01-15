@@ -9,3 +9,7 @@ cube_petit_navigation/cube_petit_navigation/__pycache__/__init__.cpython-312.pyc
 
 
 cube_petit_text_to_speech/setup/speech_lib/*
+
+cube_petit_diagnostics/.vscode/c_cpp_properties.json
+
+cube_petit_diagnostics/.vscode/settings.json

@@ -70,6 +70,10 @@ def launch_in_order(context, *args, **kwargs):
         # IncludeLaunchDescription(
         # PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword_detector.launch.py'))),
         IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/lidar.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/depth.launch.py'))),
+        IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),

@@ -1,0 +1,15 @@
+/**:
+  ros__parameters:
+    enable_color: true
+    enable_depth: true
+    enable_infra: false
+    enable_infra1: false
+    enable_infra2: false
+
+    # rgb_camera.color_profile: "640x480x15"
+    # depth_module.depth_profile: "424x240x6"
+
+    pointcloud.enable: true
+    align_depth.enable: true
+    pointcloud.stream_filter: 2
+    pointcloud.stream_index_filter: 0

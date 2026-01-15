@@ -1,0 +1,60 @@
+/**:
+  ros__parameters:
+    path: CubePetit
+
+    sensors:
+      type: diagnostic_aggregator/AnalyzerGroup
+      path: sensors
+      analyzers:
+        rgb_camera:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: rgb_camera
+          contains:
+            - /camera/color/image_raw
+          num_items: 1
+
+        depth_camera:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: depth_camera
+          contains:
+            - /camera/depth/image
+          num_items: 1
+
+        lidar:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: lidar
+          contains:
+            - /scan/scan_filtered
+          num_items: 1
+
+        imu:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: imu
+          contains:
+            - /imu/data
+          num_items: 1
+
+    nodes:
+      type: diagnostic_aggregator/AnalyzerGroup
+      path: nodes
+      analyzers:
+        realsense_node:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: realsense
+          contains:
+            - node/camera/realsense2_camera
+          num_items: 1
+
+        lidar_node:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: lidar
+          contains:
+            - node/ld06_node
+          num_items: 1
+
+        imu_node:
+          type: diagnostic_aggregator/GenericAnalyzer
+          path: imu
+          contains:
+            - node/witmotion_node
+          num_items: 1

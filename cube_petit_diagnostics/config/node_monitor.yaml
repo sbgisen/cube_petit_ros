@@ -1,0 +1,13 @@
+node_names: [realsense_node, lidar_node, imu_node]
+
+realsense_node:
+  name: /camera/realsense2_camera
+  timeout: 2.0
+
+lidar_node:
+  name: /ld06_node
+  timeout: 2.0
+
+imu_node:
+  name: /witmotion_node
+  timeout: 2.0

@@ -1,0 +1,21 @@
+topic_names: [rgb_camera, depth_camera, lidar, imu]
+
+rgb_camera:
+  name: /camera/color/image_raw
+  type: sensor_msgs/msg/Image
+  timeout: 1.0
+
+depth_camera:
+  name: /camera/depth/image
+  type: sensor_msgs/msg/Image
+  timeout: 1.0
+
+lidar:
+  name: /scan/scan_filtered
+  type: sensor_msgs/msg/LaserScan
+  timeout: 1.0
+
+imu:
+  name: /imu/data
+  type: sensor_msgs/msg/Imu
+  timeout: 1.0

@@ -32,7 +32,7 @@ from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 import socket
-
+from ament_index_python.packages import get_package_share_directory
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     hostname = socket.gethostname()
@@ -43,12 +43,15 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     doc = xacro.process_file(xacro_file, mappings={'use_sim': use_sim})
     robot_description = {"robot_description": doc.toprettyxml(indent='  ')}
 
-    my_pkg = FindPackageShare('cube_petit_hardware_interface').find('cube_petit_hardware_interface')
-    robot_controllers = [os.path.join(my_pkg, 'config', 'cube_petit_hw_interface.yaml')]
+    controllers_yaml = os.path.join(
+        get_package_share_directory("cube_petit_hardware_interface"),
+        "config",
+        "cube_petit_hw_interface.yaml",
+)
 
     control_node =Node(package="controller_manager",
              executable="ros2_control_node",
-             parameters=[robot_description, os.path.join(my_pkg, 'config', 'cube_petit_hw_interface.yaml')],
+             parameters=[robot_description, controllers_yaml],
              output="both",
              )
         
@@ -60,12 +63,12 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         Node(package='controller_manager',
              executable='spawner',
              output='both',
-             arguments=['joint_state_broadcaster', "--controller-manager", '/'+namespace+"/controller_manager",
+             arguments=['joint_state_broadcaster', "--controller-manager", "controller_manager",
                         ]),
         Node(package='controller_manager',
              executable='spawner',
              output='both',
-             arguments=['diff_drive_controller', "--controller-manager", '/'+namespace+"/controller_manager",
+             arguments=['diff_drive_controller', "--controller-manager", "controller_manager",
                         ]),
         Node(
             package='robot_state_publisher',

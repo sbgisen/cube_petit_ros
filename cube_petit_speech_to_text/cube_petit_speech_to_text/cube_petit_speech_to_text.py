@@ -39,7 +39,7 @@ class JuliusSpeechToText(rclpy.node.Node):
         self.pkill_julius()
 
     def start_listening(self):
-        cmd = 'cd ~/lib/julius_libs/dictation-kit/;bash run-linux-dnn.sh'
+        cmd = 'cd ~/work/julius_libs/dictation-kit/;bash run-linux-dnn.sh'
         self.julius_process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
         self.get_logger().info('julius:started')
 

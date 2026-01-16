@@ -18,7 +18,7 @@
 
 import glob
 import subprocess
-
+import os
 from setuptools import find_packages
 from setuptools import setup
 
@@ -36,6 +36,7 @@ setup(
           (f'share/{package_name}/config', glob.glob('./config/*.yaml')),
           (f'share/{package_name}/resources/', glob.glob('./resources/*.json')),
           (f'share/{package_name}', ['pyproject.toml']),
+          (f'share/{package_name}/setup', ['setup/install-julius.sh']),
       ],
       maintainer='gisen',
       maintainer_email='SBGRP-git@g.softbank.co.jp',
@@ -48,9 +49,23 @@ setup(
       }
     )
 
-# バックグラウンドプロセスを実行している箇所
 subprocess.Popen([f'{package_name}/fix_shebang.py'],
                  stdout=subprocess.DEVNULL,
                  stderr=subprocess.DEVNULL,
                  stdin=subprocess.DEVNULL,
                  start_new_session=True)
+
+install_script = os.path.join(
+    os.path.dirname(__file__),
+    'setup',
+    'install-julius.sh'
+)
+
+if os.path.exists(install_script):
+    subprocess.Popen(
+        ['bash', install_script],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
+        start_new_session=True
+    )

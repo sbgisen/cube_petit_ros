@@ -67,8 +67,6 @@ def launch_in_order(context, *args, **kwargs):
         PushRosNamespace(ns),
         # IncludeLaunchDescription(
         # PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py'))),
-        # IncludeLaunchDescription(
-        # PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword_detector.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/lidar.launch.py'))),
         IncludeLaunchDescription(
@@ -79,6 +77,8 @@ def launch_in_order(context, *args, **kwargs):
             PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword_detector.launch.py'))),
     ])
 
     return [robot_state_publisher, control_node, bringups]

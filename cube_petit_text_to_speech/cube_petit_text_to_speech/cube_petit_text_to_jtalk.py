@@ -128,7 +128,7 @@ class TextToJtalk(rclpy.node.Node):
             self.send_talk('あなたの勝ちです')
 
     def hotword_callback(self, hotword: String) -> None:
-        if hotword.data == 'Cube-petit':
+        if hotword.data == 'Cube_petit':
             self.send_talk('はーい')
 
     def handgesture_callback(self, hand_gesture: String) -> None:

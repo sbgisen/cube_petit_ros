@@ -40,7 +40,7 @@ def launch_in_order(context, *args, **kwargs):
     bringup_pkg = pathlib.Path(FindPackageShare('cube_petit_bringup').find('cube_petit_bringup'))
     speech_to_text_pkg = pathlib.Path(FindPackageShare('cube_petit_speech_to_text').find('cube_petit_speech_to_text'))
     text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
-
+    face_animation_pkg = pathlib.Path(FindPackageShare('cube_petit_facial_animation').find('cube_petit_facial_animation'))
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
     doc = xacro.process_file(xacro_file, mappings={'use_sim': 'false'})
@@ -65,8 +65,12 @@ def launch_in_order(context, *args, **kwargs):
 
     bringups = GroupAction([
         PushRosNamespace(ns),
-        # IncludeLaunchDescription(
-        # PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py')),
+            launch_arguments={
+                "color": "lightgreen",
+            }.items()
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/lidar.launch.py'))),
         # IncludeLaunchDescription(

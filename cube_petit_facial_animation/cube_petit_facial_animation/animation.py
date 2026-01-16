@@ -29,6 +29,9 @@ COLOR_MAP = {
     'yellow': '#fff176',
     'purple': '#ba68c8',
     'red': '#ef5350',
+    'clear': "#A3A3A3",
+    'lightgreen': "#42E34D",
+    'white': "#8E8E8E",
 }
 script_dir = os.path.dirname(os.path.abspath(__file__))
 html_path = os.path.join(script_dir, '../../share/cube_petit_facial_animation/frontend/index.html')

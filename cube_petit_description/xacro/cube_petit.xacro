@@ -67,6 +67,62 @@
   </joint>
   <xacro:include filename="$(find cube_petit_description)/xacro/sensors/lidar.xacro"/>
 
+  <joint name="depth_joint" type="fixed">
+    <parent link="body_link"/>
+    <child link="camera_link"/>
+    <origin rpy="0 0.0034 0" xyz="0.10137 -0.006 0.097793"/>
+  </joint>
+  <link name="camera_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
+      <mass value="0.11166745"/>
+      <inertia ixx="0.004391" ixy="0.000000" iyy="0.004391" ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+      <!-- <material name="red">
+        <color rgba="1.0 0.0 0.0 1.0"/>
+      </material> -->
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="depth_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_depth_optical_frame"/>
+    <origin rpy="-1.57 0 -1.57" xyz="0.0 0.0 0.0"/>
+  </joint>
+  <link name="camera_depth_optical_frame">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.00000000 0.00000000 0.0000000"/>
+      <mass value="0.11166745"/>
+      <inertia ixx="0.004391" ixy="0.000000" iyy="0.004391" ixz="0.000000" iyz="0.000000" izz="0.004277"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+      <!-- <material name="red">
+        <color rgba="1.0 0.0 0.0 1.0"/>
+      </material> -->
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+
   <!-- rear camera -->
   <!-- <xacro:include filename="$(find cube_petit_description)/xacro/sensors/camera.xacro" /> -->
 

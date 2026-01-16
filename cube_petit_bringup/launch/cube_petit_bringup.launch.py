@@ -73,8 +73,8 @@ def launch_in_order(context, *args, **kwargs):
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/lidar.launch.py'))),
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/depth.launch.py'))),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/depth.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
         IncludeLaunchDescription(

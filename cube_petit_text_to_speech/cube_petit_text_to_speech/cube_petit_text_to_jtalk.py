@@ -20,11 +20,14 @@ import rclpy
 from rclpy.action import ActionClient
 from rclpy.executors import ExternalShutdownException
 import rclpy.node
-from sbgisen_speech.lib.constants import ACTION_SERVER_SPEECH
-from sbgisen_speech_msgs.action import Speech
+from cube_petit_speech_msgs.action import Speech
 from sensor_msgs.msg import Joy
 from std_msgs.msg import String
+from typing import Any, Dict
 
+import rclpy
+import rclpy.node
+import yaml
 
 class TextToJtalk(rclpy.node.Node):
 
@@ -41,24 +44,68 @@ class TextToJtalk(rclpy.node.Node):
         self.timer = None
         self.robot_hand = None
 
-        self.__action_client = ActionClient(self, Speech, ACTION_SERVER_SPEECH)
+        self.__action_client = ActionClient(self, Speech, 'speech_action_server')
         self.__action_client.wait_for_server()
 
-        self.send_talk('起動しました！')
+        self.declare_parameter("controller_talk_config", "")
+        path = self.get_parameter("controller_talk_config").value
+
+        with open(path, "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+
+        self.buttons_map = cfg.get("buttons", {})
+        self.axes_map = cfg.get("axes", {})
+        self.debounce_sec = float(cfg.get("debounce_sec", 1.0))
+
+        self.get_logger().info(f'Loaded buttons_map: {self.buttons_map}')
+        self.get_logger().info(f'Loaded axes_map: {self.axes_map}')
+        self.get_logger().info(f'Loaded debounce_sec: {self.debounce_sec}')
+
+        self._goal_handle = None
+        self.hand_gesture_received = False
+
+        self.send_talk('起動しました。')
 
     def send_talk(self, talk_text: str) -> None:
+        self.cancel_talk()
+
         talk_msg = Speech.Goal()
         talk_msg.text = talk_text
-        talk_msg.method = 'jtalk'
-        talk_msg.emotion = 'happiness'
+        talk_msg.emotion = 'happy'
         talk_msg.emotion_level = 2
         talk_msg.pitch = 130
         talk_msg.speed = 100
         talk_msg.volume = 100
 
-        self.__action_client.wait_for_server()
-        self.get_logger().info('Robot say: [%s]' % (talk_text))
-        return self.__action_client.send_goal_async(talk_msg)
+        self.get_logger().info(f'Robot say: [{talk_text}]')
+
+        future = self.__action_client.send_goal_async(talk_msg)
+        future.add_done_callback(self._goal_response_callback)
+
+    def _goal_response_callback(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().warn("Speech goal rejected")
+            return
+
+        self.get_logger().info("Speech goal accepted")
+        self._goal_handle = goal_handle
+
+    def cancel_talk(self) -> None:
+        if self._goal_handle is None:
+            self.get_logger().info("No active goal to cancel")
+            return
+
+        self.get_logger().info("Cancel request sent")
+        cancel_future = self._goal_handle.cancel_goal_async()
+        cancel_future.add_done_callback(self._cancel_done_callback)
+
+    def _cancel_done_callback(self, future):
+        cancel_response = future.result()
+        if len(cancel_response.goals_canceling) > 0:
+            self.get_logger().info("Speech goal canceled")
+        else:
+            self.get_logger().warn("Speech goal cancel failed")
 
     def decide_robot_hand(self) -> str:
         self.robot_hand = random.choice(['rock', 'sissors', 'paper'])
@@ -87,6 +134,7 @@ class TextToJtalk(rclpy.node.Node):
             self.send_talk('はーい')
 
     def handgesture_callback(self, hand_gesture: String) -> None:
+        self.hand_gesture_received = True
         if self.janken_flag:
             if hand_gesture.data == 'FIVE':
                 self.send_talk('ぽん')
@@ -123,48 +171,59 @@ class TextToJtalk(rclpy.node.Node):
             self.janken_flag = False
             self.timer = None
 
-    def joystick_callback(self, joy: Joy) -> None:
-        if joy.buttons[0] == 1:
-            self.get_logger().info('x')
-        elif joy.buttons[1] == 1:
-            self.get_logger().info('o')
-        elif joy.buttons[2] == 1:
-            self.get_logger().info('△')
-            self.send_talk('こんにちは')
-        elif joy.buttons[3] == 1:
-            self.get_logger().info('□')
-            self.send_talk('ハローワールド！僕の名前はキューブプチです！')
-        elif joy.buttons[4] == 1:
-            self.get_logger().info('L1')
-        elif joy.buttons[5] == 1:
-            self.get_logger().info('R1')
-        elif joy.buttons[6] == 1:
-            self.get_logger().info('L2')
-        elif joy.buttons[7] == 1:
-            self.get_logger().info('R2')
-        elif joy.buttons[8] == 1:
-            self.get_logger().info('Select')
-        elif joy.buttons[9] == 1:
-            self.get_logger().info('Start')
-        elif joy.buttons[10] == 1:
-            self.get_logger().info('PS')
-        elif joy.buttons[11] == 1:
-            self.get_logger().info('12')
-        elif joy.axes[6] == 1.0 and not self.janken_flag:
-            self.get_logger().info('hidari')
-            self.send_talk('僕とじゃんけんで遊びましょう、最初はグー。じゃんけん')
-            if self.timer is not None:
-                self.timer.cancel()
-            self.timer = self.create_timer(30.0, self.timeout_callback)
+    def _execute_action(self, action: Dict[str, Any]) -> None:
+        """Execute one YAML-defined action dict."""
+        if not isinstance(action, dict):
+            return
 
-            self.janken_flag = True
-        elif joy.axes[6] == -1.0:
-            self.get_logger().info('migi')
-        elif joy.axes[7] == 1.0:
-            self.get_logger().info('ue')
-        elif joy.axes[7] == -1.0:
-            self.get_logger().info('shita')
-        time.sleep(1.0)
+        log_text = action.get('log', None)
+        talk_text = action.get('talk', None)
+
+        if log_text:
+            self.get_logger().info(str(log_text))
+
+        if talk_text:
+            self.send_talk(str(talk_text))
+
+        janken = action.get('janken', None)
+        if isinstance(janken, dict):
+            enable_flag = bool(janken.get('enable_flag', False))
+            timeout_sec = float(janken.get('timeout_sec', 30.0))
+
+            if enable_flag and not self.janken_flag:
+                if not self.hand_gesture_received:
+                    self.send_talk("手がまだ見えてないよ。もう一度ジェスチャーしてね。")
+                    return
+
+                # start janken
+                if self.timer is not None:
+                    self.timer.cancel()
+                self.timer = self.create_timer(timeout_sec, self.timeout_callback)
+                self.janken_flag = True
+
+    def joystick_callback(self, joy: Joy) -> None:
+        for idx, val in enumerate(joy.buttons):
+            if val != 1:
+                continue
+            key = str(idx)
+            action = self.buttons_map.get(key, None)
+            if action:
+                self._execute_action(action)
+                time.sleep(self.debounce_sec)
+                return
+        for axis_idx, axis_val in enumerate(joy.axes):
+            axis_key = str(axis_idx)
+            axis_table = self.axes_map.get(axis_key, None)
+            if not isinstance(axis_table, dict):
+                continue
+            v = round(float(axis_val), 1)
+            value_key = str(v)
+
+            action = axis_table.get(value_key, None)
+            if action:
+                self._execute_action(action)
+                time.sleep(self.debounce_sec)
+                return
 
 
 def main() -> None:

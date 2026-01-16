@@ -1,0 +1,45 @@
+buttons:
+  "0":
+    log: "x"
+  "1":
+    log: "o"
+  "2":
+    log: "△"
+    talk: "こんにちは"
+  "3":
+    log: "□"
+    talk: "ハローワールド！僕の名前はキューブプチです！"
+  "4":
+    log: "L1"
+  "5":
+    log: "R1"
+  "6":
+    log: "L2"
+  "7":
+    log: "R2"
+  "8":
+    log: "Select"
+  "9":
+    log: "Start"
+  "10":
+    log: "PS"
+  "11":
+    log: "12"
+
+axes:
+  "6":
+    "1.0":
+      log: "hidari"
+      talk: "僕とじゃんけんで遊びましょう、最初はグー。じゃんけん"
+      janken:
+        enable_flag: true
+        timeout_sec: 30.0
+    "-1.0":
+      log: "migi"
+  "7":
+    "1.0":
+      log: "ue"
+    "-1.0":
+      log: "shita"
+
+debounce_sec: 1.0

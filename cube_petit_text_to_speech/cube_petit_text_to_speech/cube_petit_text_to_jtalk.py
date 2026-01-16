@@ -64,8 +64,6 @@ class TextToJtalk(rclpy.node.Node):
         self._goal_handle = None
         self.hand_gesture_received = False
 
-        self.send_talk('起動しました。')
-
     def send_talk(self, talk_text: str) -> None:
         self.cancel_talk()
 

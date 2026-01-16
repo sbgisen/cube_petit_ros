@@ -69,8 +69,8 @@ def launch_in_order(context, *args, **kwargs):
         # PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/lidar.launch.py'))),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/depth.launch.py'))),
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/depth.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
         IncludeLaunchDescription(
@@ -79,9 +79,37 @@ def launch_in_order(context, *args, **kwargs):
             PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py'))),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_hotword_detector.launch.py'))),
+        Node(
+            package="cube_petit_bringup",
+            executable="startup_announcer",
+            name="startup_announcer",
+            output="screen",
+            parameters=[{
+                "text": "起動しました。",
+                "required_nodes": [
+                    f"/{ns}/speech_action_server",
+                    f"/{ns}/text_to_jtalk",
+                    f"/{ns}/ldlidar_publisher_ld06",
+                    f"/{ns}/controller_manager",
+                ],
+                "required_scan_topic": f"/{ns}/scan",
+                "controller_manager_service": f"/{ns}/controller_manager",
+                "required_controller_types": [
+                    "joint_state_broadcaster/JointStateBroadcaster",
+                    "diff_drive_controller/DiffDriveController",
+                ],
+
+                "node_check_timeout_sec": 15.0,
+                "topic_check_timeout_sec": 5.0,
+                "controller_check_timeout_sec": 30.0,
+                "controller_grace_sec": 10.0,
+                "wait_sec": 2.0,
+                
+            }],
+        ),
     ])
 
-    return [robot_state_publisher, control_node, bringups]
+    return [robot_state_publisher, bringups, control_node]
 
 def generate_launch_description() -> LaunchDescription:
     """Generate launch descriptions.

@@ -37,7 +37,7 @@ def generate_launch_description():
         {'product_name': 'LDLiDAR_LD06'},
         {'laser_scan_topic_name': 'scan'},
         {'point_cloud_2d_topic_name': 'pointcloud2d'},
-        {'frame_id': 'base_laser'},
+        {'frame_id': 'pacecat_link'},
         {'port_name': '/dev/ttyLD06-19'},
         {'serial_baudrate': 230400},
         {'laser_scan_dir': True},
@@ -50,18 +50,18 @@ def generate_launch_description():
   )
 
   # base_link to base_laser tf node
-  base_link_to_laser_tf_node = Node(
-    package='tf2_ros',
-    executable='static_transform_publisher',
-    name='base_link_to_base_laser_ld06',
-    arguments=['0','0','0.18','0','0','0','base_link','base_laser']
-  )
+  # base_link_to_laser_tf_node = Node(
+  #   package='tf2_ros',
+  #   executable='static_transform_publisher',
+  #   name='base_link_to_base_laser_ld06',
+  #   arguments=['0','0','0.18','0','0','0','base_link','pacecat_link']
+  # )
 
 
   # Define LaunchDescription variable
   ld = LaunchDescription()
 
   ld.add_action(ldlidar_node)
-  ld.add_action(base_link_to_laser_tf_node)
+  # ld.add_action(base_link_to_laser_tf_node)
 
   return ld

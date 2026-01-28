@@ -19,3 +19,7 @@ repositories:
     type: git
     url: https://github.com/ElettraSciComp/witmotion_IMU_ros.git
     version: ros2
+  emcl2_ros2:
+    type: git
+    url: https://github.com/sbgisen/emcl2_ros2.git
+    version: jazzy-devel

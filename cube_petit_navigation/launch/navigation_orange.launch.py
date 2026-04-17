@@ -75,7 +75,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     configured_params = RewrittenYaml(source_file=params_file,
                                       root_key=[LaunchConfiguration('robot'), '/navigation'],
                                       param_rewrites=param_substitutions,
-                                      convert_types=True)
+                                      convert_types=False)
 
     actions = [
         PushRosNamespace([LaunchConfiguration('robot'), '/navigation']),
@@ -179,14 +179,14 @@ def generate_launch_description() -> LaunchDescription:
                               description='Full path to keepout yaml file to load'))
     args.append(
         DeclareLaunchArgument('params_file',
-                              default_value=str(pkg_share / 'config/nav2_params.yaml'),
+                              default_value=str(pkg_share / 'config/nav2_params_orange.yaml'),
                               description='Full path to the ROS2 parameters file to use for all launched nodes'))
 
     args.append(
         DeclareLaunchArgument('container_name',
                               default_value='nav2_container',
                               description='the name of container that nodes will load in if use composition'))
-    args.append(DeclareLaunchArgument('robot', default_value='cube_petit_pink'))
+    args.append(DeclareLaunchArgument('robot', default_value='cube_petit_orange'))
 
     laser_relay = Node(package='topic_tools',
                        executable='relay',
@@ -197,7 +197,7 @@ def generate_launch_description() -> LaunchDescription:
                                'input_topic': '/laser/scan'
                            },
                            {
-                               'output_topic': '/cube_petit_pink/laser/scan'
+                               'output_topic': '/cube_petit_orange/laser/scan'
                            },
                        ],
                        output='screen')
@@ -209,7 +209,7 @@ def generate_launch_description() -> LaunchDescription:
         arguments=[
             '0', '0', '0',
             '0', '0', '0',
-            'cube_petit_pink/base_link',
+            'cube_petit_orange/base_link',
             'base_footprint',
         ],
         output='screen',
@@ -230,8 +230,8 @@ def generate_launch_description() -> LaunchDescription:
         package='topic_tools',
         executable='relay',
         arguments=[
-            '/cube_petit_pink/navigation/cmd_vel',
-            '/cube_petit_pink/diff_drive_controller/cmd_vel',
+            '/cube_petit_orange/navigation/cmd_vel',
+            '/cube_petit_orange/diff_drive_controller/cmd_vel',
         ],
         output='screen',
     )

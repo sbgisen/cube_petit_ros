@@ -3,7 +3,7 @@ emcl:
     odom_freq: 20
     transform_tolerance: 0.2
     global_frame_id: map
-    odom_frame_id: cube_petit_pink/odom
+    odom_frame_id: cube_petit_orange/odom
     base_frame_id: base_link
     footprint_frame_id: base_footprint
     laser_min_range: 0.0
@@ -49,7 +49,7 @@ bt_navigator:
 
 controller_server:
   ros__parameters:
-    odom_topic: /cube_petit_pink/diff_drive_controller/odom
+    odom_topic: /cube_petit_orange/diff_drive_controller/odom
     controller_frequency: 20.0 # = 1 / model_dt (for MPPI)
     min_x_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
@@ -88,7 +88,7 @@ controller_server:
       # https://github.com/ros-navigation/navigation2/pull/4954
       # If the PR is merged, the values will be changed to the true values.
       ax_max: 3.0 # 0.1
-      ax_min: -3.0  # -0.6
+      ax_min: -3.0 # -0.6
       # ay_max: 3.0 # Not used in diff drive
       az_max: 4.71
       iteration_count: 1
@@ -168,7 +168,7 @@ local_costmap:
     ros__parameters:
       update_frequency: 10.0
       publish_frequency: 10.0
-      global_frame: cube_petit_pink/odom
+      global_frame: cube_petit_orange/odom
       robot_base_frame: base_footprint
       rolling_window: true
       width: 5
@@ -195,7 +195,7 @@ local_costmap:
         laser:
           sensor_frame: pacecat_link
           data_type: LaserScan
-          topic: /cube_petit_pink/scan
+          topic: /cube_petit_orange/scan
           marking: true
           clearing: true
           min_obstacle_height: 0.05
@@ -213,7 +213,7 @@ local_costmap:
         decay_model: 0
         voxel_size: 0.01
         track_unknown_space: true
-        unknown_threshold: 15
+        unknown_threshold: 15.0
         mark_threshold: 0
         update_footprint_enabled: true
         combination_method: 1
@@ -225,7 +225,7 @@ local_costmap:
         observation_sources: head_mark head_clear
         head_mark:
           data_type: PointCloud2
-          topic: cube_petit_pink/camera/depth_registered/cost_points
+          topic: cube_petit_orange/camera/depth_registered/cost_points
           marking: true
           clearing: false
           obstacle_range: 2.0
@@ -238,7 +238,7 @@ local_costmap:
           filter: passthrough
         head_clear:
           data_type: PointCloud2
-          topic: cube_petit_pink/camera/depth_registered/cost_points
+          topic: cube_petit_orange/camera/depth_registered/cost_points
           marking: false
           clearing: true
           max_z: 7.0
@@ -279,7 +279,7 @@ global_costmap:
         laser:
           sensor_frame: pacecat_link
           data_type: LaserScan
-          topic: /cube_petit_pink/scan
+          topic: /cube_petit_orange/scan
           marking: true
           clearing: true
           min_obstacle_height: 0.05
@@ -309,7 +309,7 @@ global_costmap:
         observation_sources: head_mark head_clear
         head_mark:
           data_type: PointCloud2
-          topic: /cube_petit_pink/camera/depth_registered/cost_points
+          topic: /cube_petit_orange/camera/depth_registered/cost_points
           marking: true
           clearing: false
           obstacle_range: 2.0
@@ -322,7 +322,7 @@ global_costmap:
           filter: passthrough
         head_clear:
           data_type: PointCloud2
-          topic: /cube_petit_pink/camera/depth_registered/cost_points
+          topic: /cube_petit_orange/camera/depth_registered/cost_points
           marking: false
           clearing: true
           max_z: 7.0
@@ -392,7 +392,7 @@ behavior_server:
       plugin: nav2_behaviors::BackUp
     wait:
       plugin: nav2_behaviors::Wait
-    global_frame: cube_petit_pink/odom
+    global_frame: cube_petit_orange/odom
     robot_base_frame: base_footprint
     transform_timeout: 0.1
     simulate_ahead_time: 2.0

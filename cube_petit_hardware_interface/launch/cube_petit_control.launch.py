@@ -109,7 +109,7 @@ def generate_launch_description() -> LaunchDescription:
         # ttyCANable
         launch_arguments={
             'interface': 'can0',
-            'receiver_interval_sec': '0.01',
+            'receiver_interval_sec': '0.1',
             'sender_timeout_sec': '0.01',
             'enable_can_fd': 'false',
             'from_can_bus_topic': 'from_can_bus',

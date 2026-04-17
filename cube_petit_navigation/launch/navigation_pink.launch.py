@@ -81,7 +81,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         PushRosNamespace([LaunchConfiguration('robot'), '/navigation']),
         SetParameter('use_sim_time', LaunchConfiguration('use_sim_time')),
         SetParametersFromFile(configured_params),
-        SetRemap('/laser/scan', ['/', LaunchConfiguration('robot'), '/laser/scan']),
+        SetRemap('/scan', ['/', LaunchConfiguration('robot'), '/scan']),
         SetRemap('/camera/depth_registered/cost_points',
                  ['/', LaunchConfiguration('robot'), '/camera/depth_registered/cost_points']),
         ComposableNodeContainer(
@@ -95,7 +95,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                name='controller_server',
                                remappings=[
                                    ('odom', ['/', LaunchConfiguration('robot'), '/odom']),
-                                   ('scan', ['/', LaunchConfiguration('robot'), '/laser/scan']),
+                                   ('scan', ['/', LaunchConfiguration('robot'), '/scan']),
                                ]),
                 ComposableNode(package='nav2_smoother', plugin='nav2_smoother::SmootherServer',
                                name='smoother_server'),
@@ -127,7 +127,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                plugin='emcl2::EMcl2Node',
                                name='emcl',
                                parameters=[params_file],
-                               remappings=[('scan', ['/', LaunchConfiguration('robot'), '/laser/scan'])]),
+                               remappings=[('scan', ['/', LaunchConfiguration('robot'), '/scan'])]),
                 ComposableNode(package='nav2_lifecycle_manager',
                                plugin='nav2_lifecycle_manager::LifecycleManager',
                                name='lifecycle_manager_localization',
@@ -167,26 +167,26 @@ def generate_launch_description() -> LaunchDescription:
     args = []
     args.append(
         DeclareLaunchArgument('use_sim_time',
-                              default_value='true',
+                              default_value='false',
                               description='Use simulation (Gazebo) clock if true'))
     args.append(
         DeclareLaunchArgument('map',
-                              default_value=str(pkg_share / 'map/rooms/rooms.yaml'),
+                              default_value=str(pkg_share / 'map/test/test.yaml'),
                               description='Full path to map yaml file to load'))
     args.append(
         DeclareLaunchArgument('keepout',
-                              default_value=str(pkg_share / 'map/rooms/rooms_keepout.yaml'),
+                              default_value=str(pkg_share / 'map/test/test_keepout.yaml'),
                               description='Full path to keepout yaml file to load'))
     args.append(
         DeclareLaunchArgument('params_file',
-                              default_value=str(pkg_share / 'config/nav2_params_orange.yaml'),
+                              default_value=str(pkg_share / 'config/nav2_params.yaml'),
                               description='Full path to the ROS2 parameters file to use for all launched nodes'))
 
     args.append(
         DeclareLaunchArgument('container_name',
                               default_value='nav2_container',
                               description='the name of container that nodes will load in if use composition'))
-    args.append(DeclareLaunchArgument('robot', default_value='cube_petit'))
+    args.append(DeclareLaunchArgument('robot', default_value='cube_petit_pink'))
 
     laser_relay = Node(package='topic_tools',
                        executable='relay',
@@ -197,11 +197,51 @@ def generate_launch_description() -> LaunchDescription:
                                'input_topic': '/laser/scan'
                            },
                            {
-                               'output_topic': '/cube_petit/laser/scan'
+                               'output_topic': '/cube_petit_pink/laser/scan'
                            },
                        ],
                        output='screen')
+
+    bridge_base_link = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_bridge',
+        arguments=[
+            '0', '0', '0',
+            '0', '0', '0',
+            'cube_petit_pink/base_link',
+            'base_footprint',
+        ],
+        output='screen',
+    )
+    bridge_base_link2 = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_bridge',
+        arguments=[
+            '0', '0', '0',
+            '0', '0', '0',
+            'base_footprint',
+            'base_link',
+        ],
+        output='screen',
+    )
+    relay =  Node(
+        package='topic_tools',
+        executable='relay',
+        arguments=[
+            '/cube_petit_pink/navigation/cmd_vel',
+            '/cube_petit_pink/diff_drive_controller/cmd_vel',
+        ],
+        output='screen',
+    )
+
+
+
     return LaunchDescription(args + [
         laser_relay,
+        bridge_base_link,
+        bridge_base_link2,
+        relay,
         OpaqueFunction(function=launch_setup),
     ])

@@ -46,7 +46,7 @@ def generate_launch_description() -> LaunchDescription:
                               description='Use simulation (Gazebo) clock if true'))
     args.append(
         DeclareLaunchArgument('params_file',
-                              default_value=str(pkg_share / 'config/slam.yaml'),
+                              default_value=str(pkg_share / 'config/slam_orange.yaml'),
                               description='Full path to the ROS2 parameters file to use for all launched nodes'))
 
     args.append(

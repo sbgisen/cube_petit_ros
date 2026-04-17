@@ -54,9 +54,9 @@ controller_server:
     min_theta_velocity_threshold: 0.001
     failure_tolerance: 0.3
     enable_stamped_cmd_vel: true
-    progress_checker_plugins: [progress_checker]
-    goal_checker_plugins: [general_goal_checker]
-    controller_plugins: [FollowPath]
+    progress_checker_plugins: [ progress_checker ]
+    goal_checker_plugins: [ general_goal_checker ]
+    controller_plugins: [ FollowPath ]
     # Progress checker parameters
     progress_checker:
       plugin: nav2_controller::SimpleProgressChecker
@@ -87,7 +87,7 @@ controller_server:
       # https://github.com/ros-navigation/navigation2/pull/4954
       # If the PR is merged, the values will be changed to the true values.
       ax_max: 3.0 # 0.1
-      ax_min: -3.0 # -0.6
+      ax_min: -3.0  # -0.6
       # ay_max: 3.0 # Not used in diff drive
       az_max: 4.71
       iteration_count: 1
@@ -180,7 +180,7 @@ local_costmap:
         - laser_obstacles
         - stvl_layer
         - inflation_layer
-      filters: [keepout_filter]
+      filters: [ keepout_filter ]
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 10.0
@@ -208,7 +208,7 @@ local_costmap:
       stvl_layer:
         plugin: spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer
         enabled: true
-        voxel_decay: 15.
+        voxel_decay: 15.0
         decay_model: 0
         voxel_size: 0.01
         track_unknown_space: true
@@ -269,7 +269,7 @@ global_costmap:
         - laser_obstacles
         - stvl_layer
         - inflation_layer
-      filters: [keepout_filter]
+      filters: [ keepout_filter ]
       laser_obstacles:
         plugin: nav2_costmap_2d::ObstacleLayer
         enabled: true
@@ -292,7 +292,7 @@ global_costmap:
       stvl_layer:
         plugin: spatio_temporal_voxel_layer/SpatioTemporalVoxelLayer
         enabled: true
-        voxel_decay: 15.
+        voxel_decay: 15.0
         decay_model: 0
         voxel_size: 0.03
         track_unknown_space: true
@@ -369,7 +369,7 @@ map_saver:
 planner_server:
   ros__parameters:
     expected_planner_frequency: 20.0
-    planner_plugins: [GridBased]
+    planner_plugins: [ GridBased ]
     GridBased:
       plugin: nav2_navfn_planner::NavfnPlanner
       tolerance: 0.0
@@ -384,7 +384,7 @@ behavior_server:
     local_footprint_topic: local_costmap/published_footprint
     global_footprint_topic: global_costmap/published_footprint
     cycle_frequency: 10.0
-    behavior_plugins: [spin, backup, wait]
+    behavior_plugins: [ spin, backup, wait ]
     spin:
       plugin: nav2_behaviors::Spin
     backup:
@@ -411,7 +411,7 @@ waypoint_follower:
 
 smoother_server:
   ros__parameters:
-    smoother_plugins: [smooth_path]
+    smoother_plugins: [ smooth_path ]
     smooth_path:
       plugin: nav2_constrained_smoother/ConstrainedSmoother
       # whether to detect forward/reverse direction and cusps.
@@ -449,5 +449,5 @@ smoother_server:
         max_iterations: 70 # max iterations of smoother
         debug_optimizer: false # print debug info
         gradient_tol: 5000.0
-        fn_tol: 1.0e-15
-        param_tol: 1.0e-20
+        fn_tol: 0.0
+        param_tol: 0.0

@@ -181,7 +181,6 @@ local_costmap:
         - laser_obstacles
         - stvl_layer
         - inflation_layer
-      filters: [ keepout_filter ]
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 10.0
@@ -247,10 +246,6 @@ local_costmap:
           horizontal_fov_angle: 1.309
           decay_acceleration: 15.0
           model_type: 0
-      keepout_filter:
-        plugin: nav2_costmap_2d::KeepoutFilter
-        enabled: true
-        filter_info_topic: costmap_filter_info
       always_send_full_costmap: true
 
 global_costmap:

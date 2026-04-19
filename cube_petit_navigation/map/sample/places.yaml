@@ -1,0 +1,71 @@
+patrol:
+  order: ["A", "B", "C"]
+  places:
+    A:
+      pose: [2.0, -1.0, 0.0]
+      room: guest_room
+    B:
+      pose: [2.5, -2.5, 1.57]
+      room: kitchen_room
+    C:
+      pose: [4.0, -1.0, 3.14]
+      room: bed_room
+
+favorite:
+  order: ["kitchen"]
+  places:
+    kitchen:
+      pose: [2.5, -2.5, 3.14]
+      room: kitchen_room
+
+dock:
+  order: ["A"]
+  places:
+    A:
+      pose: [2.5, -2.5, 3.14]
+      room: kitchen_room
+
+rooms:
+  guest_room:
+    points:
+      - x: 0.0
+        y: 1.0
+      - x: 0.0
+        y: -2.0
+      - x: 3.0
+        y: -2.0
+      - x: 3.0
+        y: 1.0
+
+  kitchen_room:
+    points:
+      - x: 0.0
+        y: -2.0
+      - x: 0.0
+        y: -5.0
+      - x: 3.0
+        y: -5.0
+      - x: 3.0
+        y: -2.0
+
+  bed_room:
+    points:
+      - x: 3.0
+        y: 1.0
+      - x: 3.0
+        y: -2.0
+      - x: 6.0
+        y: -2.0
+      - x: 6.0
+        y: 1.0
+
+  dining_room:
+    points:
+      - x: 3.0
+        y: -2.0
+      - x: 3.0
+        y: -5.0
+      - x: 6.0
+        y: -5.0
+      - x: 6.0
+        y: 1.0

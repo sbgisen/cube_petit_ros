@@ -53,7 +53,7 @@ from nav2_common.launch import RewrittenYaml
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     actions = []
     map_file = LaunchConfiguration('map').perform(context)
-    keepout_file = LaunchConfiguration('keepout')
+    keepout_file = LaunchConfiguration('keepout').perform(context)
 
     lifecycle_nodes = [
         'controller_server',
@@ -62,6 +62,8 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         'behavior_server',
         'bt_navigator',
         'waypoint_follower',
+    ]
+    filter_nodes = [
         'keepout_mask_server',
         'costmap_filter_info_server',
     ]
@@ -123,6 +125,25 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                parameters=[{
                                    'yaml_filename': map_file
                                }]),
+                ComposableNode(package='nav2_map_server',
+                               plugin='nav2_map_server::MapServer',
+                               name='keepout_mask_server',
+                               parameters=[{
+                                   'yaml_filename': keepout_file
+                               }]),
+                ComposableNode(package='nav2_map_server',
+                               plugin='nav2_map_server::CostmapFilterInfoServer',
+                               name='costmap_filter_info_server',
+                               parameters=[{
+                                   'mask_topic': ['/', LaunchConfiguration('robot'), '/navigation/keepout_mask']
+                               }]),
+                ComposableNode(package='nav2_lifecycle_manager',
+                               plugin='nav2_lifecycle_manager::LifecycleManager',
+                               name='lifecycle_manager_filters',
+                               parameters=[{
+                                   'autostart': autostart,
+                                   'node_names': filter_nodes
+                               }]),
                 ComposableNode(package='emcl2',
                                plugin='emcl2::EMcl2Node',
                                name='emcl',
@@ -136,22 +157,6 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                    'node_names': ['map_server', 'emcl']
                                }]),
             ]),
-        Node(package='nav2_map_server',
-             executable='map_server',
-             name='keepout_mask_server',
-             output='screen',
-             emulate_tty=True,
-             parameters=[{
-                 'yaml_filename': keepout_file
-             }]),
-        Node(package='nav2_map_server',
-             executable='costmap_filter_info_server',
-             name='costmap_filter_info_server',
-             output='screen',
-             emulate_tty=True,
-             parameters=[{
-                 'mask_topic': ['/', LaunchConfiguration('robot'), '/navigation/keepout_mask']
-             }]),
     ] + actions
 
     return [GroupAction(actions=actions)]

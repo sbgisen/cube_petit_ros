@@ -99,7 +99,7 @@ def generate_launch_description() -> LaunchDescription:
                                name='controller_server',
                                remappings=[
                                    ('odom', ['/', LaunchConfiguration('robot'), '/odom']),
-                                   ('scan', ['/', LaunchConfiguration('robot'), '/laser/scan_filtered']),
+                                   ('scan', ['/', LaunchConfiguration('robot'), '/laser/scan']),
                                ]),
                 ComposableNode(package='nav2_smoother', plugin='nav2_smoother::SmootherServer',
                                name='smoother_server'),

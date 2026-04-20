@@ -1,6 +1,6 @@
-/**/controller_manager:
+cube_petit_orange/controller_manager:
   ros__parameters:
-    update_rate: 100 # Hz
+    update_rate: 50 # Hz
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
     diff_drive_controller:
@@ -8,14 +8,14 @@
     velocity_controller:
       type: velocity_controller/JointGroupVelocityController
 
-/**/velocity_controller:
+cube_petit_orange/velocity_controller:
   ros__parameters:
     joints:
       - left_wheel_joint
       - right_wheel_joint
 
 # Publish all joint states -----------------------------------
-/**/joint_state_broadcaster:
+cube_petit_orange/joint_state_broadcaster:
   ros__parameters:
     publish_rate: 50
     joints:
@@ -30,7 +30,7 @@
         - right_wheel_joint
 
 # Diff drive controller --------------------------------------
-/**/diff_drive_controller:
+cube_petit_orange/diff_drive_controller:
   ros__parameters:
     left_wheel_names:
       - left_wheel_joint
@@ -39,7 +39,7 @@
 
     # left_wheel: left_wheel_joint
     # right_wheel: right_wheel_joint
-    publish_rate: 100.0 # default: 50
+    publish_rate: 50.0 # default: 50
     pose_covariance_diagonal:
       [0.001, 0.001, 1000000.0, 1000000.0, 1000000.0, 1000.0]
     twist_covariance_diagonal:

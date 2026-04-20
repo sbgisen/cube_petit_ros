@@ -68,7 +68,7 @@ def launch_in_order(context, *args, **kwargs):
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py')),
             launch_arguments={
-                "color": "lightgreen",
+                "color": "orange",
             }.items()
         ),
         IncludeLaunchDescription(

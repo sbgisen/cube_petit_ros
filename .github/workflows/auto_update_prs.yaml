@@ -1,0 +1,40 @@
+name: auto_update_prs
+
+on:
+  push:
+    branches:
+      - jazzy-devel
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update open PR branches
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Update all open PRs targeting this branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const base = context.ref.replace("refs/heads/", "");
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              base,
+            });
+            for (const pr of prs) {
+              try {
+                await github.rest.pulls.updateBranch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                });
+                core.info(`#${pr.number} (${pr.head.ref}): updated`);
+              } catch (e) {
+                core.warning(`#${pr.number} (${pr.head.ref}): ${e.message}`);
+              }
+            }

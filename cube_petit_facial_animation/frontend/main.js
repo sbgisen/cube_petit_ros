@@ -119,10 +119,13 @@ class CubeSpeech {
 /**
  * main
  */
-const emotes = { normal, happy, sad, puzzled }
+const emotes = { normal, happy, sad, puzzled, angry, surprised, sleepy, thinking, excited, love, wink, dizzy, shy, curious }
 let lastConnect = 0 // 前回の接続時間
 const rosbridge = new Ros()
 rosbridge.connect()
+// 動作確認用: index.html?emote=表情名 で初期表情を指定できる
+const initialEmote = new URLSearchParams(location.search).get('emote')
+if (emotes[initialEmote] !== undefined) rosbridge.expression.nextStatus = initialEmote
 requestAnimationFrame(loop) // ループ処理を開始
 
 async function loop(ts) {

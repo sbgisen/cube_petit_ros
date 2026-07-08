@@ -19,8 +19,8 @@ g{
 }
 .normal, .happy, .sad, .puzzled{
   background-color: #ecf8fd;
-  stroke: #ff7da8;
-  fill: #ff7da8;
+  stroke: #ffa500;
+  fill: #ffa500;
 }
 
 .container{

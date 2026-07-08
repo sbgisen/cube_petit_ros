@@ -29,7 +29,7 @@ class CubeExpression {
   connect(ros) {
     const orderSub = new ROSLIB.Topic({
       ros,
-      name: '/facial_expression/expression_command',
+      name: '/cube_petit_orange/facial_expression/expression_command',
       messageType: 'sbgisen_msgs/FaceExpression'
     })
     orderSub.subscribe(message => {
@@ -52,7 +52,7 @@ class CubeGaze {
   connect(ros) {
     this.lookSub = new ROSLIB.Topic({
       ros,
-      name: 'facial_expression/look_at',
+      name: '/cube_petit_orange/facial_expression/look_at',
       messageType: 'std_msgs/Float64MultiArray'
     })
 
@@ -97,13 +97,13 @@ class CubeSpeech {
   connect(ros) {
     this.startSub = new ROSLIB.Topic({
       ros,
-      name: '/speech_server/goal',
+      name: '/cube_petit_orange/speech_server/goal',
       messageType: 'sbgisen_msgs/SpeechActionGoal'
     })
     this.endSub = new ROSLIB.Topic({
       ros,
-      name: '/speech_server/result',
-      messageType: 'cube_speech/SpeechActionResult'
+      name: '/cube_petit_orange/speech_server/result',
+      messageType: 'sbgisen_msgs/SpeechActionResult'
     })
     this.startSub.subscribe(data => {
       this.nextStatus = true

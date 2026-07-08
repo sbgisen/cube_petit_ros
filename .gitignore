@@ -13,3 +13,10 @@ cube_petit_text_to_speech/setup/speech_lib/*
 cube_petit_diagnostics/.vscode/c_cpp_properties.json
 
 cube_petit_diagnostics/.vscode/settings.json
+
+
+cube_petit_text_to_speech/.vscode/
+
+.vscode/
+
+*.pyc

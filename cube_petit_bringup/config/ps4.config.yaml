@@ -1,4 +1,4 @@
-diff_drive_controller/teleop_twist_joy_node:
+cube_petit_orange/diff_drive_controller/teleop_twist_joy_node:
   ros__parameters:
     # MOVE FORWARD AND BACKWARD
     axis_linear:

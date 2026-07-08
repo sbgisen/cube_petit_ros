@@ -28,6 +28,8 @@ import openai
 from ament_index_python.packages import get_package_share_directory
 from rclpy.node import Node
 
+from cube_petit_python_api.utils import gpt_logic
+
 
 class GPTClient(object):
     """Chat GPT based chat bot class."""
@@ -60,8 +62,7 @@ class GPTClient(object):
         if setting_file is not None:
             self.__setting_file = setting_file
         else:
-            self.__setting_file = """
-                出力はjson形式で{"speech_phrase": ""}のように、speech_phraseの中に返答をいれて返してください"""
+            self.__setting_file = gpt_logic.DEFAULT_SETTING
 
         if not use_image:
             self.__client = openai.OpenAI(api_key=api_key)
@@ -84,15 +85,7 @@ class GPTClient(object):
             if input_text is None:
                 self.node.get_logger().error("No input_text")
                 return False
-            contexts = [
-                {"role": "system", "content": self.__setting_file},
-                {"role": "user",
-                 "content": [
-                     {"type": "text", "text": input_text},
-                     {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"},
-                 ],
-                 }
-            ]
+            contexts = gpt_logic.build_image_contexts(self.__setting_file, input_text, base64_image)
         response = self.__client.chat.completions.create(
             model="gpt-4-vision-preview",
             messages=contexts,
@@ -114,10 +107,7 @@ class GPTClient(object):
             if input_text is None:
                 self.node.get_logger().error("No input_text")
                 return False
-            contexts = [
-                {"role": "system", "content": self.__setting_file},
-                {"role": "user", "content": input_text}
-            ]
+            contexts = gpt_logic.build_text_contexts(self.__setting_file, input_text)
         result = self.__client.chat.completions.create(
             model=self.__model_name,
             response_format={'type': 'json_object'},

@@ -14,23 +14,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 import os
 import pathlib
 import re
 import subprocess
 import sys
 
-from ament_index_python import get_package_share_directory
 from beartype import beartype
 
-from cube_petit_speech_msgs.action import Speech
-
-__all__ = ['LIB_ROUTE', 'simple_jtalk', 'generate_jtalk_command', 'adjust_text']
-
-# Jtalk Library Path
-LIB_ROUTE = f'{get_package_share_directory("cube_petit_text_to_speech")}/speech_lib/'
+__all__ = ['LIB_ROUTE', 'simple_jtalk', 'generate_jtalk_command', 'adjust_text']  # noqa: F822 (LIB_ROUTE is lazy)
 
 OUTPUT_FILE = pathlib.Path('/tmp/jtalk_output.wav')
+
+
+@functools.lru_cache(maxsize=1)
+def _lib_route() -> str:
+    """Return the jtalk library path lazily (requires a ROS environment)."""
+    from ament_index_python import get_package_share_directory
+    return f'{get_package_share_directory("cube_petit_text_to_speech")}/speech_lib/'
+
+
+def __getattr__(name: str) -> str:
+    """Provide the legacy module-level ``LIB_ROUTE`` constant lazily."""
+    if name == 'LIB_ROUTE':
+        return _lib_route()
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 
 
 @beartype
@@ -42,6 +51,7 @@ def simple_jtalk(text: str) -> None:
     """
     if text == '':
         return
+    from cube_petit_speech_msgs.action import Speech
     generate_jtalk_file(text, Speech.Goal.EMOTION_DEFAULT, 100, 100)
     subprocess.Popen(generate_jtalk_command(OUTPUT_FILE),
                      stdin=subprocess.PIPE,
@@ -51,20 +61,33 @@ def simple_jtalk(text: str) -> None:
 
 
 @beartype
-def check_goal(goal: Speech.Goal) -> bool:
+def check_goal(text: str, emotion: str, emotion_level: int, pitch: int, speed: int, volume: int) -> bool:
+    """Validate speech goal values.
+
+    Args:
+        text: Phrase to be said.
+        emotion: Emotion of the phrase to be played.
+        emotion_level: Emotion level. Value between 1 and 5.
+        pitch: Pitch of the phrase to be played. Value between 50 and 199.
+        speed: Speed of the phrase to be played. Value between 50 and 299.
+        volume: Volume of the phrase to be played. Value between 1 and 100.
+
+    Returns:
+        True if all the values are valid.
+    """
     # text
-    if not goal.text:
+    if not text:
         return False
     valid_emotions = {'happy', 'normal', 'angry', 'bashful', 'sad'}
-    if goal.emotion not in valid_emotions:
+    if emotion not in valid_emotions:
         return False
-    if not (1 <= goal.emotion_level <= 5):
+    if not (1 <= emotion_level <= 5):
         return False
-    if not (50 <= goal.pitch < 200):
+    if not (50 <= pitch < 200):
         return False
-    if not (50 <= goal.speed < 300):
+    if not (50 <= speed < 300):
         return False
-    if not (1 <= goal.volume <= 100):
+    if not (1 <= volume <= 100):
         return False
 
     return True
@@ -88,11 +111,12 @@ def generate_jtalk_file(text: str,
     Returns:
         Path to the generated audio file.
     """
+    lib_route = _lib_route()
     text = adjust_text(text)
     echo = f'echo {text} | '
-    open_jtalk = f'{LIB_ROUTE}open_jtalk-1.11/bin/open_jtalk '
-    dic = f'-x {LIB_ROUTE}open_jtalk_dic_utf_8-1.11 '
-    htsvoice = f'-m {LIB_ROUTE}MMDAgent_Example-1.6/Voice/mei/mei_{emotion}.htsvoice '
+    open_jtalk = f'{lib_route}open_jtalk-1.11/bin/open_jtalk '
+    dic = f'-x {lib_route}open_jtalk_dic_utf_8-1.11 '
+    htsvoice = f'-m {lib_route}MMDAgent_Example-1.6/Voice/mei/mei_{emotion}.htsvoice '
     speed_param = f'-r {float(speed) / 100} '
     intonation = f'-jf {float(pitch) / 100} '
     if file_path is None:

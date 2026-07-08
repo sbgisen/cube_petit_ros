@@ -92,7 +92,9 @@ class SpeechActionServer(Node):
 
         try:
             res = Speech.Result()
-            if not check_goal(goal_handle.request):
+            request = goal_handle.request
+            if not check_goal(request.text, request.emotion, request.emotion_level, request.pitch, request.speed,
+                              request.volume):
                 self.get_logger().error('Invalid speech goal received.')
                 goal_handle.abort()
                 res.result = False

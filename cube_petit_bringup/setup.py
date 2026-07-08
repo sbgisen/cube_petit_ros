@@ -25,6 +25,7 @@ setup(
     maintainer_email="SBGRP-git@g.softbank.co.jp",
     description="cube_petit bringup package",
     license="Apache License 2.0",
+    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "startup_announcer = cube_petit_bringup.startup_announcer:main",

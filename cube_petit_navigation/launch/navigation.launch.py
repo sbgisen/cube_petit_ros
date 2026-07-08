@@ -14,23 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# !/usr/bin/env python
-
-# Copyright (c) 2022 SoftBank Corp.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 import pathlib
 
 from launch import LaunchDescription
@@ -47,13 +30,14 @@ from launch_ros.actions import SetParametersFromFile
 from launch_ros.actions import SetRemap
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
+from nav2_common.launch import ReplaceString
 from nav2_common.launch import RewrittenYaml
 
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     actions = []
     map_file = LaunchConfiguration('map').perform(context)
-    keepout_file = LaunchConfiguration('keepout')
+    keepout_file = LaunchConfiguration('keepout').perform(context)
 
     lifecycle_nodes = [
         'controller_server',
@@ -62,11 +46,16 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         'behavior_server',
         'bt_navigator',
         'waypoint_follower',
+    ]
+    filter_nodes = [
         'keepout_mask_server',
         'costmap_filter_info_server',
     ]
     autostart = LaunchConfiguration('autostart', default='true')
-    params_file = LaunchConfiguration('params_file')
+    # Replace the `<robot>` placeholder in the params file with the actual robot name so that
+    # a single parameter file can serve any robot individual.
+    params_file = ReplaceString(source_file=LaunchConfiguration('params_file'),
+                                replacements={'<robot>': LaunchConfiguration('robot')})
     param_substitutions = {
         'autostart': autostart,
         'filter_info_topic': ['/', LaunchConfiguration('robot'), '/navigation/costmap_filter_info'],
@@ -81,7 +70,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         PushRosNamespace([LaunchConfiguration('robot'), '/navigation']),
         SetParameter('use_sim_time', LaunchConfiguration('use_sim_time')),
         SetParametersFromFile(configured_params),
-        SetRemap('/laser/scan', ['/', LaunchConfiguration('robot'), '/laser/scan']),
+        SetRemap('/scan', ['/', LaunchConfiguration('robot'), '/scan']),
         SetRemap('/camera/depth_registered/cost_points',
                  ['/', LaunchConfiguration('robot'), '/camera/depth_registered/cost_points']),
         ComposableNodeContainer(
@@ -95,7 +84,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                name='controller_server',
                                remappings=[
                                    ('odom', ['/', LaunchConfiguration('robot'), '/odom']),
-                                   ('scan', ['/', LaunchConfiguration('robot'), '/laser/scan']),
+                                   ('scan', ['/', LaunchConfiguration('robot'), '/scan']),
                                ]),
                 ComposableNode(package='nav2_smoother', plugin='nav2_smoother::SmootherServer',
                                name='smoother_server'),
@@ -123,11 +112,30 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                parameters=[{
                                    'yaml_filename': map_file
                                }]),
+                ComposableNode(package='nav2_map_server',
+                               plugin='nav2_map_server::MapServer',
+                               name='keepout_mask_server',
+                               parameters=[{
+                                   'yaml_filename': keepout_file
+                               }]),
+                ComposableNode(package='nav2_map_server',
+                               plugin='nav2_map_server::CostmapFilterInfoServer',
+                               name='costmap_filter_info_server',
+                               parameters=[{
+                                   'mask_topic': ['/', LaunchConfiguration('robot'), '/navigation/keepout_mask']
+                               }]),
+                ComposableNode(package='nav2_lifecycle_manager',
+                               plugin='nav2_lifecycle_manager::LifecycleManager',
+                               name='lifecycle_manager_filters',
+                               parameters=[{
+                                   'autostart': autostart,
+                                   'node_names': filter_nodes
+                               }]),
                 ComposableNode(package='emcl2',
                                plugin='emcl2::EMcl2Node',
                                name='emcl',
                                parameters=[params_file],
-                               remappings=[('scan', ['/', LaunchConfiguration('robot'), '/laser/scan'])]),
+                               remappings=[('scan', ['/', LaunchConfiguration('robot'), '/scan'])]),
                 ComposableNode(package='nav2_lifecycle_manager',
                                plugin='nav2_lifecycle_manager::LifecycleManager',
                                name='lifecycle_manager_localization',
@@ -136,22 +144,6 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                    'node_names': ['map_server', 'emcl']
                                }]),
             ]),
-        Node(package='nav2_map_server',
-             executable='map_server',
-             name='keepout_mask_server',
-             output='screen',
-             emulate_tty=True,
-             parameters=[{
-                 'yaml_filename': keepout_file
-             }]),
-        Node(package='nav2_map_server',
-             executable='costmap_filter_info_server',
-             name='costmap_filter_info_server',
-             output='screen',
-             emulate_tty=True,
-             parameters=[{
-                 'mask_topic': ['/', LaunchConfiguration('robot'), '/navigation/keepout_mask']
-             }]),
     ] + actions
 
     return [GroupAction(actions=actions)]
@@ -167,26 +159,26 @@ def generate_launch_description() -> LaunchDescription:
     args = []
     args.append(
         DeclareLaunchArgument('use_sim_time',
-                              default_value='true',
+                              default_value='false',
                               description='Use simulation (Gazebo) clock if true'))
     args.append(
         DeclareLaunchArgument('map',
-                              default_value=str(pkg_share / 'map/rooms/rooms.yaml'),
+                              default_value=str(pkg_share / 'map/test/test.yaml'),
                               description='Full path to map yaml file to load'))
     args.append(
         DeclareLaunchArgument('keepout',
-                              default_value=str(pkg_share / 'map/rooms/rooms_keepout.yaml'),
+                              default_value=str(pkg_share / 'map/test/test_keepout.yaml'),
                               description='Full path to keepout yaml file to load'))
     args.append(
         DeclareLaunchArgument('params_file',
-                              default_value=str(pkg_share / 'config/nav2_params_orange.yaml'),
+                              default_value=str(pkg_share / 'config/nav2_params.yaml'),
                               description='Full path to the ROS2 parameters file to use for all launched nodes'))
 
     args.append(
         DeclareLaunchArgument('container_name',
                               default_value='nav2_container',
                               description='the name of container that nodes will load in if use composition'))
-    args.append(DeclareLaunchArgument('robot', default_value='cube_petit'))
+    args.append(DeclareLaunchArgument('robot', default_value='cube_petit_orange', description='Robot namespace.'))
 
     laser_relay = Node(package='topic_tools',
                        executable='relay',
@@ -197,11 +189,57 @@ def generate_launch_description() -> LaunchDescription:
                                'input_topic': '/laser/scan'
                            },
                            {
-                               'output_topic': '/cube_petit/laser/scan'
+                               'output_topic': ['/', LaunchConfiguration('robot'), '/laser/scan']
                            },
                        ],
                        output='screen')
+
+    bridge_base_link = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_bridge',
+        arguments=[
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            [LaunchConfiguration('robot'), '/base_link'],
+            'base_footprint',
+        ],
+        output='screen',
+    )
+    bridge_base_link2 = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_bridge',
+        arguments=[
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            'base_footprint',
+            'base_link',
+        ],
+        output='screen',
+    )
+    relay = Node(
+        package='topic_tools',
+        executable='relay',
+        arguments=[
+            ['/', LaunchConfiguration('robot'), '/navigation/cmd_vel'],
+            ['/', LaunchConfiguration('robot'), '/diff_drive_controller/cmd_vel'],
+        ],
+        output='screen',
+    )
+
     return LaunchDescription(args + [
         laser_relay,
+        bridge_base_link,
+        bridge_base_link2,
+        relay,
         OpaqueFunction(function=launch_setup),
     ])

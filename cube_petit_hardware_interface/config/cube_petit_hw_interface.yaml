@@ -1,4 +1,4 @@
-cube_petit_orange/controller_manager:
+/**/controller_manager:
   ros__parameters:
     update_rate: 50 # Hz
     joint_state_broadcaster:
@@ -8,14 +8,14 @@ cube_petit_orange/controller_manager:
     velocity_controller:
       type: velocity_controller/JointGroupVelocityController
 
-cube_petit_orange/velocity_controller:
+/**/velocity_controller:
   ros__parameters:
     joints:
       - left_wheel_joint
       - right_wheel_joint
 
 # Publish all joint states -----------------------------------
-cube_petit_orange/joint_state_broadcaster:
+/**/joint_state_broadcaster:
   ros__parameters:
     publish_rate: 50
     joints:
@@ -30,7 +30,7 @@ cube_petit_orange/joint_state_broadcaster:
         - right_wheel_joint
 
 # Diff drive controller --------------------------------------
-cube_petit_orange/diff_drive_controller:
+/**/diff_drive_controller:
   ros__parameters:
     left_wheel_names:
       - left_wheel_joint

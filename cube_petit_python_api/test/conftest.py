@@ -14,14 +14,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Make gpt_logic importable without installing the package.
+"""Make the package importable without installing it.
 
-Note: the utils directory itself is added to sys.path because
-``cube_petit_python_api/__init__.py`` imports ROS dependencies at module
-level; importing via the package path would require a ROS environment.
+The package root is added to ``sys.path`` so ``cube_petit_python_api`` can be
+imported directly; its ``__init__`` is lazy (PEP 562), so pure-logic modules
+such as ``petit_names`` work without a ROS environment.
+
+The utils directory itself is also added because ``test_gpt_logic`` imports
+``gpt_logic`` as a top-level module (it predates the lazy ``__init__``).
 """
 
 from pathlib import Path
 import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'cube_petit_python_api' / 'utils'))

@@ -23,11 +23,12 @@ import pathlib
 import typing
 
 from ament_index_python.packages import get_package_share_directory
-from cube_petit_python_api.utils import gpt_logic
 import cv2
 import numpy as np
 import openai
 from rclpy.node import Node
+
+from cube_petit_python_api.utils import gpt_logic
 
 
 class GPTClient(object):

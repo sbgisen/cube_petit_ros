@@ -1,0 +1,36 @@
+on:
+  push:
+    branches: [jazzy-devel]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  linter:
+    if: ${{ github.event_name == 'pull_request' }}
+    name: Linter
+    uses: sbgisen/.github/.github/workflows/ros2_style.yaml@main
+  build:
+    needs: linter
+    if: ${{ !failure() }}
+    name: Build
+    uses: sbgisen/.github/.github/workflows/ros2-build.yml@main
+    with:
+      ros_distro: jazzy
+    secrets:
+      ssh_key: ${{ secrets.GISEN_ROBO_GIT }}
+      known_hosts: ${{ secrets.KNOWN_HOSTS }}
+  release-drafter:
+    name: Release drafter
+    uses: sbgisen/.github/.github/workflows/release-drafter.yml@main
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: pip install pytest beartype pyyaml
+      - name: Run unit tests
+        run: python -m pytest cube_petit_text_to_speech/test cube_petit_python_api/test cube_petit_bringup/test -v

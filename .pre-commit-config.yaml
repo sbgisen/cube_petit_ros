@@ -1,0 +1,68 @@
+---
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--disable-plugin", "KeywordDetector"]
+        exclude: package.lock.json
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args:
+          - "--fix=lf"
+        description: Forces to replace line ending by the UNIX 'lf' character.
+      - id: end-of-file-fixer
+  - repo: https://github.com/pycqa/isort
+    rev: 8.0.1
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--sp", "./pyproject.toml", "--src", "."]
+  - repo: https://github.com/google/yapf
+    rev: v0.43.0
+    hooks:
+      - id: yapf
+        args: [-ip, --style, ./pyproject.toml]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.20
+    hooks:
+      - id: ruff
+        args: [--config, ./pyproject.toml]
+  - repo: git@github.com:sbgisen/pre-commit-hooks.git
+    rev: v1.1.4
+    hooks:
+      - id: yamlfixer
+        args: [-c, ./.yamllint]
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args:
+          - "-s"
+          - "-c"
+          - "./.yamllint"
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        args: [-c, ./.cmake-format, --in-place]
+  - repo: git@github.com:sbgisen/pre-commit-hooks.git
+    rev: v1.1.4
+    hooks:
+      - id: package_lint
+        name: check package.xml schema
+  - repo: git@github.com:sbgisen/pre-commit-hooks.git
+    rev: v1.1.4
+    hooks:
+      - id: xmllint
+        name: xml format
+        args:
+          - "-i"
+          - "--format"
+          - "--ignore-empty"
+        types_or:
+          - "file"
+        files: ^.*\.(launch|xml|xacro|urdf)$

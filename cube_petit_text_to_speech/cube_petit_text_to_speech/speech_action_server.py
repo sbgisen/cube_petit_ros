@@ -18,6 +18,11 @@ import threading
 import time
 
 from action_msgs.msg import GoalStatus
+from cube_petit_speech_msgs.action import Speech
+from cube_petit_speech_msgs.msg import AudioDataStamped
+from cube_petit_speech_msgs.msg import AudioInfo
+from cube_petit_text_to_speech.utils.jtalk import check_goal
+from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_file
 import numpy as np
 import rclpy
 from rclpy.action import ActionServer
@@ -31,12 +36,6 @@ from rclpy.qos import QoSProfile
 from scipy.signal import resample_poly
 import sounddevice as sd
 import soundfile as sf
-
-from cube_petit_speech_msgs.action import Speech
-from cube_petit_speech_msgs.msg import AudioDataStamped
-from cube_petit_speech_msgs.msg import AudioInfo
-from cube_petit_text_to_speech.utils.jtalk import check_goal
-from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_file
 
 
 class SpeechActionServer(Node):

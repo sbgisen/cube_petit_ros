@@ -17,12 +17,11 @@
 
 import pathlib
 
-import pytest
-
 from cube_petit_text_to_speech.utils import jtalk
 from cube_petit_text_to_speech.utils.jtalk import adjust_text
 from cube_petit_text_to_speech.utils.jtalk import check_goal
 from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_command
+import pytest
 
 SUFFIX = '〜っ、。'
 

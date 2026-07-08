@@ -33,8 +33,14 @@ class TestBuildTextContexts:
     def test_structure(self) -> None:
         contexts = gpt_logic.build_text_contexts('system prompt', 'こんにちは')
         assert contexts == [
-            {'role': 'system', 'content': 'system prompt'},
-            {'role': 'user', 'content': 'こんにちは'},
+            {
+                'role': 'system',
+                'content': 'system prompt'
+            },
+            {
+                'role': 'user',
+                'content': 'こんにちは'
+            },
         ]
 
     def test_default_setting_is_usable_as_system_prompt(self) -> None:

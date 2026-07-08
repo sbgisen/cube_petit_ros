@@ -31,10 +31,7 @@ def build_text_contexts(setting: str, input_text: str) -> list:
     Returns:
         Message list for the Chat Completions API.
     """
-    return [
-        {"role": "system", "content": setting},
-        {"role": "user", "content": input_text}
-    ]
+    return [{'role': 'system', 'content': setting}, {'role': 'user', 'content': input_text}]
 
 
 def build_image_contexts(setting: str, input_text: str, base64_image: str) -> list:
@@ -48,12 +45,20 @@ def build_image_contexts(setting: str, input_text: str, base64_image: str) -> li
     Returns:
         Message list for the Chat Completions API.
     """
-    return [
-        {"role": "system", "content": setting},
-        {"role": "user",
-         "content": [
-             {"type": "text", "text": input_text},
-             {"type": "image_url", "image_url": f"data:image/jpeg;base64,{base64_image}"},
-         ],
-         }
-    ]
+    return [{
+        'role': 'system',
+        'content': setting
+    }, {
+        'role':
+            'user',
+        'content': [
+            {
+                'type': 'text',
+                'text': input_text
+            },
+            {
+                'type': 'image_url',
+                'image_url': f'data:image/jpeg;base64,{base64_image}'
+            },
+        ],
+    }]

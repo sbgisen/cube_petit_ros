@@ -1,7 +1,10 @@
 const normal = {
   start () {
     emoteFadeIn('.normal')
-    this.expire = Date.now()
+    // 呼吸のようなゆらゆら
+    breath.start('.normal')
+    blink.start()
+    this.expire = Date.now() + anime.random(4, 9) * 1000
     this.loop()
   },
   expire: null,
@@ -9,19 +12,21 @@ const normal = {
   loop () {
     if (this.expire <= Date.now()) {
       // 瞬きを停止
-      blink.stop().then(() => {
-        // ランダムな方向を見る
+      blink.stop().then(async () => {
+        // ちょっとためらってから
+        await sleep(anime.random(200, 600))
+        // ランダムな方向をゆっくり見る(30%はちょっとだけ)
         const r = anime.random(50, 100) / 100
         const euler = anime.random(0, 100) / 100 * Math.PI * 2
-        lookAt(r, euler).then(() => {
-          // 視線を戻す
-          lookAt(0, 0).then(() => {
-            // 瞬きを再開
-            blink.start()
-            this.expire = Date.now() + anime.random(5, 15) * 1000
-            this.timer = setTimeout(() => { this.loop() }, 1000)
-          })
-        })
+        const glance = anime.random(1, 100) <= 30
+        await lookAt(glance ? r * 0.4 : r, euler)
+        // 眺める「間」をとってから視線を戻す
+        await sleep(anime.random(400, 1200))
+        await lookAt(0, 0)
+        // 瞬きを再開
+        blink.start()
+        this.expire = Date.now() + anime.random(5, 15) * 1000
+        this.timer = setTimeout(() => { this.loop() }, 1000)
       })
     } else {
       this.timer = setTimeout(() => { this.loop() }, 1000)

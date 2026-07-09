@@ -20,6 +20,10 @@ class Ros {
   }
 }
 
+// ありさん調整用: ロボットの名前空間(全トピックの前置き)。別の個体では書き換える
+// TODO: 将来は animation.py からURLパラメータで注入して脱ハードコード(cf. #81 の robot 引数)
+const ROBOT_NS = '/cube_petit_orange'
+
 class CubeExpression {
   constructor() {
     this.currentStatus = null // 表示中のステータス
@@ -29,7 +33,7 @@ class CubeExpression {
   connect(ros) {
     const orderSub = new ROSLIB.Topic({
       ros,
-      name: '/facial_expression/expression_command',
+      name: `${ROBOT_NS}/facial_expression/expression_command`,
       messageType: 'sbgisen_msgs/FaceExpression'
     })
     orderSub.subscribe(message => {
@@ -52,7 +56,7 @@ class CubeGaze {
   connect(ros) {
     this.lookSub = new ROSLIB.Topic({
       ros,
-      name: 'facial_expression/look_at',
+      name: `${ROBOT_NS}/facial_expression/look_at`,
       messageType: 'std_msgs/Float64MultiArray'
     })
 
@@ -97,13 +101,13 @@ class CubeSpeech {
   connect(ros) {
     this.startSub = new ROSLIB.Topic({
       ros,
-      name: '/speech_server/goal',
+      name: `${ROBOT_NS}/speech_server/goal`,
       messageType: 'sbgisen_msgs/SpeechActionGoal'
     })
     this.endSub = new ROSLIB.Topic({
       ros,
-      name: '/speech_server/result',
-      messageType: 'cube_speech/SpeechActionResult'
+      name: `${ROBOT_NS}/speech_server/result`,
+      messageType: 'sbgisen_msgs/SpeechActionResult'
     })
     this.startSub.subscribe(data => {
       this.nextStatus = true

@@ -34,7 +34,7 @@ class CubeExpression {
     const orderSub = new ROSLIB.Topic({
       ros,
       name: `${ROBOT_NS}/facial_expression/expression_command`,
-      messageType: 'sbgisen_msgs/FaceExpression'
+      messageType: 'cube_petit_facial_animation_msgs/FaceExpression'
     })
     orderSub.subscribe(message => {
       const data = message.expression
@@ -101,6 +101,8 @@ class CubeSpeech {
   connect(ros) {
     this.startSub = new ROSLIB.Topic({
       ros,
+      // TODO: /speech_server/* はROS2にpublisherが存在しない(口パク同期は現状死んでいる)。
+      // 再配線の設計はIssue参照(sbgisen_msgs排除と合わせて)
       name: `${ROBOT_NS}/speech_server/goal`,
       messageType: 'sbgisen_msgs/SpeechActionGoal'
     })

@@ -17,7 +17,7 @@ g{
   display: none;
   z-index: 0;
 }
-.normal, .happy, .sad, .puzzled{
+.outer{
   background-color: #ecf8fd;
   stroke: {{COLOR}};
   fill: {{COLOR}};
@@ -27,6 +27,51 @@ g{
   width: 768px;
   height: 432px;
   position: absolute;
+}
+
+.sway{
+  width: 100%;
+  height: 100%;
+}
+
+/* 目の位置・傾き調整用(値はfaceUtil.jsのEYE_Y_OFFSET / EYE_TILT_DEGで設定) */
+.eye-pos{
+  transform: translateY(var(--eye-y-offset, 0px)) rotate(var(--eye-tilt, 0deg));
+}
+.eye-pos-right{
+  transform: translateY(var(--eye-y-offset, 0px)) rotate(calc(-1 * var(--eye-tilt, 0deg)));
+}
+
+/* 塗りなしの線パーツ(とじた目・ちいさな口・ほっぺ) */
+.line{
+  fill: none;
+  stroke-width: 20;
+  stroke-linecap: round;
+}
+
+/* ぐるぐる目(くらくら用) */
+.spiral path{
+  fill: none;
+  stroke-width: 18;
+  stroke-linecap: round;
+}
+
+/* 左右反転(おこ用のつり目) */
+.flip{
+  transform: scaleX(-1);
+}
+
+/* ねむいときのZzz */
+.zzz{
+  font-family: sans-serif;
+  font-weight: bold;
+  stroke: none;
+  opacity: 0;
+}
+
+/* 考え中の「…」とわくわくのキラキラ */
+.dot, .sparkle{
+  opacity: 0;
 }
 
 .tear{

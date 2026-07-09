@@ -20,6 +20,10 @@ class Ros {
   }
 }
 
+// ありさん調整用: ロボットの名前空間(全トピックの前置き)。別の個体では書き換える
+// TODO: 将来は animation.py からURLパラメータで注入して脱ハードコード(cf. #81 の robot 引数)
+const ROBOT_NS = '/cube_petit_orange'
+
 class CubeExpression {
   constructor() {
     this.currentStatus = null // 表示中のステータス
@@ -29,8 +33,8 @@ class CubeExpression {
   connect(ros) {
     const orderSub = new ROSLIB.Topic({
       ros,
-      name: '/facial_expression/expression_command',
-      messageType: 'sbgisen_msgs/FaceExpression'
+      name: `${ROBOT_NS}/facial_expression/expression_command`,
+      messageType: 'cube_petit_facial_animation_msgs/FaceExpression'
     })
     orderSub.subscribe(message => {
       const data = message.expression
@@ -52,7 +56,7 @@ class CubeGaze {
   connect(ros) {
     this.lookSub = new ROSLIB.Topic({
       ros,
-      name: 'facial_expression/look_at',
+      name: `${ROBOT_NS}/facial_expression/look_at`,
       messageType: 'std_msgs/Float64MultiArray'
     })
 
@@ -97,13 +101,15 @@ class CubeSpeech {
   connect(ros) {
     this.startSub = new ROSLIB.Topic({
       ros,
-      name: '/speech_server/goal',
+      // TODO: /speech_server/* はROS2にpublisherが存在しない(口パク同期は現状死んでいる)。
+      // 再配線の設計はIssue参照(sbgisen_msgs排除と合わせて)
+      name: `${ROBOT_NS}/speech_server/goal`,
       messageType: 'sbgisen_msgs/SpeechActionGoal'
     })
     this.endSub = new ROSLIB.Topic({
       ros,
-      name: '/speech_server/result',
-      messageType: 'cube_speech/SpeechActionResult'
+      name: `${ROBOT_NS}/speech_server/result`,
+      messageType: 'sbgisen_msgs/SpeechActionResult'
     })
     this.startSub.subscribe(data => {
       this.nextStatus = true
@@ -119,10 +125,13 @@ class CubeSpeech {
 /**
  * main
  */
-const emotes = { normal, happy, sad, puzzled }
+const emotes = { normal, happy, sad, puzzled, angry, surprised, sleepy, thinking, excited, love, wink, dizzy, shy, curious }
 let lastConnect = 0 // 前回の接続時間
 const rosbridge = new Ros()
 rosbridge.connect()
+// 動作確認用: index.html?emote=表情名 で初期表情を指定できる
+const initialEmote = new URLSearchParams(location.search).get('emote')
+if (emotes[initialEmote] !== undefined) rosbridge.expression.nextStatus = initialEmote
 requestAnimationFrame(loop) // ループ処理を開始
 
 async function loop(ts) {

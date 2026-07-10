@@ -23,12 +23,14 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import ComposableNodeContainer
+from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
 from launch_ros.actions import SetParameter
 from launch_ros.actions import SetParametersFromFile
 from launch_ros.actions import SetRemap
 from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
+from nav2_common.launch import ReplaceString
 from nav2_common.launch import RewrittenYaml
 
 
@@ -42,7 +44,7 @@ def generate_launch_description() -> LaunchDescription:
     args = []
     args.append(
         DeclareLaunchArgument('use_sim_time',
-                              default_value='true',
+                              default_value='false',
                               description='Use simulation (Gazebo) clock if true'))
     args.append(
         DeclareLaunchArgument('params_file',
@@ -53,7 +55,11 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('container_name',
                               default_value='nav2_container',
                               description='the name of container that nodes will load in if use composition'))
-    args.append(DeclareLaunchArgument('robot', default_value='cube_petit'))
+    args.append(DeclareLaunchArgument('robot', default_value='cube_petit_orange', description='Robot namespace.'))
+    args.append(
+        DeclareLaunchArgument('scan_topic',
+                              default_value='laser/scan',
+                              description='Scan topic name relative to the robot namespace'))
 
     lifecycle_nodes = [
         'controller_server', 'smoother_server', 'planner_server', 'behavior_server', 'bt_navigator',
@@ -61,14 +67,17 @@ def generate_launch_description() -> LaunchDescription:
     ]
 
     autostart = LaunchConfiguration('autostart', default='true')
-    params_file = LaunchConfiguration('params_file')
+    # Replace the `<robot>` placeholder in the params file with the actual robot name so that
+    # a single parameter file can serve any robot individual.
+    params_file = ReplaceString(source_file=LaunchConfiguration('params_file'),
+                                replacements={'<robot>': LaunchConfiguration('robot')})
     param_substitutions = {
         'autostart': autostart,
     }
     configured_params = RewrittenYaml(source_file=params_file,
                                       root_key=[LaunchConfiguration('robot'), '/navigation'],
                                       param_rewrites=param_substitutions,
-                                      convert_types=True)
+                                      convert_types=False)
 
     slam_launch_file = pathlib.Path(
         FindPackageShare('slam_toolbox').find('slam_toolbox')) / 'launch' / 'online_async_launch.py'
@@ -99,7 +108,9 @@ def generate_launch_description() -> LaunchDescription:
                                name='controller_server',
                                remappings=[
                                    ('odom', ['/', LaunchConfiguration('robot'), '/odom']),
-                                   ('scan', ['/', LaunchConfiguration('robot'), '/laser/scan_filtered']),
+                                   ('scan',
+                                    ['/', LaunchConfiguration('robot'), '/',
+                                     LaunchConfiguration('scan_topic')]),
                                ]),
                 ComposableNode(package='nav2_smoother', plugin='nav2_smoother::SmootherServer',
                                name='smoother_server'),
@@ -123,6 +134,24 @@ def generate_launch_description() -> LaunchDescription:
             ]),
     ])
 
+    bridge_base_link = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_link_bridge',
+        arguments=[
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            '0',
+            [LaunchConfiguration('robot'), '/base_link'],
+            'base_link',
+        ],
+        output='screen',
+    )
+
     return LaunchDescription(args + [
         nav2,
+        bridge_base_link,
     ])

@@ -16,6 +16,8 @@
 #
 
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
@@ -30,7 +32,8 @@ def generate_launch_description() -> LaunchDescription:
     ])
 
     return LaunchDescription([
-        PushRosNamespace('cube_petit/navigation'),
+        DeclareLaunchArgument('robot', default_value='cube_petit', description='Robot namespace.'),
+        PushRosNamespace([LaunchConfiguration('robot'), '/navigation']),
         Node(
             package='cube_petit_navigation',
             executable='navigation_api_node',

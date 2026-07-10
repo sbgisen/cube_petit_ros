@@ -20,10 +20,10 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import GroupAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
-
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -31,9 +31,13 @@ def generate_launch_description() -> LaunchDescription:
     bringup_dir = get_package_share_directory('cube_petit_text_to_speech')
     controller_talk_yaml = os.path.join(bringup_dir, 'config', 'controller_talk.yaml')
 
-    # 【一時的な単体テスト用】default_valueは空文字(=名前空間なし。bringup経由の起動には無影響)。
-    # 単体テスト時だけ robot:=cube_petit_orange のように明示的に指定する。
-    robot_arg = DeclareLaunchArgument('robot', default_value='', description='Robot namespace (単体テスト用、空なら無効).')
+    # Temporary standalone-test support: default is empty (= no namespace push,
+    # no effect when included from bringup). Set robot_namespace:=cube_petit_orange
+    # explicitly only for standalone testing.
+    robot_namespace_arg = DeclareLaunchArgument(
+        'robot_namespace',
+        default_value='',
+        description='Namespace of the robot unit (e.g. cube_petit_orange). Empty = no push.')
 
     # teleop_twist_joy_dir = get_package_share_directory('teleop_twist_joy')
     # cube_teleop_dir = get_package_share_directory('cube_petit_bringup')
@@ -50,24 +54,24 @@ def generate_launch_description() -> LaunchDescription:
     # )
     # depthai_hand_tracker_dir = get_package_share_directory('depthai_hand_tracker')
     # depthai_include = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(os.path.join(depthai_hand_tracker_dir, 'launch', 'depthai_hand_tracker.launch.py')),
+    #     PythonLaunchDescriptionSource(
+    #         os.path.join(depthai_hand_tracker_dir, 'launch', 'depthai_hand_tracker.launch.py')),
     # )
 
     return LaunchDescription([
-        robot_arg,
-        PushRosNamespace(LaunchConfiguration('robot')),
-        Node(
-            package='cube_petit_text_to_speech',
-            executable='cube_petit_text_to_jtalk',
-            name='text_to_jtalk',
-            parameters=[{"controller_talk_config": controller_talk_yaml}],
-
-        ),
-        Node(
-            package='cube_petit_text_to_speech',
-            executable='speech_action_server',
-            name='speech_action_server'
-        ),
+        robot_namespace_arg,
+        GroupAction([
+            PushRosNamespace(LaunchConfiguration('robot_namespace')),
+            Node(
+                package='cube_petit_text_to_speech',
+                executable='cube_petit_text_to_jtalk',
+                name='text_to_jtalk',
+                parameters=[{
+                    'controller_talk_config': controller_talk_yaml
+                }],
+            ),
+            Node(package='cube_petit_text_to_speech', executable='speech_action_server', name='speech_action_server'),
+        ]),
 
         # teleop_include
         # depthai_include,

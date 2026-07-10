@@ -117,7 +117,6 @@ def generate_launch_description() -> LaunchDescription:
         Launch descriptions
     """
     args = []
-    args.append(DeclareLaunchArgument('robot', default_value='cube_petit'))
     hostname = socket.gethostname()
     namespace = hostname.replace('-', '_')
     args.append(DeclareLaunchArgument('cube_petit_host_name', default_value=namespace))

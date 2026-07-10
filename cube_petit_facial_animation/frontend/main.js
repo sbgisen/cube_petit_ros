@@ -99,25 +99,17 @@ class CubeSpeech {
   }
 
   connect(ros) {
-    this.startSub = new ROSLIB.Topic({
+    // speech_action_server (cube_petit_text_to_speech) publishes its own private
+    // "~/speaking" topic (std_msgs/Bool), no private-repo message types involved.
+    // (speech_action_serverが発話中フラグを~/speakingでpublishする。私有リポジトリの型には依存しない)
+    this.speakingSub = new ROSLIB.Topic({
       ros,
-      // TODO: /speech_server/* はROS2にpublisherが存在しない(口パク同期は現状死んでいる)。
-      // 再配線の設計はIssue参照(sbgisen_msgs排除と合わせて)
-      name: `${ROBOT_NS}/speech_server/goal`,
-      messageType: 'sbgisen_msgs/SpeechActionGoal'
+      name: `${ROBOT_NS}/speech_action_server/speaking`,
+      messageType: 'std_msgs/Bool'
     })
-    this.endSub = new ROSLIB.Topic({
-      ros,
-      name: `${ROBOT_NS}/speech_server/result`,
-      messageType: 'sbgisen_msgs/SpeechActionResult'
-    })
-    this.startSub.subscribe(data => {
-      this.nextStatus = true
-      console.log('speech start: ' + data.goal.speech_text)
-    })
-    this.endSub.subscribe(data => {
-      this.nextStatus = false
-      console.log('speech end')
+    this.speakingSub.subscribe(message => {
+      this.nextStatus = message.data
+      console.log('speaking: ' + message.data)
     })
   }
 }

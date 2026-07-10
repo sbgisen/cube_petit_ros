@@ -31,12 +31,14 @@ from rclpy.qos import QoSProfile
 from scipy.signal import resample_poly
 import sounddevice as sd
 import soundfile as sf
+from std_msgs.msg import Bool
 
 from cube_petit_speech_msgs.action import Speech
 from cube_petit_speech_msgs.msg import AudioDataStamped
 from cube_petit_speech_msgs.msg import AudioInfo
 from cube_petit_text_to_speech.utils.jtalk import check_goal
 from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_file
+from cube_petit_text_to_speech.utils.speaking_state import SpeakingState
 
 
 class SpeechActionServer(Node):
@@ -55,6 +57,16 @@ class SpeechActionServer(Node):
         self.audio_stampled_publisher = self.create_publisher(AudioDataStamped, 'audio_stamped', 10)
         info_qos = QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.audio_info_publisher = self.create_publisher(AudioInfo, 'audio_info', info_qos)
+
+        # Lip-sync flag for the facial frontend (private-namespaced ~/speaking, std_msgs/Bool).
+        # TRANSIENT_LOCAL so a frontend that (re)connects after startup still gets the
+        # current state instead of waiting for the next speech goal.
+        # (口パク同期用の発話中フラグ。private topicの~/speakingでpublishし、後から接続した
+        # frontendにも直近の状態が届くようlatchする)
+        speaking_qos = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.__speaking_publisher = self.create_publisher(Bool, '~/speaking', speaking_qos)
+        self.__speaking_state = SpeakingState(self.__publish_speaking)
+        self.__publish_speaking(False)  # Announce the initial (not speaking) state explicitly.
 
         self.__sampling_rate = 16000  # [TODO] get ros param
 
@@ -87,6 +99,12 @@ class SpeechActionServer(Node):
     def cancel_callback(self, goal_handle: server.ServerGoalHandle) -> CancelResponse:
         self.get_logger().info(f'Received cancel request for {goal_handle.request.text}')
         return CancelResponse.ACCEPT
+
+    def __publish_speaking(self, speaking: bool) -> None:
+        """Publish the current speaking state (used as the SpeakingState callback)."""
+        msg = Bool()
+        msg.data = speaking
+        self.__speaking_publisher.publish(msg)
 
     def call_speech(self, goal_handle: server.ServerGoalHandle) -> Speech.Result:
 
@@ -137,6 +155,9 @@ class SpeechActionServer(Node):
 
             try:
                 device = None
+                # Mark speaking as started only once actual audio playback begins, so the
+                # frontend's lip sync lines up with what is actually heard.
+                self.__speaking_state.start()
                 with sd.OutputStream(sr, int(sr * 0.01), device, 1, callback=callback) as stream:
                     while rclpy.ok() and stream.active:
                         feedback.elapsed_time = (self.get_clock().now() - start_t).to_msg()
@@ -160,6 +181,9 @@ class SpeechActionServer(Node):
             return res
 
         finally:
+            # Guaranteed to run on every exit path (success, cancel, abort, exception), so the
+            # frontend never gets stuck thinking the robot is still speaking.
+            self.__speaking_state.stop()
             with self.__lock:
                 self.__is_running = False
 

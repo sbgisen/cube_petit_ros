@@ -29,9 +29,9 @@ COLOR_MAP = {
     'yellow': '#fff176',
     'purple': '#ba68c8',
     'red': '#ef5350',
-    'clear': "#A3A3A3",
-    'lightgreen': "#42E34D",
-    'white': "#8E8E8E",
+    'clear': '#A3A3A3',
+    'lightgreen': '#42E34D',
+    'white': '#8E8E8E',
 }
 script_dir = os.path.dirname(os.path.abspath(__file__))
 html_path = os.path.join(script_dir, '../../share/cube_petit_facial_animation/frontend/index.html')
@@ -50,13 +50,13 @@ class Chrome():
 
     def kill_started(self) -> None:
         """Stop Chrome."""
-        # rosnode開始時にすでにChromeが起動していた場合は何も起きない
+        # No-op if Chrome was already running when this rosnode started.
         self._p.terminate()
 
     def kill_all(self) -> None:
         """Kill all chrome process."""
-        # 現在は未使用
-        # rosnode開始時、起動済みのChromeを終了させたい場合に使用
+        # Currently unused.
+        # Use this to kill an already-running Chrome instance at rosnode startup, if needed.
         subprocess.call(['pkill', '-f', '/opt/google/chrome/chrome'])
 
 
@@ -90,7 +90,7 @@ class ChromeNode(Node):
 
     def timer_callback(self) -> None:
         """Check timer."""
-        pass  # このタイマーコールバックは何もしませんが、10Hzのループを維持します
+        pass  # This timer callback does nothing, but keeps a 10Hz loop running.
 
     def shutdown(self) -> None:
         """Shutdown."""

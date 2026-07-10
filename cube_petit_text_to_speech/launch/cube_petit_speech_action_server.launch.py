@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
 # Copyright (c) 2024 SoftBank Corp.
@@ -14,38 +14,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-
-import socket
+"""Launch file for speech_action_server only (for standalone testing)."""
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import GroupAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.actions import PushRosNamespace
 
 
 def generate_launch_description() -> LaunchDescription:
-    hostname = socket.gethostname()
-    namespace = hostname.replace('-', '_')
-
+    """Generate launch description."""
+    # Default is empty (= no namespace push). Set robot_namespace:=cube_petit_orange
+    # explicitly only for standalone testing.
     robot_namespace_arg = DeclareLaunchArgument(
         'robot_namespace',
-        default_value=namespace,
-        description='Namespace of the robot unit to relay cmd_vel from (e.g. cube_petit_orange).')
-    output_robot_namespace_arg = DeclareLaunchArgument(
-        'output_robot_namespace',
-        default_value='cube_petit_pink',
-        description='Namespace of the relay target robot unit to relay cmd_vel to.')
+        default_value='',
+        description='Namespace of the robot unit (e.g. cube_petit_orange). Empty = no push.')
 
     return LaunchDescription([
-        robot_namespace_arg, output_robot_namespace_arg,
-        Node(
-            package='topic_tools',
-            executable='relay',
-            name='cmd_vel_relay',
-            parameters=[{
-                'input_topic': ['/', LaunchConfiguration('robot_namespace'), '/diff_drive_controller/cmd_vel'],
-                'output_topic': ['/',
-                                 LaunchConfiguration('output_robot_namespace'), '/diff_drive_controller/cmd_vel']
-            }])
+        robot_namespace_arg,
+        GroupAction([
+            PushRosNamespace(LaunchConfiguration('robot_namespace')),
+            Node(
+                package='cube_petit_text_to_speech',
+                executable='speech_action_server',
+                name='speech_action_server',
+                output='screen',
+            ),
+        ]),
     ])

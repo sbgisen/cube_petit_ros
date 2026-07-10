@@ -18,8 +18,10 @@
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import GroupAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.actions import PushRosNamespace
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -28,22 +30,34 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('color',
                               default_value='blue',
                               description='Color for the faceBox (pink, orange, blue, green, yellow, purple)'),
-        Node(
-            package='cube_petit_facial_animation',
-            executable='animation.py',
-            name='facial_animation',
-            output='screen',
-            parameters=[{
-                'color': LaunchConfiguration('color')
-            }],
-        ),
-        Node(
-            package='cube_petit_facial_animation',
-            executable='expression_operator.py',
-            name='expression_operator',
-            output='screen',
-        ),
-        Node(package='rosbridge_server', executable='rosbridge_websocket', name='rosbridge_websocket', output='screen')
+        # Temporary standalone-test support: default is empty (= no namespace push,
+        # no effect when included from bringup). Set robot_namespace:=cube_petit_orange
+        # explicitly only for standalone testing.
+        DeclareLaunchArgument('robot_namespace',
+                              default_value='',
+                              description='Namespace of the robot unit (e.g. cube_petit_orange). Empty = no push.'),
+        GroupAction([
+            PushRosNamespace(LaunchConfiguration('robot_namespace')),
+            Node(
+                package='cube_petit_facial_animation',
+                executable='animation.py',
+                name='facial_animation',
+                output='screen',
+                parameters=[{
+                    'color': LaunchConfiguration('color')
+                }],
+            ),
+            Node(
+                package='cube_petit_facial_animation',
+                executable='expression_operator.py',
+                name='expression_operator',
+                output='screen',
+            ),
+            Node(package='rosbridge_server',
+                 executable='rosbridge_websocket',
+                 name='rosbridge_websocket',
+                 output='screen')
+        ])
     ])
 
 

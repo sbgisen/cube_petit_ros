@@ -8,6 +8,8 @@
 const EYE_Y_OFFSET = 16
 // 目の傾き(deg)。左目に+、右目に-で左右対称に適用される。0で無効
 const EYE_TILT_DEG = 0
+// 鼻と口の大きさ(1で原寸、0.85で15%縮小)
+const NOSE_MOUTH_SCALE = 0.85
 // ----------------------------------------------------------------------
 
 // 目(ハート・ぐるぐる目も含む)を位置調整用の<g class="eye-pos">で包む。
@@ -23,6 +25,7 @@ $('g.right-eye, g.left-eye, g.heart, g.spiral').each(function () {
 })
 document.documentElement.style.setProperty('--eye-y-offset', EYE_Y_OFFSET + 'px')
 document.documentElement.style.setProperty('--eye-tilt', EYE_TILT_DEG + 'deg')
+document.documentElement.style.setProperty('--nose-mouth-scale', NOSE_MOUTH_SCALE)
 
 /**
  * 指定方向を見る

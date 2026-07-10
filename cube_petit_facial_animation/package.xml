@@ -10,6 +10,7 @@
   <url type="bugtracker">https://github.com/sbgisen/cube_perit_ros/issues</url>
   <buildtool_depend>ament_cmake</buildtool_depend>
   <!-- <exec_depend>cube_petit_description</exec_depend> -->
+  <exec_depend>rosbridge_server</exec_depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

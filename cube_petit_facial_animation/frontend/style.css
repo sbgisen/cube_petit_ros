@@ -42,6 +42,11 @@ g{
   transform: translateY(var(--eye-y-offset, 0px)) rotate(calc(-1 * var(--eye-tilt, 0deg)));
 }
 
+/* 鼻と口の大きさ調整用(値はfaceUtil.jsのNOSE_MOUTH_SCALEで設定) */
+.nose, .mouth{
+  transform: scale(var(--nose-mouth-scale, 1));
+}
+
 /* 塗りなしの線パーツ(とじた目・ちいさな口・ほっぺ) */
 .line{
   fill: none;

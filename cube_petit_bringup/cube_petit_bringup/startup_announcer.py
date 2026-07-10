@@ -19,11 +19,12 @@
 import time
 
 from controller_manager_msgs.srv import ListControllerTypes
-from cube_petit_speech_msgs.action import Speech
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
+
+from cube_petit_speech_msgs.action import Speech
 
 
 class StartupAnnouncer(Node):

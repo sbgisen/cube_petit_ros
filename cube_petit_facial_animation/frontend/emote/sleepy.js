@@ -31,7 +31,7 @@ const sleepy = {
         { value: [0, 0.9], duration: 900 },
         { value: 0, duration: 900, delay: 1400 }
       ],
-      translateY: [{ value: [20, -30], duration: 3200 }],
+      translateY: [{ value: [8, -30], duration: 3200 }],
       delay: anime.stagger(700),
       easing: 'easeInOutSine'
     })

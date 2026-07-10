@@ -20,6 +20,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.actions import PushRosNamespace
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -28,6 +29,10 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('color',
                               default_value='blue',
                               description='Color for the faceBox (pink, orange, blue, green, yellow, purple)'),
+        # 【一時的な単体テスト用】default_valueは空文字(=名前空間なし。bringup経由の起動には無影響)。
+        # 単体テスト時だけ robot:=cube_petit_orange のように明示的に指定する。
+        DeclareLaunchArgument('robot', default_value='', description='Robot namespace (単体テスト用、空なら無効).'),
+        PushRosNamespace(LaunchConfiguration('robot')),
         Node(
             package='cube_petit_facial_animation',
             executable='animation.py',

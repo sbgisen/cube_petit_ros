@@ -16,11 +16,13 @@
 # limitations under the License.
 #
 
+import threading
 import time
 
 from controller_manager_msgs.srv import ListControllerTypes
 import rclpy
 from rclpy.action import ActionClient
+from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 
@@ -78,10 +80,12 @@ class StartupAnnouncer(Node):
         self._started = False
         self._timer = self.create_timer(0.1, self._on_timer)
 
-    def _sleep_with_spin(self, sec: float) -> None:
-        end = time.time() + sec
-        while time.time() < end:
-            rclpy.spin_once(self, timeout_sec=0.1)
+    # NOTE: The startup sequence below runs in a worker thread while the main
+    # thread keeps spinning the node (see main()). Never call
+    # rclpy.spin_once() from here: the main executor is already spinning and
+    # a nested spin raises "Executor is already spinning" (issue #96).
+    # Subscriptions and futures are serviced by the main-thread spin, so
+    # plain sleeps + polling are enough.
 
     def _wait_controller_types(self) -> bool:
         service_name = f'{self.controller_manager_service}/list_controller_types'
@@ -101,10 +105,10 @@ class StartupAnnouncer(Node):
             req = ListControllerTypes.Request()
             future = client.call_async(req)
 
-            # Key point: wait for the future to complete by spinning with spin_once.
+            # The main-thread spin completes the future; just poll it here.
             t0 = time.time()
             while not future.done() and time.time() - t0 < 2.0:
-                rclpy.spin_once(self, timeout_sec=0.1)
+                time.sleep(0.1)
 
             if not future.done() or future.result() is None:
                 self.get_logger().info('Waiting controller types...')
@@ -153,7 +157,7 @@ class StartupAnnouncer(Node):
                 return True
 
             self.get_logger().info(f'Waiting nodes... missing: {missing}')
-            rclpy.spin_once(self, timeout_sec=0.2)
+            time.sleep(0.2)
 
         self.get_logger().warn('Node check timeout.')
         return False
@@ -165,25 +169,31 @@ class StartupAnnouncer(Node):
             if self._scan_received:
                 self.get_logger().info(f'Scan topic OK: {self.required_scan_topic}')
                 return True
-            rclpy.spin_once(self, timeout_sec=0.2)
+            time.sleep(0.2)
 
         self.get_logger().warn(f'Topic check timeout: {self.required_scan_topic}')
         return False
 
     def _on_timer(self) -> None:
+        # Fires once after the executor has started spinning, then hands the
+        # blocking startup sequence to a worker thread so the main-thread
+        # spin keeps servicing callbacks and futures.
         if self._started:
             return
         self._started = True
+        self._timer.cancel()
+        threading.Thread(target=self._run_startup_sequence, daemon=True).start()
 
+    def _run_startup_sequence(self) -> None:
         self.get_logger().info(f'Wait {self.wait_sec} sec before checks...')
-        self._sleep_with_spin(self.wait_sec)
+        time.sleep(self.wait_sec)
 
         nodes_ok = self._wait_required_nodes()
 
         topic_ok = self._wait_scan_topic()
 
         self.get_logger().info(f'Grace wait {self.controller_grace_sec} sec for controller_manager...')
-        self._sleep_with_spin(self.controller_grace_sec)
+        time.sleep(self.controller_grace_sec)
 
         controllers_ok = self._wait_controller_types()
 
@@ -193,7 +203,10 @@ class StartupAnnouncer(Node):
             return
 
         self.get_logger().info('Waiting for speech_action_server action...')
-        self._client.wait_for_server()
+        if not self._client.wait_for_server(timeout_sec=15.0):
+            self.get_logger().warn('speech_action_server action not available. Not announcing.')
+            rclpy.shutdown()
+            return
 
         goal = Speech.Goal()
         goal.text = str(self.text)
@@ -204,7 +217,15 @@ class StartupAnnouncer(Node):
         goal.volume = 100
 
         self.get_logger().info(f'Announce: {self.text}')
-        self._client.send_goal_async(goal)
+        goal_future = self._client.send_goal_async(goal)
+
+        # Make sure the goal actually reached the speech server before we
+        # shut down; the server keeps playing the announcement on its own.
+        t0 = time.time()
+        while not goal_future.done() and time.time() - t0 < 5.0:
+            time.sleep(0.1)
+        if not goal_future.done():
+            self.get_logger().warn('Speech goal delivery timed out.')
 
         rclpy.shutdown()
 
@@ -212,7 +233,12 @@ class StartupAnnouncer(Node):
 def main() -> None:
     rclpy.init()
     node = StartupAnnouncer()
-    rclpy.spin(node)
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        # Normal exit paths: Ctrl-C from the launch, or our own
+        # rclpy.shutdown() issued by the worker thread when done.
+        pass
 
 
 if __name__ == '__main__':

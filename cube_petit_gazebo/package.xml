@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="2">
+<package format="3">
   <name>cube_petit_gazebo</name>
   <version>2.2.0</version>
   <description>The cube_petit_gazebo package</description>
@@ -11,9 +11,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <exec_depend>brass_gazebo_battery</exec_depend>
-  <exec_depend>gazebo_ros_pkgs</exec_depend>
-  <exec_depend>gazebo_ros2_control</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>laser_filters</exec_depend>
   <exec_depend>nav_msgs</exec_depend>

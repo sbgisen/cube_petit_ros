@@ -9,7 +9,6 @@
 
   <depend>action_msgs</depend>
   <depend>actionlib_msgs</depend>
-  <test_depend>actionlib_tutorials</test_depend>
   <test_depend>python3-pytest</test_depend>
   <!-- <depend>actionlib</depend>
   <depend>actionlib_msgs</depend>

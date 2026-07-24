@@ -33,4 +33,6 @@ jobs:
       - name: Install test dependencies
         run: pip install pytest beartype pyyaml
       - name: Run unit tests
-        run: python -m pytest cube_petit_text_to_speech/test cube_petit_python_api/test cube_petit_bringup/test -v
+        run: >
+          python -m pytest cube_petit_text_to_speech/test cube_petit_python_api/test cube_petit_bringup/test
+          cube_petit_fleet_bridge/test -v

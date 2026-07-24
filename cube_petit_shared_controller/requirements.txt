@@ -1,0 +1,6 @@
+# Not resolvable via rosdep on jazzy/noble (checked: `rosdep resolve python3-zenoh` fails).
+# Install manually, e.g.:
+#   pip install --break-system-packages -r requirements.txt
+# or inside a venv / with uv:
+#   uv pip install -r requirements.txt
+eclipse-zenoh>=1.0.0

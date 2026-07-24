@@ -120,9 +120,14 @@ def generate_launch_description() -> LaunchDescription:
     hostname = socket.gethostname()
     namespace = hostname.replace('-', '_')
     args.append(DeclareLaunchArgument('cube_petit_host_name', default_value=namespace))
+    # Individuals are named cube_petit_<color> (e.g. cube_petit_pink), so the
+    # face color can be derived from the hostname instead of being fixed to
+    # orange for every unit. Falls back to orange for hosts that don't follow
+    # that naming convention (dev machines, etc.).
+    face_color_default = (namespace[len('cube_petit_'):] if namespace.startswith('cube_petit_') else 'orange')
     args.append(
         DeclareLaunchArgument('face_color',
-                              default_value='orange',
+                              default_value=face_color_default,
                               description='Color for the faceBox (pink, orange, blue, green, yellow, purple)'))
 
     ordered_sequence = OpaqueFunction(function=launch_in_order)

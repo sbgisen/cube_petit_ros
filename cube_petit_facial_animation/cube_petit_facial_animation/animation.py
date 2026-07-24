@@ -107,8 +107,16 @@ class ChromeNode(Node):
         """Init."""
         super().__init__('cube_facial_animation')
         self.declare_parameter('color', 'blue')
-        color_name = self.get_parameter('color').get_parameter_value().string_value
-        color_code = COLOR_MAP.get(color_name, '#42AFE3')
+        color_param = self.get_parameter('color').get_parameter_value().string_value
+        if color_param.startswith('#'):
+            # cube_petit_setup (the non-engineer setup wizard) now resolves the
+            # robot's face color to a hex code itself and passes it straight
+            # through, so a new color no longer needs a code change here.
+            color_code = color_param
+        else:
+            # Backward compatible fallback for the pre-existing named colors
+            # (e.g. launch files / bags that still pass 'orange', 'pink', ...).
+            color_code = COLOR_MAP.get(color_param, '#42AFE3')
         self.apply_color_to_css(color_code)
 
         self.chrome = Chrome()

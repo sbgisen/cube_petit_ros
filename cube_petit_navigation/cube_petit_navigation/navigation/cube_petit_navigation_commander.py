@@ -24,6 +24,7 @@ from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
 from rclpy.action import ActionClient
+from rclpy.action.client import ClientGoalHandle
 from rclpy.node import Node
 from rclpy.task import Future
 
@@ -88,13 +89,19 @@ class CubePetitNavigationCommander:
             self._result = None
 
         result_future = goal_handle.get_result_async()
-        result_future.add_done_callback(self._on_result)
+        result_future.add_done_callback(lambda f: self._on_result(f, goal_handle))
 
-    def _on_result(self, future: Future) -> None:
+    def _on_result(self, future: Future, goal_handle: ClientGoalHandle) -> None:
         result = future.result()
         status = result.status
 
         with self._lock:
+            if self._goal_handle is not goal_handle:
+                # A newer goal has already preempted this one (e.g. rapid
+                # pose: updates while chasing a moving target). This result
+                # belongs to the old, superseded goal -- ignore it so it
+                # can't clobber the newer goal's in-progress state.
+                return
             self._result = status == GoalStatus.STATUS_SUCCEEDED
             self._goal_handle = None
 

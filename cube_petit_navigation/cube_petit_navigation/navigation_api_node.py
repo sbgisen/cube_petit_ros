@@ -158,6 +158,19 @@ class NavigationApiNode(Node):
         text = msg.data.strip()
         self.get_logger().info(f'Received navigation goal: {text}')
 
+        if text.startswith('pose:'):
+            # pose: goals are allowed to preempt an in-progress navigation or
+            # patrol, unlike favorite/patrol below. This is needed for use
+            # cases like chasing another robot's live position, where the
+            # target is re-sent frequently and each update must take over
+            # immediately instead of being silently dropped because a
+            # (now-stale) previous pose goal was still "running".
+            if self._patrol_controller.is_running():
+                self._patrol_controller.cancel()
+            pose = self._parse_pose(text)
+            self._start_navigation(pose)
+            return
+
         if self._nav_commander.is_navigating() or self._patrol_controller.is_running():
             self.get_logger().info('Navigation already running')
             return
@@ -170,10 +183,6 @@ class NavigationApiNode(Node):
         elif text == 'patrol':
             self._patrol_controller.start()
             self._publish_status('patrolling')
-
-        elif text.startswith('pose:'):
-            pose = self._parse_pose(text)
-            self._start_navigation(pose)
 
         else:
             self.get_logger().warning(f'Unknown goal: {text}')

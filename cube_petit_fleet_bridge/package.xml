@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cube_petit_fleet_bridge</name>
+  <version>0.0.0</version>
+  <description>
+    Per-robot zenoh connector for Open-RMF fleet integration. Publishes pose /
+    battery / map_name / command_is_completed and subscribes to command on a
+    plain zenoh session (rmw_zenoh_cpp is not involved), so ROS_DOMAIN_ID can
+    stay different per robot while fleet_adapter_zenoh talks to every robot
+    over one shared zenoh session.
+  </description>
+  <maintainer email="SBGRP-git@g.softbank.co.jp">SoftBank corp.</maintainer>
+  <license>Apache 2.0</license>
+  <url type="repository">https://github.com/sbgisen/cube_petit_ros</url>
+  <url type="bugtracker">https://github.com/sbgisen/cube_petit_ros/issues</url>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros_py</exec_depend>
+  <exec_depend>action_msgs</exec_depend>
+  <exec_depend>rcl_interfaces</exec_depend>
+  <exec_depend>cube_petit_speech_msgs</exec_depend>
+
+  <!--
+    The zenoh to fleet_adapter_zenoh link (see fleet_bridge_logic.py / zenoh_connector.py)
+    uses the plain "eclipse-zenoh" Python library, NOT rmw_zenoh_cpp. There is no
+    rosdep key for it (checked: `rosdep resolve python3-zenoh` fails on jazzy/noble),
+    so it is not listed as an exec_depend here. It is not pip installable in an
+    externally managed environment (Ubuntu 24.04 / jazzy) without an explicit opt in
+    flag or a venv; see requirements.txt next to this file for the exact package/version
+    and install instructions. This mirrors how cube_petit_text_to_speech and
+    cube_petit_speech_to_text pin extra pip only deps in their own pyproject.toml.
+  -->
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

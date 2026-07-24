@@ -16,11 +16,11 @@
 # limitations under the License.
 #
 
+from distutils.util import strtobool
 import os
 import pathlib
-from distutils.util import strtobool
 
-import xacro
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import GroupAction
@@ -31,30 +31,28 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
-import socket
-from ament_index_python.packages import get_package_share_directory
+import xacro
+
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
-    hostname = socket.gethostname()
-    namespace = hostname.replace('-', '_')
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     xacro_file = os.path.join(description_pkg, 'xacro', 'cube_petit.xacro')
     use_sim = 'false'  # or 'false', depending on your use case
     doc = xacro.process_file(xacro_file, mappings={'use_sim': use_sim})
-    robot_description = {"robot_description": doc.toprettyxml(indent='  ')}
+    robot_description = {'robot_description': doc.toprettyxml(indent='  ')}
 
     controllers_yaml = os.path.join(
-        get_package_share_directory("cube_petit_hardware_interface"),
-        "config",
-        "cube_petit_hw_interface.yaml",
-)
+        get_package_share_directory('cube_petit_hardware_interface'),
+        'config',
+        'cube_petit_hw_interface.yaml',
+    )
 
-    control_node =Node(package="controller_manager",
-             executable="ros2_control_node",
-             parameters=[robot_description, controllers_yaml],
-             output="both",
-             )
-        
+    control_node = Node(
+        package='controller_manager',
+        executable='ros2_control_node',
+        parameters=[robot_description, controllers_yaml],
+        output='both',
+    )
 
     if strtobool(LaunchConfiguration('disable_ros_controller').perform(context)):
         return [control_node]
@@ -63,18 +61,19 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         Node(package='controller_manager',
              executable='spawner',
              output='both',
-             arguments=['joint_state_broadcaster', "--controller-manager", "controller_manager",
-                        ]),
+             arguments=[
+                 'joint_state_broadcaster',
+                 '--controller-manager',
+                 'controller_manager',
+             ]),
         Node(package='controller_manager',
              executable='spawner',
              output='both',
-             arguments=['diff_drive_controller', "--controller-manager", "controller_manager",
-                        ]),
-        Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            name='robot_state_publisher',
-            parameters=[robot_description])
+             arguments=[
+                 'diff_drive_controller',
+                 '--controller-manager',
+                 'controller_manager',
+             ]),
     ])
 
     return [control_node, controllers]
@@ -87,21 +86,17 @@ def generate_launch_description() -> LaunchDescription:
         Launch descriptions
     """
     args = []
-    args.append(DeclareLaunchArgument(
-        'robot',
-        default_value='cube_petit'))
-    args.append(DeclareLaunchArgument(
-        'robot_namespace',
-        default_value=LaunchConfiguration('robot')))
-    args.append(DeclareLaunchArgument(
-        'disable_ros_controller',
-        description='Disable basic ros controller to use customize ros controller.',
-        default_value='false'))
+    args.append(DeclareLaunchArgument('robot', default_value='cube_petit'))
+    args.append(DeclareLaunchArgument('robot_namespace', default_value=LaunchConfiguration('robot')))
+    args.append(
+        DeclareLaunchArgument('disable_ros_controller',
+                              description='Disable basic ros controller to use customize ros controller.',
+                              default_value='false'))
 
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
-    args.append(DeclareLaunchArgument(
-        'hardware_config',
-        default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
+    args.append(
+        DeclareLaunchArgument('hardware_config',
+                              default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
 
     socketcan_bridge_pkg = pathlib.Path(FindPackageShare('ros2_socketcan').find('ros2_socketcan'))
     socketcan_bridge = IncludeLaunchDescription(
@@ -113,15 +108,13 @@ def generate_launch_description() -> LaunchDescription:
             'sender_timeout_sec': '0.01',
             'enable_can_fd': 'false',
             'from_can_bus_topic': 'from_can_bus',
-            'to_can_bus_topic': 'to_can_bus'}.items()
-    )
-
-
+            'to_can_bus_topic': 'to_can_bus'
+        }.items())
 
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
-    args.append(DeclareLaunchArgument(
-        'hardware_config',
-        default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
+    args.append(
+        DeclareLaunchArgument('hardware_config',
+                              default_value=str(pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro')))
 
     return LaunchDescription(args + [
         OpaqueFunction(function=launch_setup),

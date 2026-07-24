@@ -66,7 +66,7 @@ class Chrome():
         # can terminate the whole group instead of only the top-level process.
         self._p = subprocess.Popen([
             'google-chrome', '--new-window', '--start-fullscreen', '--disable-features=Translate', '--guest',
-            '--kiosk', '--start-maximized', '--password-store=basic', '--no-default-browser-check',
+            '--kiosk', '--start-maximized', '--password-store=basic', '--no-default-browser-check', '--no-first-run',
             '--hide-crash-restore-bubble', f'--user-data-dir={chrome_user_data_dir}', html_path
         ],
                                    start_new_session=True)

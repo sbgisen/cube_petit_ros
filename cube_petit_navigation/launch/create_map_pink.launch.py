@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Thin wrapper of create_map.launch.py for the pink robot.
+"""Thin wrapper of create_map.launch.py for the pink robot (kept for tooling compatibility).
 
-slam_pink.yaml is kept as a robot-specific file because it differs from the shared slam.yaml
-in SLAM tuning values (map_update_interval, minimum_travel_distance, etc.), not only in the
-robot namespace.
+Previously used a pink-specific slam_pink.yaml/scan_topic override; consolidated onto the
+shared create_map.launch.py defaults (slam.yaml, laser/scan) since the original reason for
+the divergence no longer applies (2026-07-27).
 """
 import pathlib
 
@@ -40,8 +40,6 @@ def generate_launch_description() -> LaunchDescription:
             PythonLaunchDescriptionSource(str(pkg_share / 'launch/create_map.launch.py')),
             launch_arguments={
                 'robot': 'cube_petit_pink',
-                'params_file': str(pkg_share / 'config/slam_pink.yaml'),
-                'scan_topic': 'laser/scan_filtered',
             }.items(),
         ),
     ])

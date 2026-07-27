@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""Thin wrapper of navigation.launch.py for the pink robot.
+"""Thin wrapper of navigation.launch.py for the pink robot (kept for tooling compatibility).
 
-nav2_params_pink.yaml is kept as a robot-specific file because it differs from the shared
-nav2_params.yaml in values (e.g. keepout filter applied to the local costmap), not only in
-the robot namespace.
+Previously used a pink-specific nav2_params_pink.yaml (keepout filter, tuning); consolidated
+onto the shared navigation.launch.py default (nav2_params.yaml) since the original reason for
+the divergence no longer applies (2026-07-27).
 """
 import pathlib
 
@@ -40,7 +40,6 @@ def generate_launch_description() -> LaunchDescription:
             PythonLaunchDescriptionSource(str(pkg_share / 'launch/navigation.launch.py')),
             launch_arguments={
                 'robot': 'cube_petit_pink',
-                'params_file': str(pkg_share / 'config/nav2_params_pink.yaml'),
             }.items(),
         ),
     ])

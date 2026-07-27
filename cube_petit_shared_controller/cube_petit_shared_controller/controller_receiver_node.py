@@ -73,11 +73,17 @@ class ControllerReceiverNode(Node):
         # ================= parameters =================
 
         self.declare_parameter('robot_name', '')
-        self.declare_parameter('output_cmd_vel_topic', 'diff_drive_controller/cmd_vel')
+        # diff_drive_controller/cmd_velへ直接出さずtwist_mux用の入力トピックへ出す(優先度90、
+        # navigationより上・現地joystickより下。twist_mux.yaml参照)。
+        # Publishes to twist_mux's input topic rather than diff_drive_controller/cmd_vel
+        # directly, so twist_mux can arbitrate against navigation/local joystick (priority 90;
+        # see twist_mux.yaml).
+        self.declare_parameter('output_cmd_vel_topic', 'diff_drive_controller/twist_mux/cmd_vel_shared_controller')
         self.declare_parameter('zenoh_endpoint', 'tcp/cube-petit-orange.local:7447')
         self.declare_parameter('zenoh_mode', 'client')
         self.declare_parameter('announcement_enabled', True)
-        self.declare_parameter('announcement_text', '自分だよ!')
+        self.declare_parameter('announcement_selected_text', 'コントローラオン!')
+        self.declare_parameter('announcement_deselected_text', 'コントローラオフ!')
         self.declare_parameter('announcement_emotion', 'happiness')
         self.declare_parameter('announcement_emotion_level', 2)
         self.declare_parameter('announcement_pitch', 120)
@@ -153,10 +159,11 @@ class ControllerReceiverNode(Node):
 
         if newly_selected and not was_selected:
             self.get_logger().info(f'Selected as one of the controlled robots (selection={selected_robot_names!r})')
-            self._announce_selected()
+            self._announce(str(self.get_parameter('announcement_selected_text').value))
         elif was_selected and not newly_selected:
             self.get_logger().info(f'No longer selected (selection={selected_robot_names!r}); publishing zero cmd_vel')
             self._publish_cmd_vel(0.0, 0.0)
+            self._announce(str(self.get_parameter('announcement_deselected_text').value))
 
     # =================================================
     # controller/cmd_vel -> drive the local diff_drive_controller, only if selected
@@ -185,19 +192,19 @@ class ControllerReceiverNode(Node):
         self._cmd_vel_pub.publish(msg)
 
     # =================================================
-    # "It's me!" announcement on becoming the selected robot
+    # "Controller on/off!" announcement on selection change
     # =================================================
 
-    def _announce_selected(self) -> None:
-        if not self._announcement_enabled:
+    def _announce(self, text: str) -> None:
+        if not self._announcement_enabled or not text:
             return
 
         if not self._speech_client.wait_for_server(timeout_sec=_SPEECH_SERVER_TIMEOUT_SEC):
-            self.get_logger().warning('speech_action_server not available; skipping "selected" announcement')
+            self.get_logger().warning(f'speech_action_server not available; skipping announcement {text!r}')
             return
 
         goal = Speech.Goal()
-        goal.text = str(self.get_parameter('announcement_text').value)
+        goal.text = text
         goal.emotion = str(self.get_parameter('announcement_emotion').value)
         goal.emotion_level = int(self.get_parameter('announcement_emotion_level').value)
         goal.pitch = int(self.get_parameter('announcement_pitch').value)

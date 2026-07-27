@@ -24,6 +24,7 @@ from launch.actions import GroupAction
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import PushRosNamespace
+from launch_ros.actions import SetRemap
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -40,6 +41,11 @@ def generate_launch_description() -> LaunchDescription:
 
     teleop_joy = GroupAction([
         PushRosNamespace('diff_drive_controller'),
+        # twist_muxが調停できるよう、直接cmd_velには出さずtwist_mux用の入力トピックへ出す
+        # (twist_mux.yamlのjoystickエントリ、優先度100=最優先)。
+        # Publish to twist_mux's input topic instead of cmd_vel directly, so twist_mux can
+        # arbitrate (see twist_mux.yaml's `joystick` entry, priority 100 = highest).
+        SetRemap('cmd_vel', 'twist_mux/cmd_vel_joy'),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(
             os.path.join(teleop_twist_joy_dir, 'launch', 'teleop-launch.py')),
                                  launch_arguments={

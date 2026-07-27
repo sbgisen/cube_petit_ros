@@ -80,6 +80,22 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/lidar.launch.py'))),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/depth.launch.py'))),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(bringup_pkg / 'launch/teleop.launch.py'))),
+        # 現地joystick・shared_controller(遠隔操作)・navigationの3つのcmd_velソースを
+        # 優先度で調停する(twist_mux.yaml参照)。常時起動しておき、実際にどのソースも
+        # 送信していなければ何も出力しない(無害)。
+        # Arbitrates the three cmd_vel sources (local joystick, shared_controller remote
+        # teleop, navigation) by priority (see twist_mux.yaml). Always running is harmless:
+        # it simply outputs nothing while no source is actively publishing.
+        GroupAction([
+            PushRosNamespace('diff_drive_controller'),
+            Node(
+                package='twist_mux',
+                executable='twist_mux',
+                name='twist_mux',
+                parameters=[str(bringup_pkg / 'config/twist_mux.yaml')],
+                remappings=[('cmd_vel_out', 'cmd_vel')],
+            ),
+        ]),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
         IncludeLaunchDescription(

@@ -1,0 +1,41 @@
+# Copyright (c) 2026 SoftBank Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# 現地の直接操縦(joystick)・shared_controller(遠隔操縦)・navigation(自律移動)の
+# 3つのcmd_velソースを優先度で調停する。timeoutを過ぎた(=そのソースが送信を止めた)
+# ソースは自動的に無視され、次に優先度の高いソースへフォールバックする(例:
+# コントローラのスティックを離せば自動でnavigationの制御に戻る)。
+#
+# Arbitrates between the three cmd_vel sources (local joystick teleop,
+# shared_controller remote teleop, navigation) by priority. A source that stops
+# publishing for `timeout` seconds is automatically ignored, falling back to the
+# next-highest-priority active source (e.g. releasing the joystick stick
+# automatically hands control back to navigation).
+twist_mux:
+  ros__parameters:
+    use_stamped: true
+    topics:
+      joystick:
+        topic: twist_mux/cmd_vel_joy
+        timeout: 0.5
+        priority: 100
+      shared_controller:
+        topic: twist_mux/cmd_vel_shared_controller
+        timeout: 0.5
+        priority: 90
+      navigation:
+        topic: twist_mux/cmd_vel_nav
+        timeout: 0.5
+        priority: 10
+    locks: []

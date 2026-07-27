@@ -247,12 +247,18 @@ def generate_launch_description() -> LaunchDescription:
         ],
         output='screen',
     )
+    # twist_muxが調停できるよう、diff_drive_controller/cmd_velへ直接relayせずtwist_mux用の
+    # 入力トピックへ出す(twist_mux.yamlのnavigationエントリ、優先度10=最低。joystickや
+    # shared_controllerが動いていない間だけ有効になる)。
+    # Relay into twist_mux's input topic instead of diff_drive_controller/cmd_vel directly, so
+    # twist_mux can arbitrate (see twist_mux.yaml's `navigation` entry, priority 10 = lowest;
+    # only takes effect while neither joystick nor shared_controller is active).
     relay = Node(
         package='topic_tools',
         executable='relay',
         arguments=[
             ['/', LaunchConfiguration('robot'), '/navigation/cmd_vel'],
-            ['/', LaunchConfiguration('robot'), '/diff_drive_controller/cmd_vel'],
+            ['/', LaunchConfiguration('robot'), '/diff_drive_controller/twist_mux/cmd_vel_nav'],
         ],
         output='screen',
     )

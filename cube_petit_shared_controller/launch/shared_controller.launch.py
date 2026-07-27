@@ -30,9 +30,6 @@ Usage::
     ros2 launch cube_petit_shared_controller shared_controller.launch.py role:=receiver
 """
 
-import os
-
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import GroupAction
@@ -61,8 +58,6 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         ]
         joy_topic = LaunchConfiguration('joy_topic').perform(context)
         local_cmd_vel_topic = LaunchConfiguration('local_cmd_vel_topic').perform(context)
-        ps4_config_filepath = os.path.join(get_package_share_directory('cube_petit_bringup'), 'config',
-                                           'ps4.config.yaml')
 
         return [
             GroupAction([
@@ -73,12 +68,36 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                 # running here, see role:=receiver above) never feeds this relay's own
                 # subscription back into itself. Does not start its own joy_node: it reads
                 # the /joy topic already published by teleop.launch.py.
+                #
+                # ps4.config.yaml自体は使わない: そのファイルは`/**/teleop_twist_joy_node:`
+                # というワイルドカードキーで、"ノード名がteleop_twist_joy_nodeである"ことが
+                # 適用条件になっている。このノードはteleop.launch.py側の同名インスタンスと
+                # 衝突しないよう名前を変えているため、ワイルドカードが一致せずデフォルト値
+                # (enable_button等)にフォールバックしてしまい、実機で「ボタン選択は効くのに
+                # スティックで動かない」不具合になっていた(2026-07-28判明)。ノード名に
+                # 依存しないよう、必要な値をそのままここで指定する。
+                #
+                # ps4.config.yaml itself is NOT used here: it keys its parameters under the
+                # wildcard `/**/teleop_twist_joy_node:`, which only applies when the node's
+                # NAME is literally `teleop_twist_joy_node`. This node is deliberately renamed
+                # to avoid clashing with teleop.launch.py's own instance, so the wildcard never
+                # matched and it silently fell back to library defaults (wrong enable_button
+                # etc.) -- on real hardware this looked like "robot selection works but the
+                # stick does nothing" (found 2026-07-28). Inline the needed values instead so
+                # they don't depend on the node's name.
                 Node(
                     package='teleop_twist_joy',
                     executable='teleop_node',
                     name='shared_controller_teleop_twist_joy_node',
-                    parameters=[ps4_config_filepath, {
+                    parameters=[{
                         'publish_stamped_twist': False,
+                        'axis_linear.x': 1,
+                        'scale_linear.x': 0.3,
+                        'scale_linear_turbo.x': 0.7,
+                        'axis_angular.yaw': 0,
+                        'scale_angular.yaw': 5.0,
+                        'enable_button': 0,
+                        'enable_turbo_button': 5,
                     }],
                     remappings=[('joy', joy_topic), ('cmd_vel', local_cmd_vel_topic)],
                 ),
@@ -95,7 +114,19 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                         'local_cmd_vel_topic': local_cmd_vel_topic,
                         'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
                         'zenoh_mode': LaunchConfiguration('zenoh_mode'),
-                        'initial_robot_names': initial_robot_names,
+                        # 空リストをROS2パラメータとして渡すと要素型を推論できずlaunchが
+                        # "Expected 'value' to be one of [...], but got '()' of type
+                        # 'tuple'"で落ちる(実機で確認)。デフォルト(誰も選択なし)の
+                        # ときはキー自体を渡さず、ノード側のdeclare_parameterの
+                        # 型付きデフォルト([])に任せる。
+                        # Passing an empty list as a ROS2 parameter makes launch fail with
+                        # "Expected 'value' to be one of [...], but got '()' of type
+                        # 'tuple'" (confirmed on real hardware) since the element type can't
+                        # be inferred. When nothing is pre-selected, omit the key entirely and
+                        # let the node's own typed declare_parameter default ([]) apply.
+                        **({
+                            'initial_robot_names': initial_robot_names
+                        } if initial_robot_names else {}),
                     }],
                 ),
             ]),
@@ -116,7 +147,8 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                         'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
                         'zenoh_mode': LaunchConfiguration('zenoh_mode'),
                         'announcement_enabled': LaunchConfiguration('announcement_enabled'),
-                        'announcement_text': LaunchConfiguration('announcement_text'),
+                        'announcement_selected_text': LaunchConfiguration('announcement_selected_text'),
+                        'announcement_deselected_text': LaunchConfiguration('announcement_deselected_text'),
                     }],
                 ),
             ]),
@@ -180,16 +212,21 @@ def generate_launch_description() -> LaunchDescription:
                               description="This individual's name, compared against controller/selected_robot. "
                               'Empty means: use the ROBOT_NAMESPACE env var if set, else robot_namespace.'),
         DeclareLaunchArgument('output_cmd_vel_topic',
-                              default_value='diff_drive_controller/cmd_vel',
-                              description='Real actuator topic (relative to robot_namespace) to publish '
-                              'TwistStamped to while selected.'),
+                              default_value='diff_drive_controller/twist_mux/cmd_vel_shared_controller',
+                              description='Topic (relative to robot_namespace) to publish TwistStamped to '
+                              'while selected. Feeds into twist_mux for arbitration against navigation and '
+                              'the local joystick teleop -- not diff_drive_controller/cmd_vel directly '
+                              '(see cube_petit_bringup/config/twist_mux.yaml).'),
         DeclareLaunchArgument('announcement_enabled',
                               default_value='true',
-                              description='Whether to speak an "it\'s me" announcement when this individual '
-                              'becomes the selected robot.'),
-        DeclareLaunchArgument('announcement_text',
-                              default_value='自分だよ!',
+                              description='Whether to speak an announcement when this individual is selected/'
+                              'deselected as a controlled robot.'),
+        DeclareLaunchArgument('announcement_selected_text',
+                              default_value='コントローラオン!',
                               description='Text spoken via speech_action_server when selected.'),
+        DeclareLaunchArgument('announcement_deselected_text',
+                              default_value='コントローラオフ!',
+                              description='Text spoken via speech_action_server when deselected.'),
         # ---- shared ----
         DeclareLaunchArgument('zenoh_router_endpoint',
                               default_value='tcp/cube-petit-orange.local:7447',

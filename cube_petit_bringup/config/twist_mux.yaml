@@ -25,6 +25,17 @@
 /**/twist_mux:
   ros__parameters:
     use_stamped: true
+    # locksパラメータは意図的に省略している(ロック機構自体を使わないため)。
+    # locksはtopicsと違いロック名ごとのマップなので、空リスト[]を渡すと
+    # ROS2パラメータローダーが型を推論できずlaunch時にInvalidParameterValueException
+    # ("parameter_value_from failed for parameter 'locks': No parameter value set")
+    # でクラッシュする(実機で確認、initial_robot_namesの空リスト問題と同種)。
+    #
+    # The locks parameter is deliberately omitted (we don't use the lock feature).
+    # Unlike topics, locks is a name-keyed map, and passing an empty list [] makes
+    # the ROS2 parameter loader unable to infer a type, crashing at launch with
+    # InvalidParameterValueException (confirmed on real hardware; same class of bug
+    # as the empty initial_robot_names list).
     topics:
       joystick:
         topic: twist_mux/cmd_vel_joy
@@ -38,4 +49,3 @@
         topic: twist_mux/cmd_vel_nav
         timeout: 0.5
         priority: 10
-    locks: []

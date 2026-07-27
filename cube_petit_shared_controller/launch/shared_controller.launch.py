@@ -51,7 +51,14 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         robot_names = [
             name.strip() for name in LaunchConfiguration('robot_names').perform(context).split(',') if name.strip()
         ]
-        switch_button = int(LaunchConfiguration('switch_button').perform(context))
+        toggle_buttons = [
+            int(b.strip()) for b in LaunchConfiguration('toggle_buttons').perform(context).split(',') if b.strip()
+        ]
+        initial_robot_names = [
+            name.strip()
+            for name in LaunchConfiguration('initial_robot_names').perform(context).split(',')
+            if name.strip()
+        ]
         joy_topic = LaunchConfiguration('joy_topic').perform(context)
         local_cmd_vel_topic = LaunchConfiguration('local_cmd_vel_topic').perform(context)
         ps4_config_filepath = os.path.join(get_package_share_directory('cube_petit_bringup'), 'config',
@@ -82,12 +89,13 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                     output='screen',
                     parameters=[{
                         'robot_names': robot_names,
-                        'switch_button': switch_button,
+                        'toggle_buttons': toggle_buttons,
+                        'exclusive_modifier_button': LaunchConfiguration('exclusive_modifier_button'),
                         'joy_topic': joy_topic,
                         'local_cmd_vel_topic': local_cmd_vel_topic,
                         'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
                         'zenoh_mode': LaunchConfiguration('zenoh_mode'),
-                        'initial_robot_name': LaunchConfiguration('initial_robot_name'),
+                        'initial_robot_names': initial_robot_names,
                     }],
                 ),
             ]),
@@ -135,15 +143,24 @@ def generate_launch_description() -> LaunchDescription:
         # ---- role:=hub only ----
         DeclareLaunchArgument('robot_names',
                               default_value='cube_petit_orange,cube_petit_pink',
-                              description='Comma-separated candidate robot names to cycle through on '
-                              'switch_button. Order matters (toggle order).'),
-        DeclareLaunchArgument('switch_button',
-                              default_value='2',
-                              description='sensor_msgs/Joy buttons[] index that cycles the selected robot on '
-                              'its rising edge (nominally Triangle on a PS4 pad). Buttons 0 (X, enable_button) '
-                              'and 5 (L1, enable_turbo_button) are already used by ps4.config.yaml -- do not '
-                              'reuse those. NEEDS REAL-ROBOT VERIFICATION: confirm the actual index with '
-                              '`ros2 topic echo <joy_topic>` while pressing the intended button.'),
+                              description='Comma-separated candidate robot names, in the same order as '
+                              'toggle_buttons (robot_names[i] <-> toggle_buttons[i]).'),
+        DeclareLaunchArgument('toggle_buttons',
+                              default_value='2,1,3',
+                              description='Comma-separated sensor_msgs/Joy buttons[] indices, one per '
+                              'robot_names entry (nominally Triangle/Circle/Square on a PS4 pad). A rising '
+                              "edge toggles that robot's membership in the selected set (multiple robots can "
+                              'be selected at once -- they all move together from the one controller). '
+                              'Buttons 0 (X, enable_button) and 5 (L1, enable_turbo_button) are already used '
+                              'by ps4.config.yaml -- do not reuse those. NEEDS REAL-ROBOT VERIFICATION: '
+                              'confirm the actual indices with `ros2 topic echo <joy_topic>` while pressing '
+                              'each intended button.'),
+        DeclareLaunchArgument('exclusive_modifier_button',
+                              default_value='4',
+                              description='Held while pressing a toggle_buttons entry -> switch to '
+                              'controlling just that one robot (drops every other selection) instead of '
+                              'adding/removing it from the group. NEEDS REAL-ROBOT VERIFICATION like '
+                              'toggle_buttons.'),
         DeclareLaunchArgument('joy_topic',
                               default_value='diff_drive_controller/joy',
                               description='Local /joy topic (relative to robot_namespace) published by '
@@ -153,10 +170,10 @@ def generate_launch_description() -> LaunchDescription:
                               description='Internal-only topic the dedicated teleop_twist_joy_node instance '
                               'publishes to. Deliberately distinct from diff_drive_controller/cmd_vel; see '
                               "this file's module docstring."),
-        DeclareLaunchArgument('initial_robot_name',
+        DeclareLaunchArgument('initial_robot_names',
                               default_value='',
-                              description='Robot selected at startup, before any button press. Empty means '
-                              'robot_names[0].'),
+                              description='Comma-separated robots selected at startup, before any button '
+                              'press. Empty means nobody selected (nothing moves until a button is pressed).'),
         # ---- role:=receiver only ----
         DeclareLaunchArgument('robot_name',
                               default_value='',

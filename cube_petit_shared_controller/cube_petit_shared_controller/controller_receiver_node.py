@@ -24,7 +24,9 @@ the ``controller/selected_robot`` and ``controller/cmd_vel`` zenoh keys publishe
 ControllerHubNode and republishes velocity commands to this individual's own
 ``diff_drive_controller/cmd_vel`` (``geometry_msgs/msg/TwistStamped``, matching
 ``teleop.launch.py``'s ``publish_stamped_twist: true``) **only** while this individual's name
-matches the selection. Individuals that are not selected never move.
+is a member of the selected *set*. Individuals that are not selected never move; every
+individual that is selected drives the exact same command (multiple robots can be selected
+at once, all moving together from the one controller).
 
 Requires the `eclipse-zenoh` pip package, same as cube_petit_fleet_bridge (see this package's
 requirements.txt).
@@ -139,21 +141,21 @@ class ControllerReceiverNode(Node):
 
     def _on_selected_robot(self, sample: 'zenoh.Sample') -> None:
         try:
-            selected_robot_name = logic.decode_selected_robot(sample.payload.to_bytes())
+            selected_robot_names = logic.decode_selected_robots(sample.payload.to_bytes())
         except logic.ControllerMessageError as error:
             self.get_logger().warning(f'Dropping malformed controller/selected_robot payload: {error}')
             return
 
-        newly_selected = selected_robot_name == self._robot_name
+        newly_selected = self._robot_name in selected_robot_names
         with self._lock:
             was_selected = self._is_selected
             self._is_selected = newly_selected
 
         if newly_selected and not was_selected:
-            self.get_logger().info(f'Selected as the controlled robot (selection={selected_robot_name!r})')
+            self.get_logger().info(f'Selected as one of the controlled robots (selection={selected_robot_names!r})')
             self._announce_selected()
         elif was_selected and not newly_selected:
-            self.get_logger().info(f'No longer selected (selection={selected_robot_name!r}); publishing zero cmd_vel')
+            self.get_logger().info(f'No longer selected (selection={selected_robot_names!r}); publishing zero cmd_vel')
             self._publish_cmd_vel(0.0, 0.0)
 
     # =================================================

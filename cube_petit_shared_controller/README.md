@@ -1,10 +1,10 @@
 # cube_petit_shared_controller
 
 Lets **one** PS4 controller, physically (Bluetooth) paired to a single "hub" individual,
-drive **whichever** CubePetit individual is currently selected -- switched instantly with a
-button press, no Bluetooth re-pairing. Relays over a plain `eclipse-zenoh` session, the same
-library `cube_petit_fleet_bridge` uses (see that package's `zenoh_connector.py` for the
-established pattern this package follows).
+drive **whichever CubePetit individuals are currently selected** -- one, several, or all of
+them at once, switched instantly with button presses, no Bluetooth re-pairing. Relays over a
+plain `eclipse-zenoh` session, the same library `cube_petit_fleet_bridge` uses (see that
+package's `zenoh_connector.py` for the established pattern this package follows).
 
 ## Why not just re-pair Bluetooth?
 
@@ -18,11 +18,19 @@ individual and relays commands to whichever individual is selected instead.
 
 - `controller_hub_node` subscribes the local `/joy` topic (published by the existing
   `joy_node`, started separately by `cube_petit_bringup/launch/teleop.launch.py`) and detects
-  the **rising edge** of `switch_button` (default button `2`, nominally Triangle -- buttons
-  `0`/X and `5`/L1 are already used by `ps4.config.yaml`'s `enable_button` /
-  `enable_turbo_button`, see that file). Each press cycles to the next name in `robot_names`
-  (default `cube_petit_orange,cube_petit_pink`) and publishes it to the `controller/selected_robot`
-  zenoh key as `{"robot_name": "..."}`.
+  the **rising edge** of each `toggle_buttons[i]` -- one dedicated button per `robot_names[i]`
+  (default `toggle_buttons=2,1,3` / `robot_names=cube_petit_orange,cube_petit_pink`, nominally
+  Triangle/Circle/Square -- buttons `0`/X and `5`/L1 are already used by `ps4.config.yaml`'s
+  `enable_button` / `enable_turbo_button`, see that file):
+  - **Plain press**: toggles that robot's membership in the *selected set* (add if absent,
+    remove if present). Select several, or all of them, to have them all move together from
+    this one controller.
+  - **Held `exclusive_modifier_button`(default `4`) + press**: switches to controlling
+    *only* that robot (drops every other selection) -- the classic "switch between
+    individuals" workflow, in one press.
+
+  Either way, the full selected set is published to the `controller/selected_robot` zenoh key
+  as `{"robot_names": ["...", ...]}`.
 - A second, dedicated `teleop_twist_joy_node` instance (started by this package's launch file,
   reusing `cube_petit_bringup/config/ps4.config.yaml`) turns `/joy` into a `Twist` on a
   **local-only** topic (`local_cmd_vel_topic`, default
@@ -52,8 +60,9 @@ real hardware -- left as a separate launch for now so it's easy to disable indep
   `'cube_petit'`.
 - Only republishes `controller/cmd_vel` to this individual's own
   `diff_drive_controller/cmd_vel` (`geometry_msgs/msg/TwistStamped`, matching
-  `teleop.launch.py`'s `publish_stamped_twist: true`) **while its name matches the current
-  selection**. Individuals that are not selected never move.
+  `teleop.launch.py`'s `publish_stamped_twist: true`) **while its name is a member of the
+  current selected set**. Individuals that are not selected never move; every individual that
+  *is* selected drives the exact same command.
 - The instant this individual **becomes** selected (was not selected, now is), it speaks a
   short "it's me" announcement (`announcement_text`, default `自分だよ!`) through
   `speech_action_server` (`cube_petit_speech_msgs/action/Speech`), the same action
@@ -76,10 +85,10 @@ on the hub individual.
 
 ## Zenoh keys
 
-| Key                          | Published by | Payload                                      |
-|-------------------------------|---------------|-----------------------------------------------|
-| `controller/selected_robot`   | hub           | `{"robot_name": "cube_petit_pink"}`            |
-| `controller/cmd_vel`          | hub           | `{"linear_x": 0.1, "angular_z": -0.5}`         |
+| Key                          | Published by | Payload                                             |
+|-------------------------------|---------------|------------------------------------------------------|
+| `controller/selected_robot`   | hub           | `{"robot_names": ["cube_petit_pink", "cube_petit_orange"]}` |
+| `controller/cmd_vel`          | hub           | `{"linear_x": 0.1, "angular_z": -0.5}`                |
 
 These are independent of `cube_petit_fleet_bridge`'s `robots/<robot_name>/...` keys.
 
@@ -87,12 +96,15 @@ These are independent of `cube_petit_fleet_bridge`'s `robots/<robot_name>/...` k
 
 The most important ones for real-robot bring-up:
 
-- `switch_button` (hub, default `2`): **NEEDS REAL-ROBOT VERIFICATION** -- joystick button
-  indices depend on the OS/driver mapping and can differ from the nominal PS4 layout. Confirm
-  with `ros2 topic echo <joy_topic>` while pressing the intended button, and pass the actual
-  index via this parameter if it differs.
-- `robot_names` (hub, default `cube_petit_orange,cube_petit_pink`): comma-separated toggle
-  order.
+- `toggle_buttons` (hub, default `2,1,3`): **NEEDS REAL-ROBOT VERIFICATION** -- joystick
+  button indices depend on the OS/driver mapping and can differ from the nominal PS4 layout.
+  Confirm with `ros2 topic echo <joy_topic>` while pressing each intended button, and pass
+  the actual indices via this parameter if they differ.
+- `exclusive_modifier_button` (hub, default `4`): same caveat -- held while pressing a
+  `toggle_buttons` entry to switch to controlling just that one robot instead of
+  adding/removing it from the group.
+- `robot_names` (hub, default `cube_petit_orange,cube_petit_pink`): comma-separated, same
+  order as `toggle_buttons`.
 - `zenoh_router_endpoint` (both, default `tcp/cube-petit-orange.local:7447`): same default
   router address as `cube_petit_fleet_bridge`.
 

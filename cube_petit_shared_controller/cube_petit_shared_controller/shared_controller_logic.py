@@ -26,9 +26,16 @@ Zenoh key convention (this package only; unrelated to fleet_adapter_zenoh's
 ``robots/<robot_name>/...`` keys used by cube_petit_fleet_bridge):
 
     controller/selected_robot   (pub by hub, sub by every receiver)
-        {"robot_name": "cube_petit_pink"}
+        {"robot_names": ["cube_petit_pink", "cube_petit_orange"]}
     controller/cmd_vel          (pub by hub, sub by every receiver)
         {"linear_x": float, "angular_z": float}
+
+``selected_robot`` carries a *set* of names (as an ordered list on the wire), not a single
+one: every individual whose name is in the set drives the exact same ``cmd_vel`` at once
+("all selected petit move together from one controller"). A receiver's gating logic is an
+unconditional ``self._robot_name in selected_names`` membership check either way, so this
+supports 1 selected robot (the original "switch between individuals" use case) just as well
+as N.
 """
 
 from __future__ import annotations
@@ -36,7 +43,7 @@ from __future__ import annotations
 import json
 import typing
 
-#: zenoh key the hub publishes the currently selected robot name to.
+#: zenoh key the hub publishes the currently selected robot name *set* to.
 SELECTED_ROBOT_KEY = 'controller/selected_robot'
 #: zenoh key the hub publishes the joystick-derived velocity command to.
 CMD_VEL_KEY = 'controller/cmd_vel'
@@ -73,28 +80,29 @@ def _decode_json_object(payload: typing.Union[bytes, bytearray, str]) -> dict:
     return data
 
 
-def encode_selected_robot(robot_name: str) -> str:
-    """Encode the currently selected robot name as the ``controller/selected_robot`` payload."""
-    return json.dumps({'robot_name': robot_name})
+def encode_selected_robots(robot_names: typing.Iterable[str]) -> str:
+    """Encode the currently selected robot name *set* as the ``controller/selected_robot`` payload."""
+    return json.dumps({'robot_names': list(robot_names)})
 
 
-def decode_selected_robot(payload: typing.Union[bytes, bytearray, str]) -> str:
+def decode_selected_robots(payload: typing.Union[bytes, bytearray, str]) -> typing.List[str]:
     """Decode a ``controller/selected_robot`` payload.
 
     Args:
         payload: Raw zenoh payload.
 
     Returns:
-        The selected robot name.
+        The selected robot names (may be empty: nobody selected).
 
     Raises:
-        ControllerMessageError: If the payload is malformed or ``robot_name`` is missing/empty.
+        ControllerMessageError: If the payload is malformed or ``robot_names`` is not a list
+            of non-empty strings.
     """
     data = _decode_json_object(payload)
-    robot_name = data.get('robot_name')
-    if not isinstance(robot_name, str) or not robot_name:
-        raise ControllerMessageError(f"Expected a non-empty string 'robot_name': {data!r}")
-    return robot_name
+    robot_names = data.get('robot_names')
+    if not isinstance(robot_names, list) or not all(isinstance(name, str) and name for name in robot_names):
+        raise ControllerMessageError(f"Expected a list of non-empty strings 'robot_names': {data!r}")
+    return robot_names
 
 
 def encode_cmd_vel(linear_x: float, angular_z: float) -> str:
@@ -128,22 +136,32 @@ def decode_cmd_vel(payload: typing.Union[bytes, bytearray, str]) -> typing.Tuple
 # =================================================
 
 
-def next_robot_index(current_index: int, num_robots: int) -> int:
-    """Compute the index to toggle to next, wrapping around ``robot_names``.
+def toggle_robot_selection(selected: typing.FrozenSet[str], robot_name: str) -> typing.FrozenSet[str]:
+    """Toggle one robot's membership in the selected set (one button = one robot).
+
+    Use this for "select several / everyone" -- press each robot's button to add it to the
+    group that will move together, press again to drop it back out.
 
     Args:
-        current_index: Index of the currently selected robot.
-        num_robots: Number of candidate robots (``len(robot_names)``).
+        selected: Currently selected robot names.
+        robot_name: The robot whose ``toggle_buttons`` entry just had a rising edge.
 
     Returns:
-        The next index, ``(current_index + 1) % num_robots``.
-
-    Raises:
-        ValueError: If ``num_robots`` is not positive.
+        The updated selected set: ``robot_name`` removed if it was present, added otherwise.
     """
-    if num_robots <= 0:
-        raise ValueError('num_robots must be positive (robot_names must not be empty)')
-    return (current_index + 1) % num_robots
+    if robot_name in selected:
+        return selected - {robot_name}
+    return selected | {robot_name}
+
+
+def exclusive_robot_selection(robot_name: str) -> typing.FrozenSet[str]:
+    """Select exactly ``robot_name``, dropping every other currently-selected robot.
+
+    Use this for "switch to controlling just this one" (the ``exclusive_modifier_button``
+    held down while pressing a robot's toggle button) -- the classic single-robot
+    switch-between-individuals workflow, in one press instead of deselect-then-select.
+    """
+    return frozenset({robot_name})
 
 
 def button_rising_edge(previous_buttons: typing.Sequence[int], current_buttons: typing.Sequence[int],

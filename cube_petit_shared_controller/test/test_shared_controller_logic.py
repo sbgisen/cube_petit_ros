@@ -26,28 +26,36 @@ from cube_petit_shared_controller import shared_controller_logic as logic
 class TestSelectedRobotCodec:
 
     def test_round_trip(self) -> None:
-        payload = logic.encode_selected_robot('cube_petit_pink')
-        assert json.loads(payload) == {'robot_name': 'cube_petit_pink'}
-        assert logic.decode_selected_robot(payload) == 'cube_petit_pink'
+        payload = logic.encode_selected_robots(['cube_petit_pink', 'cube_petit_orange'])
+        assert json.loads(payload) == {'robot_names': ['cube_petit_pink', 'cube_petit_orange']}
+        assert logic.decode_selected_robots(payload) == ['cube_petit_pink', 'cube_petit_orange']
+
+    def test_round_trip_empty(self) -> None:
+        payload = logic.encode_selected_robots([])
+        assert logic.decode_selected_robots(payload) == []
 
     def test_decode_accepts_bytes(self) -> None:
-        assert logic.decode_selected_robot(b'{"robot_name": "cube_petit_orange"}') == 'cube_petit_orange'
+        assert logic.decode_selected_robots(b'{"robot_names": ["cube_petit_orange"]}') == ['cube_petit_orange']
 
     def test_decode_rejects_invalid_json(self) -> None:
         with pytest.raises(logic.ControllerMessageError):
-            logic.decode_selected_robot('not json')
+            logic.decode_selected_robots('not json')
 
     def test_decode_rejects_missing_field(self) -> None:
         with pytest.raises(logic.ControllerMessageError):
-            logic.decode_selected_robot('{}')
+            logic.decode_selected_robots('{}')
 
-    def test_decode_rejects_empty_name(self) -> None:
+    def test_decode_rejects_non_list(self) -> None:
         with pytest.raises(logic.ControllerMessageError):
-            logic.decode_selected_robot('{"robot_name": ""}')
+            logic.decode_selected_robots('{"robot_names": "cube_petit_orange"}')
 
-    def test_decode_rejects_non_string_name(self) -> None:
+    def test_decode_rejects_empty_name_in_list(self) -> None:
         with pytest.raises(logic.ControllerMessageError):
-            logic.decode_selected_robot('{"robot_name": 1}')
+            logic.decode_selected_robots('{"robot_names": [""]}')
+
+    def test_decode_rejects_non_string_name_in_list(self) -> None:
+        with pytest.raises(logic.ControllerMessageError):
+            logic.decode_selected_robots('{"robot_names": [1]}')
 
 
 class TestCmdVelCodec:
@@ -73,18 +81,25 @@ class TestCmdVelCodec:
             logic.decode_cmd_vel('{"linear_x": "fast", "angular_z": 0.0}')
 
 
-class TestNextRobotIndex:
+class TestToggleRobotSelection:
 
-    def test_wraps_around(self) -> None:
-        assert logic.next_robot_index(0, 2) == 1
-        assert logic.next_robot_index(1, 2) == 0
+    def test_adds_when_absent(self) -> None:
+        assert logic.toggle_robot_selection(frozenset(), 'cube_petit_pink') == frozenset({'cube_petit_pink'})
 
-    def test_single_robot_stays_put(self) -> None:
-        assert logic.next_robot_index(0, 1) == 0
+    def test_removes_when_present(self) -> None:
+        selected = frozenset({'cube_petit_pink', 'cube_petit_orange'})
+        assert logic.toggle_robot_selection(selected, 'cube_petit_pink') == frozenset({'cube_petit_orange'})
 
-    def test_rejects_zero_robots(self) -> None:
-        with pytest.raises(ValueError):
-            logic.next_robot_index(0, 0)
+    def test_does_not_mutate_other_members(self) -> None:
+        selected = frozenset({'cube_petit_orange'})
+        result = logic.toggle_robot_selection(selected, 'cube_petit_pink')
+        assert result == frozenset({'cube_petit_orange', 'cube_petit_pink'})
+
+
+class TestExclusiveRobotSelection:
+
+    def test_selects_only_that_robot(self) -> None:
+        assert logic.exclusive_robot_selection('cube_petit_pink') == frozenset({'cube_petit_pink'})
 
 
 class TestButtonRisingEdge:

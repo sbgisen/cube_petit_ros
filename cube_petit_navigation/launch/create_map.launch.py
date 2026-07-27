@@ -79,8 +79,10 @@ def generate_launch_description() -> LaunchDescription:
                               'auto-derived from hostname, override explicitly if needed).'))
     args.append(
         DeclareLaunchArgument('scan_topic',
-                              default_value='laser/scan',
-                              description='Scan topic name relative to the robot namespace'))
+                              default_value='scan',
+                              description='Scan topic name relative to the robot namespace '
+                              '(navigation.launch.pyのcontroller_serverと同じ規約 / '
+                              "matches navigation.launch.py's controller_server convention)."))
 
     lifecycle_nodes = [
         'controller_server', 'smoother_server', 'planner_server', 'behavior_server', 'bt_navigator',

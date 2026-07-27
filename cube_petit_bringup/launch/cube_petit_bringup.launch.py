@@ -48,7 +48,12 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
         FindPackageShare('cube_petit_facial_animation').find('cube_petit_facial_animation'))
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
-    doc = xacro.process_file(xacro_file, mappings={'use_sim': 'false'})
+    # robot_namespaceをnsに合わせないと、URDFのroot link名がcube_petit_orange固定のまま
+    # 発行され続け、navigation側のTFツリー(<robot>/base_link起点)と接続しなくなる。
+    # Without matching robot_namespace to ns, the URDF's root link name would keep
+    # publishing as the hardcoded cube_petit_orange, disconnecting it from the
+    # navigation-side TF tree (rooted at <robot>/base_link).
+    doc = xacro.process_file(xacro_file, mappings={'use_sim': 'false', 'robot_namespace': ns})
     robot_description = {'robot_description': doc.toprettyxml(indent='  ')}
 
     robot_state_publisher = GroupAction([
@@ -60,7 +65,9 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
         PushRosNamespace(ns),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(
             str(hardware_pkg / 'launch/cube_petit_control.launch.py')),
-                                 launch_arguments={}.items())
+                                 launch_arguments={
+                                     'robot_namespace': ns,
+                                 }.items())
     ])
 
     bringups = GroupAction([

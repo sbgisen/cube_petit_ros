@@ -38,7 +38,8 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     xacro_file = os.path.join(description_pkg, 'xacro', 'cube_petit.xacro')
     use_sim = 'false'  # or 'false', depending on your use case
-    doc = xacro.process_file(xacro_file, mappings={'use_sim': use_sim})
+    robot_namespace = LaunchConfiguration('robot_namespace').perform(context)
+    doc = xacro.process_file(xacro_file, mappings={'use_sim': use_sim, 'robot_namespace': robot_namespace})
     robot_description = {'robot_description': doc.toprettyxml(indent='  ')}
 
     controllers_yaml = os.path.join(

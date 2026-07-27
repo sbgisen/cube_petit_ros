@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import pathlib
+import socket
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -32,6 +33,22 @@ from launch_ros.descriptions import ComposableNode
 from launch_ros.substitutions import FindPackageShare
 from nav2_common.launch import ReplaceString
 from nav2_common.launch import RewrittenYaml
+
+
+def _default_robot_namespace() -> str:
+    """hostname(cube-petit-<color>)からROS名前空間を導く / Derive the ROS namespace from hostname.
+
+    cube_petit_web_interface.helpers.resolve_namespace()と同じ発想(PR #102参照)。
+    以前はnavigation_orange.launch.py/navigation_pink.launch.py等の機体別ラッパーで
+    固定値を渡していたが、hostnameから自動導出することで機体ごとのラッパーファイルを
+    廃止できる(2026-07-27)。
+    Same idea as cube_petit_web_interface.helpers.resolve_namespace() (see PR #102).
+    Previously per-robot wrapper launch files (navigation_orange.launch.py,
+    navigation_pink.launch.py, ...) hardcoded this value; auto-deriving it from hostname
+    lets us drop those wrapper files entirely.
+    """
+    namespace = socket.gethostname().replace('-', '_')
+    return namespace if namespace.startswith('cube_petit_') else 'cube_petit_orange'
 
 
 def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
@@ -178,7 +195,11 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('container_name',
                               default_value='nav2_container',
                               description='the name of container that nodes will load in if use composition'))
-    args.append(DeclareLaunchArgument('robot', default_value='cube_petit_orange', description='Robot namespace.'))
+    args.append(
+        DeclareLaunchArgument('robot',
+                              default_value=_default_robot_namespace(),
+                              description='Robot namespace (hostnameから自動導出、明示指定で上書き可能 / '
+                              'auto-derived from hostname, override explicitly if needed).'))
 
     laser_relay = Node(package='topic_tools',
                        executable='relay',

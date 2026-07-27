@@ -22,7 +22,7 @@
 # publishing for `timeout` seconds is automatically ignored, falling back to the
 # next-highest-priority active source (e.g. releasing the joystick stick
 # automatically hands control back to navigation).
-twist_mux:
+/**/twist_mux:
   ros__parameters:
     use_stamped: true
     topics:

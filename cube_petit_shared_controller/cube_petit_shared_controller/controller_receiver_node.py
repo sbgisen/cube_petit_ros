@@ -84,7 +84,11 @@ class ControllerReceiverNode(Node):
         self.declare_parameter('announcement_enabled', True)
         self.declare_parameter('announcement_selected_text', 'コントローラオン!')
         self.declare_parameter('announcement_deselected_text', 'コントローラオフ!')
-        self.declare_parameter('announcement_emotion', 'happiness')
+        # speech_action_serverのcheck_goal()が受け付けるのは
+        # {'happy', 'normal', 'angry', 'bashful', 'sad'}のみ('happiness'は無効)。
+        # speech_action_server accepts only {'happy', 'normal', 'angry', 'bashful',
+        # 'sad'} in check_goal() -- 'happiness' is rejected.
+        self.declare_parameter('announcement_emotion', 'happy')
         self.declare_parameter('announcement_emotion_level', 2)
         self.declare_parameter('announcement_pitch', 120)
         self.declare_parameter('announcement_speed', 100)

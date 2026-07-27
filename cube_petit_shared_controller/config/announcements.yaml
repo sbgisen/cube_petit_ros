@@ -1,0 +1,23 @@
+# 共有コントローラで選択/解除されたときのアナウンス文言。
+# 個体ごとの`on`はロボット名(robot_namespace)ごとに指定する。未登録の個体は
+# shared_controller.launch.pyのデフォルト文言にフォールバックする。
+# `off`は全個体共通(トップレベル)。個体固有のoffが必要になったら
+# `cube_petit_<color>.off`を追加すれば、そちらが優先される。
+#
+# Announcement text spoken when this individual is selected/deselected via the
+# shared controller. Per-individual `on` is keyed by robot_namespace; an
+# individual not listed here falls back to shared_controller.launch.py's own
+# default phrase. `off` is shared by all individuals (top level) -- add
+# `cube_petit_<color>.off` if a per-individual override is ever needed; it
+# takes priority over the shared one.
+
+off: とまるよ。
+
+cube_petit_orange:
+  on: オレンジプチ、いくよ〜
+
+cube_petit_pink:
+  on: ピンクプチ。いきます。
+
+cube_petit_yellow:
+  on: イエロープチ。いくぞ。

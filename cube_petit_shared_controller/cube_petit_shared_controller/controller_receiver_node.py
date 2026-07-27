@@ -82,8 +82,12 @@ class ControllerReceiverNode(Node):
         self.declare_parameter('zenoh_endpoint', 'tcp/cube-petit-orange.local:7447')
         self.declare_parameter('zenoh_mode', 'client')
         self.declare_parameter('announcement_enabled', True)
-        self.declare_parameter('announcement_selected_text', 'コントローラオン!')
-        self.declare_parameter('announcement_deselected_text', 'コントローラオフ!')
+        # 句点で区切ってjtalkに間を入れさせる(「コントローラオン」と続けて読まれると
+        # 聞き取りづらいため)。
+        # Split with a Japanese period so jtalk inserts a pause (read together as
+        # one word, "コントローラオン" was hard to parse by ear).
+        self.declare_parameter('announcement_selected_text', 'コントローラ。オン。')
+        self.declare_parameter('announcement_deselected_text', 'コントローラ。オフ。')
         # speech_action_serverのcheck_goal()が受け付けるのは
         # {'happy', 'normal', 'angry', 'bashful', 'sad'}のみ('happiness'は無効)。
         # speech_action_server accepts only {'happy', 'normal', 'angry', 'bashful',

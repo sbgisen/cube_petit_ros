@@ -95,6 +95,17 @@ class ControllerHubNode(Node):
         # (exclusive_robot_selection) instead of the default add/remove-from-the-group
         # behavior (toggle_robot_selection). NEEDS REAL-ROBOT VERIFICATION like toggle_buttons.
         self.declare_parameter('exclusive_modifier_button', 4)
+        # 選択トグル自体を有効にするためのガード: これ(D-pad上、デフォルトaxes[7])を押して
+        # いない間はtoggle_buttonsの立ち上がりを無視する(誤操作でロボット選択が
+        # 変わらないようにするための安全策)。NEEDS REAL-ROBOT VERIFICATION: D-padが
+        # axesのhat軸として現れるかbuttonsとして現れるかはドライバ依存。
+        # Guard that must be held for toggle_buttons to take effect at all (D-pad up,
+        # defaults to axes[7]) -- prevents accidental robot-selection changes from a
+        # stray button press. NEEDS REAL-ROBOT VERIFICATION: whether the D-pad shows up
+        # as a hat axis or as buttons is driver-dependent.
+        self.declare_parameter('required_modifier_axis', 7)
+        self.declare_parameter('required_modifier_axis_value', 1.0)
+        self.declare_parameter('required_modifier_axis_tolerance', 0.5)
         self.declare_parameter('joy_topic', 'diff_drive_controller/joy')
         self.declare_parameter('local_cmd_vel_topic', 'diff_drive_controller/shared_controller/local_cmd_vel')
         self.declare_parameter('zenoh_endpoint', 'tcp/cube-petit-orange.local:7447')
@@ -111,6 +122,9 @@ class ControllerHubNode(Node):
             raise RuntimeError(f'toggle_buttons ({self._toggle_buttons!r}) must have the same length as '
                                f'robot_names ({self._robot_names!r})')
         self._exclusive_modifier_button = int(self.get_parameter('exclusive_modifier_button').value)
+        self._required_modifier_axis = int(self.get_parameter('required_modifier_axis').value)
+        self._required_modifier_axis_value = float(self.get_parameter('required_modifier_axis_value').value)
+        self._required_modifier_axis_tolerance = float(self.get_parameter('required_modifier_axis_tolerance').value)
 
         initial_names = [str(name) for name in self.get_parameter('initial_robot_names').value]
         self._selected: typing.FrozenSet[str] = frozenset(name for name in initial_names if name in self._robot_names)
@@ -162,12 +176,24 @@ class ControllerHubNode(Node):
     # /joy -> selected robot set toggle (one button per robot)
     # =================================================
 
+    def _required_modifier_held(self, msg: Joy) -> bool:
+        """Whether the toggle-enable guard (D-pad up by default) is currently held."""
+        axis_index = self._required_modifier_axis
+        if not (0 <= axis_index < len(msg.axes)):
+            return False
+        return abs(msg.axes[axis_index] - self._required_modifier_axis_value) <= self._required_modifier_axis_tolerance
+
     def _on_joy(self, msg: Joy) -> None:
+        guard_held = self._required_modifier_held(msg)
         modifier_held = (0 <= self._exclusive_modifier_button < len(msg.buttons) and
                          bool(msg.buttons[self._exclusive_modifier_button]))
         changed = False
         for robot_name, button_index in zip(self._robot_names, self._toggle_buttons):
             if not logic.button_rising_edge(self._previous_buttons, msg.buttons, button_index):
+                continue
+            if not guard_held:
+                self.get_logger().info(f'toggle_buttons[{button_index}] pressed without the required '
+                                       'modifier (D-pad up) held -- ignored')
                 continue
             if modifier_held:
                 self._selected = logic.exclusive_robot_selection(robot_name)

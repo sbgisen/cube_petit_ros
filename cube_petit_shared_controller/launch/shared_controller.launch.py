@@ -30,6 +30,8 @@ Usage::
     ros2 launch cube_petit_shared_controller shared_controller.launch.py role:=receiver
 """
 
+import pathlib
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import GroupAction
@@ -38,6 +40,37 @@ from launch.launch_context import LaunchContext
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.actions import PushRosNamespace
+from launch_ros.substitutions import FindPackageShare
+import yaml
+
+_DEFAULT_SELECTED_ANNOUNCEMENT = 'コントローラ。オン。'
+_DEFAULT_DESELECTED_ANNOUNCEMENT = 'コントローラ。オフ。'
+
+
+def _load_announcements(config_path: str) -> dict:
+    """Load announcements.yaml (see this package's config/ dir for the schema)."""
+    path = pathlib.Path(config_path)
+    if not path.is_file():
+        return {}
+    with path.open(encoding='utf-8') as config_file:
+        return yaml.safe_load(config_file) or {}
+
+
+def _announcement_texts(config_path: str, robot_namespace_str: str) -> tuple:
+    """Resolve this individual's (selected, deselected) announcement text.
+
+    ``off``がトップレベル(全個体共通)、個体固有の`cube_petit_<color>.off`が
+    あればそちらを優先。`on`は個体ごとの指定が無ければジェネリック文言。
+    ``off`` is shared across individuals unless a per-individual
+    ``cube_petit_<color>.off`` override exists (which then takes priority).
+    ``on`` falls back to a generic phrase when this individual isn't listed.
+    """
+    data = _load_announcements(config_path)
+    shared_off = data.get('off', _DEFAULT_DESELECTED_ANNOUNCEMENT)
+    per_robot = data.get(robot_namespace_str) or {}
+    selected = per_robot.get('on', _DEFAULT_SELECTED_ANNOUNCEMENT)
+    deselected = per_robot.get('off', shared_off)
+    return selected, deselected
 
 
 def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
@@ -110,6 +143,9 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                         'robot_names': robot_names,
                         'toggle_buttons': toggle_buttons,
                         'exclusive_modifier_button': LaunchConfiguration('exclusive_modifier_button'),
+                        'required_modifier_axis': LaunchConfiguration('required_modifier_axis'),
+                        'required_modifier_axis_value': LaunchConfiguration('required_modifier_axis_value'),
+                        'required_modifier_axis_tolerance': LaunchConfiguration('required_modifier_axis_tolerance'),
                         'joy_topic': joy_topic,
                         'local_cmd_vel_topic': local_cmd_vel_topic,
                         'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
@@ -133,6 +169,19 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         ]
 
     if role == 'receiver':
+        # announcement_selected_text/deselected_textが未指定(空文字列)なら、
+        # announcements_config(YAML)からrobot_namespace別の文言を読み込む。
+        # 明示指定があればそちらを優先する。
+        # When announcement_selected_text/deselected_text are left unset (empty
+        # string), load per-robot_namespace text from announcements_config
+        # (YAML). An explicit value always takes priority.
+        robot_namespace_str = robot_namespace.perform(context)
+        config_path = LaunchConfiguration('announcements_config').perform(context)
+        default_selected, default_deselected = _announcement_texts(config_path, robot_namespace_str)
+
+        selected_text = LaunchConfiguration('announcement_selected_text').perform(context) or default_selected
+        deselected_text = LaunchConfiguration('announcement_deselected_text').perform(context) or default_deselected
+
         return [
             GroupAction([
                 PushRosNamespace(robot_namespace),
@@ -147,8 +196,8 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                         'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
                         'zenoh_mode': LaunchConfiguration('zenoh_mode'),
                         'announcement_enabled': LaunchConfiguration('announcement_enabled'),
-                        'announcement_selected_text': LaunchConfiguration('announcement_selected_text'),
-                        'announcement_deselected_text': LaunchConfiguration('announcement_deselected_text'),
+                        'announcement_selected_text': selected_text,
+                        'announcement_deselected_text': deselected_text,
                     }],
                 ),
             ]),
@@ -193,6 +242,19 @@ def generate_launch_description() -> LaunchDescription:
                               'controlling just that one robot (drops every other selection) instead of '
                               'adding/removing it from the group. NEEDS REAL-ROBOT VERIFICATION like '
                               'toggle_buttons.'),
+        DeclareLaunchArgument('required_modifier_axis',
+                              default_value='7',
+                              description='Joy axes[] index that must be held for toggle_buttons to take '
+                              'effect at all (D-pad up by default) -- prevents accidental robot-selection '
+                              'changes from a stray button press. NEEDS REAL-ROBOT VERIFICATION: whether the '
+                              'D-pad shows up as a hat axis or as buttons is driver-dependent.'),
+        DeclareLaunchArgument('required_modifier_axis_value',
+                              default_value='1.0',
+                              description='axes[required_modifier_axis] value meaning "held" (e.g. D-pad up).'),
+        DeclareLaunchArgument('required_modifier_axis_tolerance',
+                              default_value='0.5',
+                              description='How close axes[required_modifier_axis] must be to '
+                              'required_modifier_axis_value to count as held.'),
         DeclareLaunchArgument('joy_topic',
                               default_value='diff_drive_controller/joy',
                               description='Local /joy topic (relative to robot_namespace) published by '
@@ -221,12 +283,23 @@ def generate_launch_description() -> LaunchDescription:
                               default_value='true',
                               description='Whether to speak an announcement when this individual is selected/'
                               'deselected as a controlled robot.'),
+        DeclareLaunchArgument(
+            'announcements_config',
+            default_value=str(
+                pathlib.Path(FindPackageShare('cube_petit_shared_controller').find('cube_petit_shared_controller')) /
+                'config/announcements.yaml'),
+            description='Path to a YAML file mapping robot_namespace -> {on, off} announcement '
+            "text, plus a top-level `off` shared by every individual (see this package's "
+            'config/announcements.yaml). Used only when announcement_selected_text/'
+            'announcement_deselected_text are left empty.'),
         DeclareLaunchArgument('announcement_selected_text',
-                              default_value='コントローラオン!',
-                              description='Text spoken via speech_action_server when selected.'),
+                              default_value='',
+                              description='Text spoken via speech_action_server when selected. Empty means: '
+                              'look up robot_namespace in announcements_config.'),
         DeclareLaunchArgument('announcement_deselected_text',
-                              default_value='コントローラオフ!',
-                              description='Text spoken via speech_action_server when deselected.'),
+                              default_value='',
+                              description='Text spoken via speech_action_server when deselected. Empty means: '
+                              'look up robot_namespace (or the shared `off`) in announcements_config.'),
         # ---- shared ----
         DeclareLaunchArgument('zenoh_router_endpoint',
                               default_value='tcp/cube-petit-orange.local:7447',

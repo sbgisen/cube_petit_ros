@@ -17,12 +17,14 @@
 """Cube petit's speech."""
 
 import typing
+
+from action_msgs.msg import GoalStatus
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionClient
-from sbgisen_speech_msgs.action import Speech
-from action_msgs.msg import GoalStatus
+
 from cube_petit_python_api.utils import proxies
+from cube_petit_speech_msgs.action import Speech
+
 
 class SpeechCommander:
     """Commander for handling speech."""
@@ -30,7 +32,7 @@ class SpeechCommander:
     enable_init_timeout = True
 
     def __init__(self, node: Node) -> None:
-        """Constructor."""
+        """Initialize the commander."""
         self.node = node
         self.speaker = proxies.get_action_client(node, Speech, '/speech_action_server')
         # Wait for connection
@@ -63,12 +65,11 @@ class SpeechCommander:
         Returns:
             True if a speech has succeeded or if the speech is disabled or if the speech is held asynchronously.
         """
-
         if not isinstance(phrase_id, str):
             raise TypeError('Invalid phrase input, use str type input for phrase or phrase_id')
 
         if emotion is None:
-            emotion = "happiness"
+            emotion = 'happiness'
         if emotion_level is None:
             emotion_level = 2
         if pitch is None:
@@ -83,14 +84,13 @@ class SpeechCommander:
 
         goal_msg = Speech.Goal()
         goal_msg.text = phrase
-        goal_msg.method = "jtalk"
         goal_msg.emotion = emotion
         goal_msg.emotion_level = emotion_level
         goal_msg.pitch = pitch
         goal_msg.speed = speed
         goal_msg.volume = volume
 
-        self.node.get_logger().info(f"Robot say: [{phrase}]")
+        self.node.get_logger().info(f'Robot say: [{phrase}]')
         self._send_goal_future = self.speaker.send_goal_async(goal_msg)
         self._send_goal_future.add_done_callback(self.goal_response_callback)
 
@@ -100,7 +100,7 @@ class SpeechCommander:
 
         return True
 
-    def goal_response_callback(self, future):
+    def goal_response_callback(self, future: 'rclpy.task.Future') -> None:
         goal_handle = future.result()
         if not goal_handle.accepted:
             self.node.get_logger().info('Goal rejected :(')
@@ -110,14 +110,15 @@ class SpeechCommander:
         self._get_result_future = goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.get_result_callback)
 
-    def get_result_callback(self, future):
+    def get_result_callback(self, future: 'rclpy.task.Future') -> None:
         result = future.result().result
         if result.result:
             self.node.get_logger().info('Speech succeeded!')
         else:
             self.node.get_logger().info('Speech failed.')
 
-def main(args=None):
+
+def main(args: typing.Optional[typing.List[str]] = None) -> None:
     rclpy.init(args=args)
     node = Node('speech_commander_node')
     speech_commander = SpeechCommander(node)

@@ -27,6 +27,39 @@ __all__ = ['LIB_ROUTE', 'simple_jtalk', 'generate_jtalk_command', 'adjust_text']
 
 OUTPUT_FILE = pathlib.Path('/tmp/jtalk_output.wav')
 
+# Speech.action宣言のEMOTION_*定数(happiness/default/anger/shout/sadness)は、
+# 実際のjtalk音声ファイル(speech_lib/.../Voice/mei/mei_<name>.htsvoice、
+# happy/normal/angry/bashful/sadのみ存在)の語彙と一致していない。ここで変換する。
+# shoutに対応する音声ファイルは無いため、一番近いangryにフォールバックする。
+# Speech.action's declared EMOTION_* constants (happiness/default/anger/shout/
+# sadness) don't match the jtalk voice files' own vocabulary (speech_lib/.../
+# Voice/mei/mei_<name>.htsvoice only has happy/normal/angry/bashful/sad).
+# Bridge the two here. shout has no dedicated voice file, so it falls back to
+# the closest match, angry.
+_EMOTION_ALIASES: dict = {
+    'happiness': 'happy',
+    'default': 'normal',
+    'anger': 'angry',
+    'sadness': 'sad',
+    'shout': 'angry',
+}
+
+
+def normalize_emotion(emotion: str) -> str:
+    """Map a Speech.action EMOTION_* constant to the jtalk voice file vocabulary.
+
+    Args:
+        emotion: Emotion string from a speech goal (either a Speech.action
+            EMOTION_* constant, e.g. ``happiness``, or a jtalk voice file name
+            already, e.g. ``happy``).
+
+    Returns:
+        The jtalk voice file vocabulary name (happy/normal/angry/bashful/sad).
+        Values not found in the alias table pass through unchanged, so
+        :func:`check_goal` can still reject genuinely unknown emotions.
+    """
+    return _EMOTION_ALIASES.get(emotion, emotion)
+
 
 @functools.lru_cache(maxsize=1)
 def _lib_route() -> str:
@@ -79,7 +112,7 @@ def check_goal(text: str, emotion: str, emotion_level: int, pitch: int, speed: i
     if not text:
         return False
     valid_emotions = {'happy', 'normal', 'angry', 'bashful', 'sad'}
-    if emotion not in valid_emotions:
+    if normalize_emotion(emotion) not in valid_emotions:
         return False
     if not (1 <= emotion_level <= 5):
         return False
@@ -116,7 +149,7 @@ def generate_jtalk_file(text: str,
     echo = f'echo {text} | '
     open_jtalk = f'{lib_route}open_jtalk-1.11/bin/open_jtalk '
     dic = f'-x {lib_route}open_jtalk_dic_utf_8-1.11 '
-    htsvoice = f'-m {lib_route}MMDAgent_Example-1.6/Voice/mei/mei_{emotion}.htsvoice '
+    htsvoice = f'-m {lib_route}MMDAgent_Example-1.6/Voice/mei/mei_{normalize_emotion(emotion)}.htsvoice '
     speed_param = f'-r {float(speed) / 100} '
     intonation = f'-jf {float(pitch) / 100} '
     if file_path is None:

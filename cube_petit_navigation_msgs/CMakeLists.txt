@@ -21,7 +21,7 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
-set(srv_files "srv/SavePlace.srv")
+set(srv_files "srv/SavePlace.srv" "srv/GetNavigationState.srv")
 
 set(msg_files "msg/NavigationState.msg")
 

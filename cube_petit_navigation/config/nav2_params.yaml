@@ -184,7 +184,15 @@ local_costmap:
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 10.0
-        inflation_radius: 1.0
+        # footprint(±0.11m)に対して1.0mは大きすぎ、部屋の狭い場所では障害物から
+        # 0.5m弱の地点まで全面的に高コスト化してnavigateに失敗していた
+        # (2026-07-28、実機で発見: 目標地点近傍0.461mに障害物があるケースで
+        # "Failed to make progress"/リカバリの"Initial checks failed"が発生)。
+        # 1.0m was too large relative to the footprint (±0.11m): in tight rooms it
+        # inflated cost across nearly the whole free space near any obstacle,
+        # causing "Failed to make progress" / recovery "Initial checks failed"
+        # (found on real hardware, 2026-07-28, target ~0.461m from an obstacle).
+        inflation_radius: 0.3
         inflate_unknown: true
       laser_obstacles:
         plugin: nav2_costmap_2d::ObstacleLayer
@@ -332,7 +340,10 @@ global_costmap:
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
         cost_scaling_factor: 5.0
-        inflation_radius: 1.0
+        # local_costmapと同じ理由でfootprintに対して過大だったため縮小(2026-07-28)。
+        # Reduced for the same reason as local_costmap (too large for the
+        # footprint), 2026-07-28.
+        inflation_radius: 0.3
       keepout_filter:
         plugin: nav2_costmap_2d::KeepoutFilter
         enabled: true

@@ -191,7 +191,12 @@ class TestBuildMoveGoalText:
 
 class TestDeriveMapNameFromYamlPath:
 
-    def test_extracts_stem(self) -> None:
+    def test_extracts_parent_directory_name(self) -> None:
+        # map_router.pyの保存レイアウト: <MAP_BASE_DIR>/<map_name>/map.yaml
+        # (ファイル名は常に"map.yaml"固定、ディレクトリ名がmap_name)。
+        assert logic.derive_map_name_from_yaml_path('/home/cube-petit/map/arisan_room/map.yaml') == 'arisan_room'
+
+    def test_extracts_parent_directory_name_when_stem_matches_too(self) -> None:
         assert logic.derive_map_name_from_yaml_path('/opt/share/cube_petit_navigation/map/test/test.yaml') == 'test'
 
     def test_empty_path_falls_back(self) -> None:

@@ -221,13 +221,21 @@ def build_move_goal_text(x: float, y: float, yaw: float) -> str:
 def derive_map_name_from_yaml_path(path: str) -> str:
     """Derive a short map name from a nav2 map yaml path.
 
+    map_router.pyが保存するマップは``<MAP_BASE_DIR>/<map_name>/map.yaml``という構造
+    (ディレクトリ名がmap_name、ファイル名は固定で"map.yaml")なので、ファイルの
+    stemではなく親ディレクトリ名を使う必要がある。ファイルステムを直接map_name
+    として使うレイアウト(``.../map/test/test.yaml``)にも親ディレクトリ名で対応
+    できる(どちらもディレクトリ名==意図したmap_name)。
+
     Args:
-        path: Full path such as ``/.../map/test/test.yaml``.
+        path: Full path such as ``/home/cube-petit/map/arisan_room/map.yaml``.
 
     Returns:
-        The file stem (e.g. ``test``), or ``'unknown'`` if empty.
+        The parent directory name (e.g. ``arisan_room``), or ``'unknown'`` if
+        that and the file stem are both empty.
     """
-    return pathlib.Path(path).stem or 'unknown'
+    parsed = pathlib.Path(path)
+    return parsed.parent.name or parsed.stem or 'unknown'
 
 
 def yaw_from_quaternion(x: float, y: float, z: float, w: float) -> float:

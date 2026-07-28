@@ -118,13 +118,27 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                plugin='nav2_waypoint_follower::WaypointFollower',
                                name='waypoint_follower',
                                remappings=[('/fromLL', 'fromLL')]),
-                ComposableNode(package='nav2_lifecycle_manager',
-                               plugin='nav2_lifecycle_manager::LifecycleManager',
-                               name='lifecycle_manager_navigation',
-                               parameters=[{
-                                   'autostart': autostart,
-                                   'node_names': lifecycle_nodes
-                               }]),
+                ComposableNode(
+                    package='nav2_lifecycle_manager',
+                    plugin='nav2_lifecycle_manager::LifecycleManager',
+                    name='lifecycle_manager_navigation',
+                    parameters=[{
+                        'autostart': autostart,
+                        'node_names': lifecycle_nodes,
+                        # デフォルト4.0秒だと、実機の負荷が高い(カメラ・
+                        # 会話系ノード等が同時稼働)タイミングでbond接続の
+                        # 確立が間に合わずbringup全体が失敗し、
+                        # bt_navigatorのアクションサーバーが非アクティブの
+                        # ままgoalを拒否し続ける不具合になっていた
+                        # (2026-07-28、実機で発見)。
+                        # Default 4.0s bond timeout was occasionally too
+                        # short under real-hardware load (camera, speech,
+                        # etc. running concurrently), causing bringup to
+                        # fail and bt_navigator's action server to stay
+                        # inactive, silently rejecting every goal (found on
+                        # real hardware, 2026-07-28).
+                        'bond_timeout': 10.0,
+                    }]),
                 ComposableNode(package='nav2_map_server',
                                plugin='nav2_map_server::MapServer',
                                name='map_server',
@@ -143,13 +157,22 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                                parameters=[{
                                    'mask_topic': ['/', LaunchConfiguration('robot'), '/navigation/keepout_mask']
                                }]),
-                ComposableNode(package='nav2_lifecycle_manager',
-                               plugin='nav2_lifecycle_manager::LifecycleManager',
-                               name='lifecycle_manager_filters',
-                               parameters=[{
-                                   'autostart': autostart,
-                                   'node_names': filter_nodes
-                               }]),
+                ComposableNode(
+                    package='nav2_lifecycle_manager',
+                    plugin='nav2_lifecycle_manager::LifecycleManager',
+                    name='lifecycle_manager_filters',
+                    parameters=[{
+                        'autostart': autostart,
+                        'node_names': filter_nodes,
+                        # lifecycle_manager_navigationと同じ理由でbond_timeoutを
+                        # 延長(2026-07-28)。実機ではcostmap_filter_info_serverの
+                        # bond確立がデフォルト4.0秒に間に合わないことがあった。
+                        # Extended for the same reason as
+                        # lifecycle_manager_navigation (2026-07-28):
+                        # costmap_filter_info_server's bond didn't always
+                        # connect within the default 4.0s on real hardware.
+                        'bond_timeout': 10.0,
+                    }]),
                 ComposableNode(package='emcl2',
                                plugin='emcl2::EMcl2Node',
                                name='emcl',

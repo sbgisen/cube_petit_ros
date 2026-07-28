@@ -20,8 +20,10 @@ import socket
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import GroupAction
+from launch.actions import IncludeLaunchDescription
 from launch.actions import OpaqueFunction
 from launch.launch_context import LaunchContext
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.actions import Node
@@ -263,10 +265,30 @@ def generate_launch_description() -> LaunchDescription:
         output='screen',
     )
 
+    # フリート機能(追いかけっこ・集合等)がmove_to_pose完了を検知するのに必要な
+    # navigation/goal・navigation/cancel・navigation/statusの仲介ノード。以前は
+    # どこからもincludeされておらず(navigation_api.launch.pyが孤立していた)、
+    # zenoh_connectorが送るmove_to_poseコマンドが永遠に完了しないまま
+    # in-flight状態でスタックし、以降の全コマンドが拒否され続ける不具合の原因に
+    # なっていた(2026-07-28、実機で発見)。
+    # Bridges navigation/goal, navigation/cancel, navigation/status, needed for
+    # fleet features (chase mode, gather, etc.) to detect move_to_pose
+    # completion. Previously included nowhere (navigation_api.launch.py was
+    # orphaned), so a zenoh_connector move_to_pose command would never
+    # complete and get stuck in-flight forever, rejecting every subsequent
+    # command (found on real hardware, 2026-07-28).
+    navigation_api = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(str(pkg_share / 'launch/navigation_api.launch.py')),
+        launch_arguments={
+            'robot': LaunchConfiguration('robot'),
+        }.items(),
+    )
+
     return LaunchDescription(args + [
         laser_relay,
         bridge_base_link,
         bridge_base_link2,
         relay,
+        navigation_api,
         OpaqueFunction(function=launch_setup),
     ])

@@ -23,3 +23,11 @@ repositories:
     type: git
     url: https://github.com/sbgisen/emcl2_ros2.git
     version: jazzy-devel
+  cube_petit_scenario:
+    type: git
+    url: https://github.com/sbgisen/cube_petit_scenario.git
+    version: jazzy-devel
+  cube_petit_interaction:
+    type: git
+    url: https://github.com/sbgisen/cube_petit_interaction.git
+    version: jazzy-devel

@@ -46,6 +46,8 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
     text_to_speech_pkg = pathlib.Path(FindPackageShare('cube_petit_text_to_speech').find('cube_petit_text_to_speech'))
     face_animation_pkg = pathlib.Path(
         FindPackageShare('cube_petit_facial_animation').find('cube_petit_facial_animation'))
+    shared_controller_pkg = pathlib.Path(
+        FindPackageShare('cube_petit_shared_controller').find('cube_petit_shared_controller'))
     description_pkg = FindPackageShare('cube_petit_description').find('cube_petit_description')
     xacro_file = pathlib.Path(description_pkg) / 'xacro/cube_petit.xacro'
     # robot_namespaceをnsに合わせないと、URDFのroot link名がcube_petit_orange固定のまま
@@ -96,6 +98,24 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
                 remappings=[('cmd_vel_out', 'cmd_vel')],
             ),
         ]),
+        # shared_controller(共有コントローラ)のreceiver役は常時起動しておく:
+        # どの機体も他機のhubから遠隔操作を受け付けられる状態にしておき、実際に
+        # コントローラを物理接続してhub役になるかどうかはWeb UIから明示的に選ぶ運用
+        # (2026-07-28、ありさん指示)。receiver自体は選択されていなければ何も動かさない
+        # ので常時起動は無害。robot_namespaceは既に外側のPushRosNamespace(ns)で
+        # 適用済みのため空文字列を渡す(二重pushを避ける)。
+        # cube_petit_shared_controller's receiver role runs always-on: every individual
+        # can be remote-driven by whichever robot is acting as hub, and becoming a hub
+        # (physically pairing a controller) is an explicit Web UI choice instead
+        # (2026-07-28). The receiver is inert while not selected, so always-on is
+        # harmless. robot_namespace is left empty since the outer PushRosNamespace(ns)
+        # already applies it (avoids double-pushing the namespace).
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            str(shared_controller_pkg / 'launch/shared_controller.launch.py')),
+                                 launch_arguments={
+                                     'role': 'receiver',
+                                     'robot_namespace': '',
+                                 }.items()),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
         IncludeLaunchDescription(

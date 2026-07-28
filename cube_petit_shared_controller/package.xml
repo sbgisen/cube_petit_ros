@@ -19,7 +19,6 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>cube_petit_speech_msgs</exec_depend>
   <exec_depend>teleop_twist_joy</exec_depend>
-  <exec_depend>cube_petit_bringup</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
 
   <!--

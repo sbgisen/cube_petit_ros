@@ -180,15 +180,22 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         # 二重pushを避ける設計)。そのため robot_namespace.perform(context) だけでは
         # 個体名が分からずYAML検索が常に空振りし、全機体でジェネリックな
         # 「コントローラ。オン。」に固定されてしまっていた(2026-07-28判明)。
-        # robot_nameパラメータと同じ ROBOT_NAMESPACE 環境変数フォールバックを適用する。
+        # ROBOT_NAMESPACE環境変数はsystemdサービスの実環境には設定されておらず
+        # フォールバックとして機能しないため(同日判明)、bringup.launch.py側で
+        # 既に解決済みの個体名をrobot_name引数として明示的に渡してもらい、
+        # それを個体名として使う。
         # After the always-on bringup integration, robot_namespace is passed as '' (the
         # outer cube_petit_bringup.launch.py already applies PushRosNamespace, so this
         # avoids double-pushing). That meant robot_namespace.perform(context) alone could
         # never identify the individual, so the per-robot YAML lookup always missed and
         # every individual fell back to the generic "コントローラ。オン。" (found on real
-        # hardware, 2026-07-28). Apply the same ROBOT_NAMESPACE env var fallback already
-        # used for the robot_name parameter.
-        robot_namespace_str = robot_namespace.perform(context) or os.environ.get('ROBOT_NAMESPACE', '')
+        # hardware, 2026-07-28). The ROBOT_NAMESPACE env var isn't actually set in the
+        # systemd service's environment either (found same day), so it can't serve as a
+        # fallback -- instead rely on bringup.launch.py passing its already-resolved
+        # individual name via the robot_name argument.
+        robot_namespace_str = (robot_namespace.perform(context) or
+                               LaunchConfiguration('robot_name').perform(context) or
+                               os.environ.get('ROBOT_NAMESPACE', ''))
         config_path = LaunchConfiguration('announcements_config').perform(context)
         default_selected, default_deselected = _announcement_texts(config_path, robot_namespace_str)
 

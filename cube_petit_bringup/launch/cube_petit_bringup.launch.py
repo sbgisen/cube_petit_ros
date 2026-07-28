@@ -110,12 +110,28 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
         # (2026-07-28). The receiver is inert while not selected, so always-on is
         # harmless. robot_namespace is left empty since the outer PushRosNamespace(ns)
         # already applies it (avoids double-pushing the namespace).
-        IncludeLaunchDescription(PythonLaunchDescriptionSource(
-            str(shared_controller_pkg / 'launch/shared_controller.launch.py')),
-                                 launch_arguments={
-                                     'role': 'receiver',
-                                     'robot_namespace': '',
-                                 }.items()),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(shared_controller_pkg / 'launch/shared_controller.launch.py')),
+            launch_arguments={
+                'role': 'receiver',
+                'robot_namespace': '',
+                # robot_namespaceは(上記の理由で)空のままだが、
+                # 個体名を必要とするrobot_nameパラメータ・
+                # announcement文言のYAML検索には、既にここで
+                # 解決済みのnsをそのまま渡す(nodeのROBOT_NAMESPACE
+                # 環境変数フォールバックはsystemdサービスの実環境に
+                # 変数自体が無く効かないため、2026-07-28判明)。
+                # robot_namespace stays empty (see above), but
+                # robot_name (used by the node for selection
+                # matching and, via this file, for the per-robot
+                # announcement YAML lookup) needs the actual
+                # individual name -- pass the already-resolved ns
+                # directly (the node's ROBOT_NAMESPACE env var
+                # fallback doesn't help here since that variable
+                # isn't actually set in the systemd service's
+                # environment, found 2026-07-28).
+                'robot_name': ns,
+            }.items()),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
         IncludeLaunchDescription(

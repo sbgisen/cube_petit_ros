@@ -75,12 +75,12 @@ class NavigationApiNode(Node):
 
         self.create_service(
             SavePlace,
-            'navigation/save_place',
+            'save_place',
             self._on_save_place,
         )
         self.create_service(
             GetNavigationState,
-            'navigation/get_state',
+            'get_state',
             self._on_get_state,
         )
 
@@ -91,13 +91,13 @@ class NavigationApiNode(Node):
 
         # ================= publishers =================
 
-        self._status_pub = self.create_publisher(String, 'navigation/status', 10)
-        self._room_pub = self.create_publisher(String, 'navigation/room', 10)
+        self._status_pub = self.create_publisher(String, 'status', 10)
+        self._room_pub = self.create_publisher(String, 'room', 10)
 
         # ================= subscribers =================
 
-        self.create_subscription(String, 'navigation/goal', self._on_goal, 10)
-        self.create_subscription(String, 'navigation/cancel', self._on_cancel, 10)
+        self.create_subscription(String, 'goal', self._on_goal, 10)
+        self.create_subscription(String, 'cancel', self._on_cancel, 10)
 
         # ================= commanders =================
 

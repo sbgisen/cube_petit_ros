@@ -33,21 +33,35 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription([
         DeclareLaunchArgument('robot', default_value='cube_petit', description='Robot namespace.'),
-        # navigation_api_node自身のtopic/service名はコード側で既に'navigation/'を
-        # 前置している(navigation/goal, navigation/status, navigation/save_place等)。
-        # ここでさらに'/navigation'をpushすると実際の購読先が
-        # '<robot>/navigation/navigation/goal'のように二重になり、zenoh_connectorが
-        # publishする'<robot>/navigation/goal'(navigation1階層)と一致せず
-        # ゴールが一切届かない不具合になっていた(2026-07-28、実機で発見。
-        # move_to_poseが永遠に"in flight"のまま完了しなかった根本原因の一つ)。
-        # The node's own topic/service names already carry the 'navigation/' prefix
-        # in code (navigation/goal, navigation/status, navigation/save_place, ...).
-        # Pushing an extra '/navigation' namespace here doubled it, so the actual
-        # subscribed topic became '<robot>/navigation/navigation/goal', not matching
-        # zenoh_connector's '<robot>/navigation/goal' publisher (found on real
-        # hardware, 2026-07-28 -- root cause of move_to_pose goals never being
-        # received at all).
-        PushRosNamespace([LaunchConfiguration('robot')]),
+        # navigation_api_nodeは'<robot>/navigation'名前空間で動く必要がある:
+        # (1) 自身のtopic/service名(goal, status, save_place等、'navigation/'接頭辞は
+        #     コード側から削除済み)がここに相対解決されてzenoh_connectorの
+        #     '<robot>/navigation/goal'と一致する。
+        # (2) CubePetitNavigationCommanderのActionClientが相対名'navigate_to_pose'を
+        #     使っており、nav2のbt_navigator(navigation.launch.py側でこの名前空間に
+        #     pushされている)が公開する'<robot>/navigation/navigate_to_pose'と
+        #     一致する必要がある。
+        # 以前(2026-07-28)、(1)のtopic名重複だけを見て namespace を'<robot>'のみに
+        # 変更したが、それは(2)を壊し、ActionClient.wait_for_server()が永遠に
+        # ブロックしてnavigation_api_nodeがrclpy.spin()に到達できず、結局goalも
+        # 一切処理されなくなっていた(実機で発見)。正しい修正はnamespaceを
+        # '<robot>/navigation'に戻し、ノード側のtopic名から冗長な'navigation/'
+        # 接頭辞を外すことだった。
+        # navigation_api_node must run under the '<robot>/navigation' namespace:
+        # (1) its own topic/service names (goal, status, save_place, ... -- the
+        #     'navigation/' prefix was removed from the code) resolve relative to
+        #     it, matching zenoh_connector's '<robot>/navigation/goal'.
+        # (2) CubePetitNavigationCommander's ActionClient uses the relative name
+        #     'navigate_to_pose', which must match nav2's bt_navigator (pushed into
+        #     this same namespace by navigation.launch.py) at
+        #     '<robot>/navigation/navigate_to_pose'.
+        # Previously (2026-07-28) only (1)'s doubled topic name was noticed and the
+        # namespace was changed to just '<robot>', which broke (2) instead:
+        # ActionClient.wait_for_server() blocked forever, so navigation_api_node
+        # never reached rclpy.spin() and no goal was ever processed either (found on
+        # real hardware). The correct fix is to keep this namespace and instead drop
+        # the redundant 'navigation/' prefix from the node's own topic names.
+        PushRosNamespace([LaunchConfiguration('robot'), '/navigation']),
         Node(
             package='cube_petit_navigation',
             executable='navigation_api_node',

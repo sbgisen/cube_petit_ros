@@ -53,9 +53,8 @@ class NavigationApiNode(Node):
             'places_config_file',
             str(pathlib.Path(pkg_path) / 'config' / 'places.yaml'),
         )
-        places_path = pkg_path / 'config' / 'places.yaml'
         config_path = pathlib.Path(self.get_parameter('places_config_file').value)
-        self._places_store = PlacesStore(places_path)
+        self._places_store = PlacesStore(config_path)
         self.get_logger().info(f'Loading places config: {config_path}')
 
         with config_path.open() as f:

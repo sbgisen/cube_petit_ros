@@ -143,9 +143,7 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
                         'robot_names': robot_names,
                         'toggle_buttons': toggle_buttons,
                         'exclusive_modifier_button': LaunchConfiguration('exclusive_modifier_button'),
-                        'required_modifier_axis': LaunchConfiguration('required_modifier_axis'),
-                        'required_modifier_axis_value': LaunchConfiguration('required_modifier_axis_value'),
-                        'required_modifier_axis_tolerance': LaunchConfiguration('required_modifier_axis_tolerance'),
+                        'required_modifier_button': LaunchConfiguration('required_modifier_button'),
                         'joy_topic': joy_topic,
                         'local_cmd_vel_topic': local_cmd_vel_topic,
                         'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
@@ -242,19 +240,12 @@ def generate_launch_description() -> LaunchDescription:
                               'controlling just that one robot (drops every other selection) instead of '
                               'adding/removing it from the group. NEEDS REAL-ROBOT VERIFICATION like '
                               'toggle_buttons.'),
-        DeclareLaunchArgument('required_modifier_axis',
-                              default_value='7',
-                              description='Joy axes[] index that must be held for toggle_buttons to take '
-                              'effect at all (D-pad up by default) -- prevents accidental robot-selection '
-                              'changes from a stray button press. NEEDS REAL-ROBOT VERIFICATION: whether the '
-                              'D-pad shows up as a hat axis or as buttons is driver-dependent.'),
-        DeclareLaunchArgument('required_modifier_axis_value',
-                              default_value='1.0',
-                              description='axes[required_modifier_axis] value meaning "held" (e.g. D-pad up).'),
-        DeclareLaunchArgument('required_modifier_axis_tolerance',
-                              default_value='0.5',
-                              description='How close axes[required_modifier_axis] must be to '
-                              'required_modifier_axis_value to count as held.'),
+        DeclareLaunchArgument('required_modifier_button',
+                              default_value='11',
+                              description='Joy buttons[] index that must be held for toggle_buttons to take '
+                              'effect at all (D-pad up) -- prevents accidental robot-selection changes from '
+                              'a stray button press. Confirmed on real hardware (2026-07-28, orange, PS4/DualShock 4 '
+                              'pad): D-pad up is button 11 in this environment, not a hat axis.'),
         DeclareLaunchArgument('joy_topic',
                               default_value='diff_drive_controller/joy',
                               description='Local /joy topic (relative to robot_namespace) published by '

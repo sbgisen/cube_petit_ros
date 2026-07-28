@@ -15,19 +15,18 @@
 import random
 import sys
 import time
+from typing import Any, Dict
 
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.executors import ExternalShutdownException
 import rclpy.node
-from cube_petit_speech_msgs.action import Speech
 from sensor_msgs.msg import Joy
 from std_msgs.msg import String
-from typing import Any, Dict
-
-import rclpy
-import rclpy.node
 import yaml
+
+from cube_petit_speech_msgs.action import Speech
+
 
 class TextToJtalk(rclpy.node.Node):
 
@@ -47,15 +46,22 @@ class TextToJtalk(rclpy.node.Node):
         self.__action_client = ActionClient(self, Speech, 'speech_action_server')
         self.__action_client.wait_for_server()
 
-        self.declare_parameter("controller_talk_config", "")
-        path = self.get_parameter("controller_talk_config").value
+        self.declare_parameter('controller_talk_config', '')
+        path = self.get_parameter('controller_talk_config').value
 
-        with open(path, "r", encoding="utf-8") as f:
+        # cube_petit_shared_controllerのrequired_modifier_buttonのデフォルトと同じ
+        # (D-pad上、実機確認: button 11)。
+        # Matches cube_petit_shared_controller's required_modifier_button default
+        # (D-pad up, confirmed on real hardware: button 11).
+        self.declare_parameter('ignore_while_button_held', 11)
+        self.ignore_while_button_held = int(self.get_parameter('ignore_while_button_held').value)
+
+        with open(path, 'r', encoding='utf-8') as f:
             cfg = yaml.safe_load(f)
 
-        self.buttons_map = cfg.get("buttons", {})
-        self.axes_map = cfg.get("axes", {})
-        self.debounce_sec = float(cfg.get("debounce_sec", 1.0))
+        self.buttons_map = cfg.get('buttons', {})
+        self.axes_map = cfg.get('axes', {})
+        self.debounce_sec = float(cfg.get('debounce_sec', 1.0))
 
         self.get_logger().info(f'Loaded buttons_map: {self.buttons_map}')
         self.get_logger().info(f'Loaded axes_map: {self.axes_map}')
@@ -80,30 +86,30 @@ class TextToJtalk(rclpy.node.Node):
         future = self.__action_client.send_goal_async(talk_msg)
         future.add_done_callback(self._goal_response_callback)
 
-    def _goal_response_callback(self, future):
+    def _goal_response_callback(self, future: 'rclpy.task.Future') -> None:
         goal_handle = future.result()
         if not goal_handle.accepted:
-            self.get_logger().warn("Speech goal rejected")
+            self.get_logger().warn('Speech goal rejected')
             return
 
-        self.get_logger().info("Speech goal accepted")
+        self.get_logger().info('Speech goal accepted')
         self._goal_handle = goal_handle
 
     def cancel_talk(self) -> None:
         if self._goal_handle is None:
-            self.get_logger().info("No active goal to cancel")
+            self.get_logger().info('No active goal to cancel')
             return
 
-        self.get_logger().info("Cancel request sent")
+        self.get_logger().info('Cancel request sent')
         cancel_future = self._goal_handle.cancel_goal_async()
         cancel_future.add_done_callback(self._cancel_done_callback)
 
-    def _cancel_done_callback(self, future):
+    def _cancel_done_callback(self, future: 'rclpy.task.Future') -> None:
         cancel_response = future.result()
         if len(cancel_response.goals_canceling) > 0:
-            self.get_logger().info("Speech goal canceled")
+            self.get_logger().info('Speech goal canceled')
         else:
-            self.get_logger().warn("Speech goal cancel failed")
+            self.get_logger().warn('Speech goal cancel failed')
 
     def decide_robot_hand(self) -> str:
         self.robot_hand = random.choice(['rock', 'sissors', 'paper'])
@@ -190,7 +196,7 @@ class TextToJtalk(rclpy.node.Node):
 
             if enable_flag and not self.janken_flag:
                 if not self.hand_gesture_received:
-                    self.send_talk("手がまだ見えてないよ。もう一度ジェスチャーしてね。")
+                    self.send_talk('手がまだ見えてないよ。もう一度ジェスチャーしてね。')
                     return
 
                 # start janken
@@ -200,6 +206,18 @@ class TextToJtalk(rclpy.node.Node):
                 self.janken_flag = True
 
     def joystick_callback(self, joy: Joy) -> None:
+        # 共有コントローラ(cube_petit_shared_controller)の機体選択トグルは上矢印
+        # (D-pad上)を押しながら操作する仕様で、同じ/joyトピックをこちらも見ている
+        # ため、そのままだと選択操作のたびに三角/四角ボタンの発話トリガーが誤発火
+        # していた(実機確認、2026-07-28)。上矢印が押されている間はこちらの
+        # ボタントリガーを丸ごと無視する。
+        # cube_petit_shared_controller's robot-selection toggle is operated while
+        # holding D-pad up, and it watches the same /joy topic this node does --
+        # without this guard, every selection toggle also misfired this node's
+        # triangle/square speech triggers (confirmed on real hardware, 2026-07-28).
+        # Ignore all button triggers here while D-pad up is held.
+        if len(joy.buttons) > self.ignore_while_button_held and joy.buttons[self.ignore_while_button_held]:
+            return
         for idx, val in enumerate(joy.buttons):
             if val != 1:
                 continue

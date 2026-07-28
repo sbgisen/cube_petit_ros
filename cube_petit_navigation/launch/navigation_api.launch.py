@@ -33,7 +33,21 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription([
         DeclareLaunchArgument('robot', default_value='cube_petit', description='Robot namespace.'),
-        PushRosNamespace([LaunchConfiguration('robot'), '/navigation']),
+        # navigation_api_node自身のtopic/service名はコード側で既に'navigation/'を
+        # 前置している(navigation/goal, navigation/status, navigation/save_place等)。
+        # ここでさらに'/navigation'をpushすると実際の購読先が
+        # '<robot>/navigation/navigation/goal'のように二重になり、zenoh_connectorが
+        # publishする'<robot>/navigation/goal'(navigation1階層)と一致せず
+        # ゴールが一切届かない不具合になっていた(2026-07-28、実機で発見。
+        # move_to_poseが永遠に"in flight"のまま完了しなかった根本原因の一つ)。
+        # The node's own topic/service names already carry the 'navigation/' prefix
+        # in code (navigation/goal, navigation/status, navigation/save_place, ...).
+        # Pushing an extra '/navigation' namespace here doubled it, so the actual
+        # subscribed topic became '<robot>/navigation/navigation/goal', not matching
+        # zenoh_connector's '<robot>/navigation/goal' publisher (found on real
+        # hardware, 2026-07-28 -- root cause of move_to_pose goals never being
+        # received at all).
+        PushRosNamespace([LaunchConfiguration('robot')]),
         Node(
             package='cube_petit_navigation',
             executable='navigation_api_node',

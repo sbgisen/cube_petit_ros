@@ -11,13 +11,20 @@
 # `cube_petit_<color>.off` if a per-individual override is ever needed; it
 # takes priority over the shared one.
 
-off: とまるよ。
+# NOTE: on/offはクォート必須。クォート無しだとYAML1.1のブール型解釈で
+# True/Falseになってしまい、文字列キーとして拾えなくなる("Norway problem"、
+# 実機で確認)。
+# NOTE: on/off MUST be quoted. Left bare, YAML 1.1's boolean parsing turns
+# them into True/False and the string-keyed lookups below silently miss
+# (the "Norway problem" -- confirmed on real hardware).
+
+'off': とまるよ。
 
 cube_petit_orange:
-  on: オレンジプチ、いくよ〜
+  'on': オレンジプチ、いくよ〜
 
 cube_petit_pink:
-  on: ピンクプチ。いきます。
+  'on': ピンクプチ。いきます。
 
 cube_petit_yellow:
-  on: イエロープチ。いくぞ。
+  'on': イエロープチ。いくぞ。

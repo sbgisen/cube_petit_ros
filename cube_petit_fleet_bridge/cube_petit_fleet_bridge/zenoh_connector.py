@@ -130,8 +130,16 @@ class ZenohConnector(Node):
 
         self._battery_level = float(self.get_parameter('battery_level').value)
 
-        configured_map_name = str(self.get_parameter('map_name').value)
-        self._map_name = configured_map_name or self._lookup_map_name_from_map_server() or 'unknown'
+        # 明示指定(map_nameパラメータ)があれば以後の自動更新をスキップする。無ければ
+        # 起動時に一度取得し、_on_state_timerで毎回非ブロッキングに再チェックして
+        # nav/SLAMの起動・終了(map_serverの出現・消失)を追従する。
+        # An explicit map_name parameter disables auto-refresh entirely. Otherwise,
+        # look it up once at startup and keep re-checking (non-blocking) on every
+        # _on_state_timer tick, so nav/SLAM starting or stopping (map_server
+        # appearing/disappearing) is picked up automatically.
+        self._configured_map_name = str(self.get_parameter('map_name').value)
+        self._map_name = self._configured_map_name or self._lookup_map_name_from_map_server() or 'unknown'
+        self._map_name_lookup_in_flight = False
         self.get_logger().info(f'map_name={self._map_name!r}')
 
         # ================= TF =================
@@ -245,6 +253,46 @@ class ZenohConnector(Node):
         # TODO(battery): replace with a real sensor reading once available.
         self._pub_battery.put(logic.encode_battery(self._battery_level))
         self._pub_map_name.put(logic.encode_map_name(self._map_name))
+        self._refresh_map_name_async()
+
+    def _refresh_map_name_async(self) -> None:
+        """Best-effort, non-blocking re-check of map_server's loaded map.
+
+        No-op when map_name was explicitly configured. Sets map_name back to
+        'unknown' if map_server has disappeared (e.g. navigation/SLAM stopped),
+        so the fleet dashboard doesn't keep showing a stale map name.
+        """
+        if self._configured_map_name or self._map_name_lookup_in_flight:
+            return
+        node_name = str(self.get_parameter('map_server_node').value).strip('/')
+        service_name = f'{node_name}/get_parameters'
+        client = self.create_client(GetParameters, service_name)
+        if not client.service_is_ready():
+            self.destroy_client(client)
+            if self._map_name != 'unknown':
+                self.get_logger().info(f"'{service_name}' no longer available; map_name -> 'unknown'")
+                self._map_name = 'unknown'
+            return
+
+        self._map_name_lookup_in_flight = True
+        future = client.call_async(GetParameters.Request(names=['yaml_filename']))
+
+        def _on_done(done_future: 'rclpy.task.Future') -> None:
+            self._map_name_lookup_in_flight = False
+            self.destroy_client(client)
+            try:
+                result = done_future.result()
+            except Exception as error:  # noqa: BLE001 - best-effort only, must never raise
+                self.get_logger().warning(f'map_name refresh failed: {error}')
+                return
+            if not result or not result.values or result.values[0].type != ParameterType.PARAMETER_STRING:
+                return
+            new_map_name = logic.derive_map_name_from_yaml_path(result.values[0].string_value) or 'unknown'
+            if new_map_name != self._map_name:
+                self.get_logger().info(f'map_name changed: {self._map_name!r} -> {new_map_name!r}')
+                self._map_name = new_map_name
+
+        future.add_done_callback(_on_done)
 
     def _lookup_pose(self) -> typing.Optional[typing.Tuple[float, float, float]]:
         """Look up the robot's map-frame pose from TF (map -> base_link).

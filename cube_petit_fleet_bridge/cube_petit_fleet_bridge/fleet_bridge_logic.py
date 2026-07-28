@@ -138,6 +138,16 @@ def encode_map_name(name: str) -> str:
     return json.dumps(name)
 
 
+def encode_bringup_active(active: bool) -> str:
+    """Encode bringup readiness as the JSON payload for the ``bringup_active`` key."""
+    return json.dumps(bool(active))
+
+
+def encode_nav_active(active: bool) -> str:
+    """Encode navigation readiness as the JSON payload for the ``nav_active`` key."""
+    return json.dumps(bool(active))
+
+
 def encode_completion(command_id: str, is_completed: bool, success: bool) -> str:
     """Encode a completion notice for the ``command_is_completed`` key."""
     return json.dumps({'id': command_id, 'is_completed': is_completed, 'success': success})

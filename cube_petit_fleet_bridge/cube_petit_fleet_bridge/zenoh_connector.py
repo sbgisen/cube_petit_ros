@@ -60,6 +60,7 @@ import threading
 import typing
 
 from action_msgs.msg import GoalStatus
+from controller_manager_msgs.srv import ListControllers
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from rcl_interfaces.msg import ParameterType
 from rcl_interfaces.srv import GetParameters
@@ -120,6 +121,11 @@ class ZenohConnector(Node):
         self.declare_parameter('map_name', '')
         self.declare_parameter('map_server_node', 'navigation/map_server')
         self.declare_parameter('map_lookup_timeout_sec', 2.0)
+        # controller_manager(bringupの目印)のlist_controllersサービス名。namespace指定は
+        # 不要(このノード自体が既に機体のnamespace内でスポーンされているため)。
+        # controller_manager (a proxy for "bringup is up") list_controllers service name.
+        # No namespace prefix needed -- this node already runs inside the robot's namespace.
+        self.declare_parameter('bringup_check_service', 'controller_manager/list_controllers')
         self.declare_parameter('initialpose_topic', 'navigation/initialpose')
         self.declare_parameter('battery_level', 1.0)  # TODO(battery): real sensor, see module docstring.
         self.declare_parameter('state_publish_period_sec', 1.0)
@@ -141,6 +147,18 @@ class ZenohConnector(Node):
         self._map_name = self._configured_map_name or self._lookup_map_name_from_map_server() or 'unknown'
         self._map_name_lookup_in_flight = False
         self.get_logger().info(f'map_name={self._map_name!r}')
+
+        # bringup_active/nav_active: フリートダッシュボードでこの機体のbringup(モーター等の
+        # フル起動)とnavigationが動いているか一目で分かるようにするための、controller_manager/
+        # map_serverの生存確認(いずれもmap_nameの再チェックと同じ非ブロッキングタイマーで
+        # 更新する)。
+        # bringup_active/nav_active: liveness checks for controller_manager/map_server so the
+        # fleet dashboard can show at a glance whether this individual's bringup (full
+        # hardware stack) and navigation are up. Refreshed on the same non-blocking timer as
+        # the map_name re-check.
+        self._bringup_active = False
+        self._nav_active = False
+        self._bringup_active_lookup_in_flight = False
 
         # ================= TF =================
 
@@ -172,6 +190,9 @@ class ZenohConnector(Node):
         self._pub_pose = self._zenoh_session.declare_publisher(logic.robot_key(self._robot_name, 'pose'))
         self._pub_battery = self._zenoh_session.declare_publisher(logic.robot_key(self._robot_name, 'battery'))
         self._pub_map_name = self._zenoh_session.declare_publisher(logic.robot_key(self._robot_name, 'map_name'))
+        self._pub_bringup_active = self._zenoh_session.declare_publisher(
+            logic.robot_key(self._robot_name, 'bringup_active'))
+        self._pub_nav_active = self._zenoh_session.declare_publisher(logic.robot_key(self._robot_name, 'nav_active'))
         self._pub_completion = self._zenoh_session.declare_publisher(
             logic.robot_key(self._robot_name, 'command_is_completed'))
         self._sub_command = self._zenoh_session.declare_subscriber(logic.robot_key(self._robot_name, 'command'),
@@ -253,7 +274,34 @@ class ZenohConnector(Node):
         # TODO(battery): replace with a real sensor reading once available.
         self._pub_battery.put(logic.encode_battery(self._battery_level))
         self._pub_map_name.put(logic.encode_map_name(self._map_name))
+        self._pub_bringup_active.put(logic.encode_bringup_active(self._bringup_active))
+        self._pub_nav_active.put(logic.encode_nav_active(self._nav_active))
         self._refresh_map_name_async()
+        self._refresh_bringup_active_async()
+
+    def _refresh_bringup_active_async(self) -> None:
+        """Best-effort, non-blocking liveness check for controller_manager and map_server.
+
+        controller_manager being reachable is used as a proxy for "bringup (the full
+        hardware stack) is up"; map_server being reachable is used as a proxy for
+        "navigation is up". Both are independent of map_name auto-refresh (this runs
+        even when map_name was explicitly configured).
+        """
+        if self._bringup_active_lookup_in_flight:
+            return
+        self._bringup_active_lookup_in_flight = True
+        try:
+            bringup_service = str(self.get_parameter('bringup_check_service').value)
+            bringup_client = self.create_client(ListControllers, bringup_service)
+            self._bringup_active = bringup_client.service_is_ready()
+            self.destroy_client(bringup_client)
+
+            nav_node_name = str(self.get_parameter('map_server_node').value).strip('/')
+            nav_client = self.create_client(GetParameters, f'{nav_node_name}/get_parameters')
+            self._nav_active = nav_client.service_is_ready()
+            self.destroy_client(nav_client)
+        finally:
+            self._bringup_active_lookup_in_flight = False
 
     def _refresh_map_name_async(self) -> None:
         """Best-effort, non-blocking re-check of map_server's loaded map.

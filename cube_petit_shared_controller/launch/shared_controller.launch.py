@@ -30,6 +30,7 @@ Usage::
     ros2 launch cube_petit_shared_controller shared_controller.launch.py role:=receiver
 """
 
+import os
 import pathlib
 
 from launch import LaunchDescription
@@ -173,7 +174,21 @@ def _launch_setup(context: LaunchContext, *args, **kwargs) -> list:
         # When announcement_selected_text/deselected_text are left unset (empty
         # string), load per-robot_namespace text from announcements_config
         # (YAML). An explicit value always takes priority.
-        robot_namespace_str = robot_namespace.perform(context)
+        #
+        # bringup統合(常時receiver起動)後はrobot_namespace引数が''のまま渡される
+        # (外側のcube_petit_bringup.launch.py側で既にPushRosNamespaceされているため、
+        # 二重pushを避ける設計)。そのため robot_namespace.perform(context) だけでは
+        # 個体名が分からずYAML検索が常に空振りし、全機体でジェネリックな
+        # 「コントローラ。オン。」に固定されてしまっていた(2026-07-28判明)。
+        # robot_nameパラメータと同じ ROBOT_NAMESPACE 環境変数フォールバックを適用する。
+        # After the always-on bringup integration, robot_namespace is passed as '' (the
+        # outer cube_petit_bringup.launch.py already applies PushRosNamespace, so this
+        # avoids double-pushing). That meant robot_namespace.perform(context) alone could
+        # never identify the individual, so the per-robot YAML lookup always missed and
+        # every individual fell back to the generic "コントローラ。オン。" (found on real
+        # hardware, 2026-07-28). Apply the same ROBOT_NAMESPACE env var fallback already
+        # used for the robot_name parameter.
+        robot_namespace_str = robot_namespace.perform(context) or os.environ.get('ROBOT_NAMESPACE', '')
         config_path = LaunchConfiguration('announcements_config').perform(context)
         default_selected, default_deselected = _announcement_texts(config_path, robot_namespace_str)
 

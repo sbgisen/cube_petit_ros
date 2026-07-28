@@ -36,7 +36,7 @@ from cube_petit_navigation.cube_petit_patrol_commander import CubePetitPatrolCom
 from cube_petit_navigation.navigation.cube_petit_navigation_commander import CubePetitNavigationCommander
 from cube_petit_navigation.patrol.patrol_controller import PatrolController
 from cube_petit_navigation.places.places_store import PlacesStore
-from cube_petit_navigation_msgs.msg import NavigationState
+from cube_petit_navigation_msgs.srv import GetNavigationState
 from cube_petit_navigation_msgs.srv import SavePlace
 
 
@@ -79,7 +79,7 @@ class NavigationApiNode(Node):
             self._on_save_place,
         )
         self.create_service(
-            NavigationState,
+            GetNavigationState,
             'navigation/get_state',
             self._on_get_state,
         )
@@ -120,9 +120,13 @@ class NavigationApiNode(Node):
     # =================================================
     # Callbacks
     # =================================================
-    def _on_get_state(self, _, res: NavigationState) -> NavigationState:
-        res.status = self._current_status
-        res.room = self._current_room or 'unknown'
+    def _on_get_state(
+        self,
+        _: GetNavigationState.Request,
+        res: GetNavigationState.Response,
+    ) -> GetNavigationState.Response:
+        res.state.status = self._current_status
+        res.state.room = self._current_room or 'unknown'
         return res
 
     def _on_save_place(

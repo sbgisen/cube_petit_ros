@@ -277,12 +277,27 @@ def generate_launch_description() -> LaunchDescription:
     # orphaned), so a zenoh_connector move_to_pose command would never
     # complete and get stuck in-flight forever, rejecting every subsequent
     # command (found on real hardware, 2026-07-28).
-    navigation_api = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(str(pkg_share / 'launch/navigation_api.launch.py')),
-        launch_arguments={
-            'robot': LaunchConfiguration('robot'),
-        }.items(),
-    )
+    # navigation_api.launch.py自身もPushRosNamespaceを持っており、GroupActionで
+    # scopeしないままIncludeLaunchDescriptionすると、そのnamespaceが後続の
+    # launch_setup(OpaqueFunction)側のPushRosNamespaceに漏れて積み重なり、
+    # controller_server等が二重namespace(.../navigation/.../navigation/...)で
+    # 起動してSetParametersFromFileのnamespaceマッチングが崩れる不具合があった
+    # (2026-07-28、実機で発見。critics未ロードエラーの原因)。scoped GroupActionで
+    # 包んでnamespace pushをこのIncludeLaunchDescription内に閉じ込める。
+    # navigation_api.launch.py itself pushes a ros namespace; including it directly
+    # (without a scoping GroupAction) leaks that namespace into the later
+    # launch_setup (OpaqueFunction) PushRosNamespace call, stacking namespaces and
+    # breaking SetParametersFromFile's namespace matching for controller_server etc.
+    # (found on real hardware, 2026-07-28 — root cause of the critics-not-loaded error).
+    # Wrap in a scoped GroupAction so the namespace push stays contained here.
+    navigation_api = GroupAction(actions=[
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(str(pkg_share / 'launch/navigation_api.launch.py')),
+            launch_arguments={
+                'robot': LaunchConfiguration('robot'),
+            }.items(),
+        ),
+    ])
 
     return LaunchDescription(args + [
         laser_relay,

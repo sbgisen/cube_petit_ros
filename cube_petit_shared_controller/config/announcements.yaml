@@ -18,13 +18,18 @@
 # them into True/False and the string-keyed lookups below silently miss
 # (the "Norway problem" -- confirmed on real hardware).
 
+# 未登録個体用フォールバック。
+# Fallback for individuals not listed below.
 'off': とまるよ。
 
 cube_petit_orange:
   'on': オレンジプチ、いくよ〜
+  'off': オレンジ。解除したよ〜。
 
 cube_petit_pink:
   'on': ピンクプチ。いきます。
+  'off': ピンク。解除しました。
 
 cube_petit_yellow:
   'on': イエロープチ。いくぞ。
+  'off': イエロー。解除したぞ。

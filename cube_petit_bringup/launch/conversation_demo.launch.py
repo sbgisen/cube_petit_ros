@@ -64,18 +64,26 @@ def generate_launch_description() -> LaunchDescription:
                               description="zenoh session mode: 'client' (connect out to the router) or 'peer'."),
     ]
 
-    # face + speech are namespaced by pushing robot_namespace onto the group and
-    # relying on the included launch files' own empty-default robot_namespace
-    # (same pattern as cube_petit_bringup.launch.py's `bringups` group).
+    # face + speech are namespaced by pushing robot_namespace onto the group.
+    # The included launch files declare their own `robot_namespace` argument, and
+    # since this launch's argument shares that name, its value would leak into the
+    # includes and get pushed a second time (/<ns>/<ns>). Unlike here,
+    # cube_petit_bringup.launch.py's argument is named `cube_petit_host_name`, so
+    # it never collides. Explicitly pass an empty robot_namespace to keep the
+    # includes' push a no-op.
     demo_group = GroupAction([
         PushRosNamespace(LaunchConfiguration('robot_namespace')),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(
             str(face_animation_pkg / 'launch/cube_petit_facial_animation.launch.py')),
                                  launch_arguments={
                                      'color': LaunchConfiguration('face_color'),
+                                     'robot_namespace': '',
                                  }.items()),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py')),
+                                 launch_arguments={
+                                     'robot_namespace': '',
+                                 }.items()),
     ])
 
     # zenoh_connector applies its own namespace via the Node's `namespace=` field

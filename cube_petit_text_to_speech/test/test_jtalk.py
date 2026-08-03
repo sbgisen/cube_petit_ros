@@ -23,6 +23,9 @@ from cube_petit_text_to_speech.utils import jtalk
 from cube_petit_text_to_speech.utils.jtalk import adjust_text
 from cube_petit_text_to_speech.utils.jtalk import check_goal
 from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_command
+from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_file
+from cube_petit_text_to_speech.utils.jtalk import resolve_voice_params
+from cube_petit_text_to_speech.utils.jtalk import VOICE_PRESETS
 
 SUFFIX = '〜っ、。'
 
@@ -140,6 +143,64 @@ class TestGenerateJtalkCommand:
         first = generate_jtalk_command()
         first.append('--tainted')
         assert generate_jtalk_command() == ['pw-play', '/tmp/jtalk_output.wav']
+
+
+class TestResolveVoiceParams:
+    """Tests for resolve_voice_params() and VOICE_PRESETS (per-robot voice)."""
+
+    def test_default_preset_with_neutral_overrides_is_unshifted(self) -> None:
+        assert resolve_voice_params('default', 0.0, 1.0) == (0.0, 1.0)
+
+    def test_pink_preset_matches_table(self) -> None:
+        assert resolve_voice_params('pink', 0.0, 1.0) == VOICE_PRESETS['pink']
+
+    def test_violet_preset_matches_table(self) -> None:
+        assert resolve_voice_params('violet', 0.0, 1.0) == VOICE_PRESETS['violet']
+
+    def test_unknown_preset_falls_back_to_default(self) -> None:
+        assert resolve_voice_params('nonexistent', 0.0, 1.0) == VOICE_PRESETS['default']
+
+    def test_semitone_override_is_additive_on_top_of_preset(self) -> None:
+        semitone_shift, _ = resolve_voice_params('pink', 1.5, 1.0)
+        assert semitone_shift == VOICE_PRESETS['pink'][0] + 1.5
+
+    def test_speed_override_is_multiplicative_on_top_of_preset(self) -> None:
+        _, speed_scale = resolve_voice_params('violet', 0.0, 2.0)
+        assert speed_scale == VOICE_PRESETS['violet'][1] * 2.0
+
+
+class TestGenerateJtalkFileVoiceParams:
+    """Tests that generate_jtalk_file() forwards voice params without changing defaults.
+
+    open_jtalk/sox are never actually invoked here: _lib_route() and
+    subprocess.run() are mocked out so this runs without a ROS environment.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _mock_lib_route(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(jtalk, '_lib_route', lambda: '/opt/speech_lib/')
+
+    def _run_and_capture_command(self, monkeypatch: pytest.MonkeyPatch, **kwargs: object) -> str:
+        captured: dict = {}
+        monkeypatch.setattr(jtalk.subprocess, 'run', lambda cmd, **_kw: captured.setdefault('cmd', cmd))
+        generate_jtalk_file('hi', 'happy', 100, 100, pathlib.Path('/tmp/out.wav'), **kwargs)
+        return captured['cmd']
+
+    def test_default_semitone_shift_and_voice_name_reproduce_pre_existing_command(
+            self, monkeypatch: pytest.MonkeyPatch) -> None:
+        command = self._run_and_capture_command(monkeypatch)
+        assert '-m /opt/speech_lib/MMDAgent_Example-1.6/Voice/mei/mei_happy.htsvoice ' in command
+        assert '-fm 0.0 ' in command
+        assert '-jf 1.0 ' in command
+        assert '-r 1.0 ' in command
+
+    def test_semitone_shift_is_forwarded_to_fm_option(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        command = self._run_and_capture_command(monkeypatch, semitone_shift=2.0)
+        assert '-fm 2.0 ' in command
+
+    def test_voice_name_is_forwarded_to_htsvoice_path(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        command = self._run_and_capture_command(monkeypatch, voice_name='takumi')
+        assert '-m /opt/speech_lib/MMDAgent_Example-1.6/Voice/takumi/takumi_happy.htsvoice ' in command
 
 
 class TestLazyLibRoute:

@@ -39,6 +39,32 @@ def generate_launch_description() -> LaunchDescription:
         default_value='',
         description='Namespace of the robot unit (e.g. cube_petit_orange). Empty = no push.')
 
+    # Per-robot voice, so a listener can tell orange/pink/violet apart during the
+    # ROSConJP conversation demo (2026-08-04). Defaults reproduce the pre-existing
+    # voice exactly. See cube_petit_text_to_speech/utils/jtalk.py (VOICE_PRESETS,
+    # resolve_voice_params) for how preset + the two override params combine, and
+    # cube_petit_text_to_speech/README.md for the tuning method.
+    voice_preset_arg = DeclareLaunchArgument('voice_preset',
+                                             default_value='default',
+                                             description="Per-robot voice preset name: 'default' (orange, unchanged), "
+                                             "'pink' (a bit higher & slower, soft), 'violet' (higher & a bit faster, "
+                                             "playful). Unknown names fall back to 'default'.")
+    voice_semitone_shift_arg = DeclareLaunchArgument(
+        'voice_semitone_shift',
+        default_value='0.0',
+        description='Extra half-tone pitch shift added on top of voice_preset '
+        "(open_jtalk -fm; e.g. '1.0' = a bit higher). 0.0 = no adjustment.")
+    voice_speed_scale_arg = DeclareLaunchArgument(
+        'voice_speed_scale',
+        default_value='1.0',
+        description='Extra speed multiplier applied on top of voice_preset and of '
+        "each utterance's own speed (e.g. '1.05' = 5% faster). 1.0 = no adjustment.")
+    voice_name_arg = DeclareLaunchArgument('voice_name',
+                                           default_value='mei',
+                                           description='htsvoice model folder name under MMDAgent_Example-1.6/Voice/. '
+                                           'Only "mei" is bundled today; switching requires installing another '
+                                           '5-emotion htsvoice set with the same file-naming convention.')
+
     # teleop_twist_joy_dir = get_package_share_directory('teleop_twist_joy')
     # cube_teleop_dir = get_package_share_directory('cube_petit_bringup')
     # joy_dev = '/dev/input/js0'
@@ -60,6 +86,10 @@ def generate_launch_description() -> LaunchDescription:
 
     return LaunchDescription([
         robot_namespace_arg,
+        voice_preset_arg,
+        voice_semitone_shift_arg,
+        voice_speed_scale_arg,
+        voice_name_arg,
         GroupAction([
             PushRosNamespace(LaunchConfiguration('robot_namespace')),
             Node(
@@ -70,7 +100,15 @@ def generate_launch_description() -> LaunchDescription:
                     'controller_talk_config': controller_talk_yaml
                 }],
             ),
-            Node(package='cube_petit_text_to_speech', executable='speech_action_server', name='speech_action_server'),
+            Node(package='cube_petit_text_to_speech',
+                 executable='speech_action_server',
+                 name='speech_action_server',
+                 parameters=[{
+                     'voice_preset': LaunchConfiguration('voice_preset'),
+                     'voice_semitone_shift': LaunchConfiguration('voice_semitone_shift'),
+                     'voice_speed_scale': LaunchConfiguration('voice_speed_scale'),
+                     'voice_name': LaunchConfiguration('voice_name'),
+                 }]),
         ]),
 
         # teleop_include

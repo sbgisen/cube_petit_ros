@@ -62,6 +62,22 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('zenoh_mode',
                               default_value='client',
                               description="zenoh session mode: 'client' (connect out to the router) or 'peer'."),
+        # Per-robot voice, forwarded to cube_petit_text_to_jtalk.launch.py (which
+        # starts speech_action_server). Default 'violet' matches this launch
+        # file's usual target (see module docstring); override for other units.
+        DeclareLaunchArgument('voice_preset',
+                              default_value='violet',
+                              description="Voice preset name: 'default' (orange, unchanged), 'pink' "
+                              "(a bit higher & slower, soft), 'violet' (higher & a bit faster, "
+                              "playful)."),
+        DeclareLaunchArgument('voice_semitone_shift',
+                              default_value='0.0',
+                              description='Extra half-tone pitch shift on top of voice_preset. '
+                              '0.0 = no adjustment.'),
+        DeclareLaunchArgument('voice_speed_scale',
+                              default_value='1.0',
+                              description='Extra speed multiplier on top of voice_preset. '
+                              '1.0 = no adjustment.'),
     ]
 
     # face + speech are namespaced by pushing robot_namespace onto the group.
@@ -83,6 +99,9 @@ def generate_launch_description() -> LaunchDescription:
             str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py')),
                                  launch_arguments={
                                      'robot_namespace': '',
+                                     'voice_preset': LaunchConfiguration('voice_preset'),
+                                     'voice_semitone_shift': LaunchConfiguration('voice_semitone_shift'),
+                                     'voice_speed_scale': LaunchConfiguration('voice_speed_scale'),
                                  }.items()),
     ])
 

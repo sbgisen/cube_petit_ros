@@ -27,6 +27,29 @@ __all__ = ['LIB_ROUTE', 'simple_jtalk', 'generate_jtalk_command', 'adjust_text']
 
 OUTPUT_FILE = pathlib.Path('/tmp/jtalk_output.wav')
 
+# Per-robot voice presets for the ROSConJP conversation demo (2026-08-04), so a
+# listener can tell orange/pink/violet apart by voice alone. Each entry is
+# (semitone_shift, speed_scale):
+#   - semitone_shift: additional half-tone pitch shift, fed to open_jtalk's
+#     `-fm` option (0.0 = unchanged). This is a real average-pitch shift, unlike
+#     the Speech.action `pitch` field, which actually controls `-jf` (GV weight
+#     for log F0 / intonation dynamics), not average pitch -- see
+#     resolve_voice_params() and generate_jtalk_file() below.
+#   - speed_scale: multiplier applied on top of each utterance's own speed
+#     (1.0 = unchanged).
+# 'default' is orange's baseline and is byte-for-byte identical to the
+# pre-2026-08 behavior. pink/violet values are chosen to match each
+# individual's personality.yaml (2026-08-03, ありさん指示): pink is
+# おっとりマイペース -> a bit higher & slower (soft); violet is
+# いたずら好き・やんちゃ -> higher & a bit faster (playful/brisk). These are a
+# starting point to be confirmed and tuned by ear on real hardware; see
+# cube_petit_text_to_speech/README.md for how to retune them.
+VOICE_PRESETS: dict[str, tuple[float, float]] = {
+    'default': (0.0, 1.0),
+    'pink': (1.5, 0.90),
+    'violet': (3.0, 1.10),
+}
+
 # Speech.action宣言のEMOTION_*定数(happiness/default/anger/shout/sadness)は、
 # 実際のjtalk音声ファイル(speech_lib/.../Voice/mei/mei_<name>.htsvoice、
 # happy/normal/angry/bashful/sadのみ存在)の語彙と一致していない。ここで変換する。
@@ -59,6 +82,30 @@ def normalize_emotion(emotion: str) -> str:
         :func:`check_goal` can still reject genuinely unknown emotions.
     """
     return _EMOTION_ALIASES.get(emotion, emotion)
+
+
+@beartype
+def resolve_voice_params(preset: str, semitone_shift_param: float, speed_scale_param: float) -> tuple[float, float]:
+    """Resolve the effective (semitone_shift, speed_scale) for a robot's voice.
+
+    Combines a named preset (see VOICE_PRESETS) with additive/multiplicative
+    node parameters, so per-utterance tuning ("nudge pink a bit higher") is
+    possible without editing the preset table. Both parameters are neutral at
+    their defaults (0.0 / 1.0), so preset='default' with default params
+    reproduces the pre-existing (unshifted, unscaled) behavior exactly.
+
+    Args:
+        preset: Name from VOICE_PRESETS. Unknown names fall back to 'default'.
+        semitone_shift_param: Extra half-tone shift added on top of the preset's
+            own semitone_shift. 0.0 = no adjustment.
+        speed_scale_param: Extra multiplier applied on top of the preset's own
+            speed_scale. 1.0 = no adjustment.
+
+    Returns:
+        (semitone_shift, speed_scale) to use for this robot's speech.
+    """
+    preset_semitone_shift, preset_speed_scale = VOICE_PRESETS.get(preset, VOICE_PRESETS['default'])
+    return preset_semitone_shift + semitone_shift_param, preset_speed_scale * speed_scale_param
 
 
 @functools.lru_cache(maxsize=1)
@@ -131,15 +178,29 @@ def generate_jtalk_file(text: str,
                         emotion: str,
                         pitch: int,
                         speed: int,
-                        file_path: pathlib.Path | None = None) -> pathlib.Path:
+                        file_path: pathlib.Path | None = None,
+                        semitone_shift: float = 0.0,
+                        voice_name: str = 'mei') -> pathlib.Path:
     """Generate jtalk audio file.
 
     Args:
         text: Phrase to be said.
         emotion: Emotion of the phrase to be played.
-        pitch: Pitch of the phrase to be played. Value between 50 to 200.
+        pitch: Weight of GV (global variance) for log F0, i.e. intonation
+            dynamics/expressiveness (open_jtalk `-jf`). Despite the name, this
+            does not shift the average pitch -- use semitone_shift for that.
+            Value between 50 to 200.
         speed: Speed of the phrase to be played. Value between 50 and 400.
         file_path: Path to save mp3 audio file.
+        semitone_shift: Additional half-tone pitch shift (open_jtalk `-fm`),
+            the actual average-pitch control. 0.0 (default) reproduces the
+            pre-existing behavior exactly. See VOICE_PRESETS/resolve_voice_params
+            for the per-robot presets built on top of this.
+        voice_name: htsvoice model folder name under
+            MMDAgent_Example-1.6/Voice/ (default 'mei', the only model
+            bundled today). Exposed so a differently-voiced htsvoice set can
+            be swapped in later without code changes, as long as it follows
+            the same `<voice_name>/<voice_name>_<emotion>.htsvoice` layout.
 
     Returns:
         Path to the generated audio file.
@@ -149,14 +210,16 @@ def generate_jtalk_file(text: str,
     echo = f'echo {text} | '
     open_jtalk = f'{lib_route}open_jtalk-1.11/bin/open_jtalk '
     dic = f'-x {lib_route}open_jtalk_dic_utf_8-1.11 '
-    htsvoice = f'-m {lib_route}MMDAgent_Example-1.6/Voice/mei/mei_{normalize_emotion(emotion)}.htsvoice '
+    htsvoice = (f'-m {lib_route}MMDAgent_Example-1.6/Voice/{voice_name}/'
+                f'{voice_name}_{normalize_emotion(emotion)}.htsvoice ')
     speed_param = f'-r {float(speed) / 100} '
     intonation = f'-jf {float(pitch) / 100} '
+    pitch_shift = f'-fm {float(semitone_shift)} '
     if file_path is None:
         file_path = OUTPUT_FILE
     sox = f'sox -t wav - -p silence 1 0.1 0.1% reverse | sox -p -t wav {str(file_path)} silence 1 0.1 0.1% reverse'
     outwav = f'-ow /dev/stdout | {sox}'
-    subprocess.run(echo + open_jtalk + dic + htsvoice + speed_param + intonation + outwav,
+    subprocess.run(echo + open_jtalk + dic + htsvoice + speed_param + intonation + pitch_shift + outwav,
                    stdin=subprocess.PIPE,
                    stdout=subprocess.PIPE,
                    shell=True)

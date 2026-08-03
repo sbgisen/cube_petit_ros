@@ -217,7 +217,11 @@ def generate_jtalk_file(text: str,
     pitch_shift = f'-fm {float(semitone_shift)} '
     if file_path is None:
         file_path = OUTPUT_FILE
-    sox = f'sox -t wav - -p silence 1 0.1 0.1% reverse | sox -p -t wav {str(file_path)} silence 1 0.1 0.1% reverse'
+    # After trimming leading/trailing silence, pad 0.35s at the head so the first
+    # phonemes are not swallowed while the audio sink (pipewire) wakes from idle,
+    # plus a 0.1s tail so playback does not end abruptly.
+    sox = (f'sox -t wav - -p silence 1 0.1 0.1% reverse | '
+           f'sox -p -t wav {str(file_path)} silence 1 0.1 0.1% reverse pad 0.35 0.1')
     outwav = f'-ow /dev/stdout | {sox}'
     subprocess.run(echo + open_jtalk + dic + htsvoice + speed_param + intonation + pitch_shift + outwav,
                    stdin=subprocess.PIPE,

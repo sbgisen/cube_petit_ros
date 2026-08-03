@@ -217,11 +217,21 @@ def generate_jtalk_file(text: str,
     pitch_shift = f'-fm {float(semitone_shift)} '
     if file_path is None:
         file_path = OUTPUT_FILE
-    # After trimming leading/trailing silence, pad 0.35s at the head so the first
-    # phonemes are not swallowed while the audio sink (pipewire) wakes from idle,
-    # plus a 0.1s tail so playback does not end abruptly.
+    # After trimming leading/trailing silence, prepend a ~1s quiet pink-noise
+    # "breath" as an amp wake-up cue. The speaker amps have a signal-detect
+    # standby that swallows ~1s of audio whenever a robot has been silent for a
+    # while (each robot's amp re-sleeps between its own turns), and digital
+    # silence cannot wake them, so plain padding does not help (2026-08-03
+    # booth finding; a continuous sub-audible keep-alive tone was audible on
+    # these small speakers and got rejected). Most of the noise is eaten during
+    # wake-up; only a faint short "shh" leaks right before the speech.
+    raw_path = f'{file_path}.raw.wav'
+    wake_path = f'{file_path}.wake.wav'
     sox = (f'sox -t wav - -p silence 1 0.1 0.1% reverse | '
-           f'sox -p -t wav {str(file_path)} silence 1 0.1 0.1% reverse pad 0.35 0.1')
+           f'sox -p -t wav {raw_path} silence 1 0.1 0.1% reverse pad 0 0.1 && '
+           f'sox -n -r $(soxi -r {raw_path}) -c $(soxi -c {raw_path}) -b $(soxi -b {raw_path}) '
+           f'{wake_path} synth 1.0 pinknoise vol 0.04 fade t 0.05 1.0 0.2 pad 0 0.1 && '
+           f'sox {wake_path} {raw_path} {str(file_path)}')
     outwav = f'-ow /dev/stdout | {sox}'
     subprocess.run(echo + open_jtalk + dic + htsvoice + speed_param + intonation + pitch_shift + outwav,
                    stdin=subprocess.PIPE,

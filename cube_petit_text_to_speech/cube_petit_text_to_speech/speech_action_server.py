@@ -38,6 +38,7 @@ from cube_petit_speech_msgs.msg import AudioDataStamped
 from cube_petit_speech_msgs.msg import AudioInfo
 from cube_petit_text_to_speech.utils.jtalk import check_goal
 from cube_petit_text_to_speech.utils.jtalk import generate_jtalk_file
+from cube_petit_text_to_speech.utils.jtalk import resolve_voice_params
 from cube_petit_text_to_speech.utils.speaking_state import SpeakingState
 
 
@@ -67,6 +68,25 @@ class SpeechActionServer(Node):
         self.__speaking_publisher = self.create_publisher(Bool, '~/speaking', speaking_qos)
         self.__speaking_state = SpeakingState(self.__publish_speaking)
         self.__publish_speaking(False)  # Announce the initial (not speaking) state explicitly.
+
+        # Per-robot voice (ROSConJP conversation demo, 2026-08-04). Defaults
+        # reproduce the pre-existing voice exactly (preset='default',
+        # semitone_shift/speed_scale params neutral at 0.0/1.0). See
+        # cube_petit_text_to_speech/README.md for how to pick/retune these,
+        # and cube_petit_text_to_jtalk.launch.py for how they're wired per robot.
+        self.declare_parameter('voice_preset', 'default')
+        self.declare_parameter('voice_semitone_shift', 0.0)
+        self.declare_parameter('voice_speed_scale', 1.0)
+        self.declare_parameter('voice_name', 'mei')
+        self.__voice_semitone_shift, self.__voice_speed_scale = resolve_voice_params(
+            self.get_parameter('voice_preset').value,
+            float(self.get_parameter('voice_semitone_shift').value),
+            float(self.get_parameter('voice_speed_scale').value),
+        )
+        self.__voice_name = self.get_parameter('voice_name').value
+        self.get_logger().info(f'Voice: preset={self.get_parameter("voice_preset").value}, '
+                               f'semitone_shift={self.__voice_semitone_shift}, '
+                               f'speed_scale={self.__voice_speed_scale}, voice_name={self.__voice_name}')
 
         self.__sampling_rate = 16000  # [TODO] get ros param
 
@@ -122,7 +142,17 @@ class SpeechActionServer(Node):
             goal = goal_handle.request
             speech_file = None
             start_t = self.get_clock().now()
-            speech_file = generate_jtalk_file(goal.text, goal.emotion, goal.pitch, goal.speed, speech_file)
+            # goal.speed is validated by check_goal() above; the per-robot
+            # speed_scale is applied on top of it here, after validation, so a
+            # preset can never make an otherwise-invalid goal pass the check.
+            effective_speed = round(goal.speed * self.__voice_speed_scale)
+            speech_file = generate_jtalk_file(goal.text,
+                                              goal.emotion,
+                                              goal.pitch,
+                                              effective_speed,
+                                              speech_file,
+                                              semitone_shift=self.__voice_semitone_shift,
+                                              voice_name=self.__voice_name)
             data, sr = sf.read(speech_file, dtype='float32')
             if data.ndim != 1:
                 data = np.mean(data, axis=1)

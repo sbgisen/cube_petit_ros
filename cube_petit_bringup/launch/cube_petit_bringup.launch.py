@@ -132,8 +132,13 @@ def launch_in_order(context: LaunchContext, *args, **kwargs) -> list:
                 # environment, found 2026-07-28).
                 'robot_name': ns,
             }.items()),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py'))),
+        IncludeLaunchDescription(PythonLaunchDescriptionSource(
+            str(text_to_speech_pkg / 'launch/cube_petit_text_to_jtalk.launch.py')),
+                                 launch_arguments={
+                                     'voice_preset': LaunchConfiguration('voice_preset'),
+                                     'voice_semitone_shift': LaunchConfiguration('voice_semitone_shift'),
+                                     'voice_speed_scale': LaunchConfiguration('voice_speed_scale'),
+                                 }.items()),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(str(speech_to_text_pkg / 'launch/cube_petit_speech_to_text.launch.py'))),
         IncludeLaunchDescription(
@@ -188,6 +193,27 @@ def generate_launch_description() -> LaunchDescription:
         DeclareLaunchArgument('face_color',
                               default_value=face_color_default,
                               description='Color for the faceBox (pink, orange, blue, green, yellow, purple)'))
+    # Per-robot voice (ROSConJP conversation demo, 2026-08-04), so a listener can
+    # tell orange/pink/violet apart by voice alone. Derived from the hostname the
+    # same way face_color is above; only 'pink'/'violet' have a distinct preset
+    # today (see cube_petit_text_to_speech VOICE_PRESETS) -- anything else
+    # (orange, dev machines, ...) falls back to the unshifted 'default' voice.
+    args.append(
+        DeclareLaunchArgument('voice_preset',
+                              default_value=face_color_default,
+                              description="Per-robot voice preset name (derived from hostname, same as face_color): "
+                              "'pink' (a bit higher & slower, soft), 'violet' (higher & a bit faster, playful). "
+                              "Unknown names (including 'orange') fall back to the unshifted 'default' voice."))
+    args.append(
+        DeclareLaunchArgument('voice_semitone_shift',
+                              default_value='0.0',
+                              description='Extra half-tone pitch shift on top of voice_preset. '
+                              '0.0 = no adjustment.'))
+    args.append(
+        DeclareLaunchArgument('voice_speed_scale',
+                              default_value='1.0',
+                              description='Extra speed multiplier on top of voice_preset. '
+                              '1.0 = no adjustment.'))
 
     ordered_sequence = OpaqueFunction(function=launch_in_order)
 

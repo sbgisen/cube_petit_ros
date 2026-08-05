@@ -93,6 +93,10 @@ def generate_launch_description() -> LaunchDescription:
         name='zenoh_connector',
         namespace=LaunchConfiguration('robot_namespace'),
         output='screen',
+        # The connector dies if the router (on orange) is not up yet -- e.g. when
+        # this unit boots faster than orange. Respawn so it reconnects on its own.
+        respawn=True,
+        respawn_delay=5.0,
         parameters=[{
             'robot_name': LaunchConfiguration('robot_name'),
             'zenoh_endpoint': LaunchConfiguration('zenoh_router_endpoint'),
